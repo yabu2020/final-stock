@@ -19,6 +19,8 @@ import UserContext from '../admin/UserContext';
 import BranchSidebar from '../branch/BranchSidebar'; 
 import CreateBranch from "../admin/CreateBranch";
 import BranchList from "../admin/BranchList";
+import NoAccess from "../branch/NoAccess";
+
 
 function App() {
   const [cUSer, setCuser] = useState({});
@@ -69,6 +71,7 @@ function App() {
             <Route path="/manager/:userId" element={<BranchSidebar  />} />
             <Route path="/branches" element={<BranchList branches={branches} />} />
             <Route path="/addbranch" element={<CreateBranch setBranches={setBranches} />} /> {/* Pass setBranches */}
+            <Route path="/no-access" element={<NoAccess />} />
 
 
             {/* user */}

@@ -1,20 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+import  UserContext  from "../admin/UserContext"; // Adjust import path as needed
 
 function AdminOrderPage() {
+  const { cUSer } = useContext(UserContext); // Access current user from context
   const [orders, setOrders] = useState([]);
   const [message, setMessage] = useState("");
 
-  // Fetch all orders on component mount
+  // Ensure cUSer is defined before accessing its properties
+  const branchManagerId = cUSer?._id; // Assuming the logged-in user is a branch manager
+
   useEffect(() => {
+    if (!branchManagerId) {
+      setMessage("You must be logged in as a branch manager to view orders.");
+      return;
+    }
+
     axios
-      .get("http://localhost:3001/admin/orders")
+      .get("http://localhost:3001/admin/orders", {
+        params: { branchManagerId }, // Pass the branchManagerId
+      })
       .then((response) => {
         setOrders(response.data);
       })
       .catch((error) => setMessage(`Error fetching orders: ${error.message}`));
-  }, []);
-  
+  }, [branchManagerId]);
+
   // Confirm an order
   const handleConfirmOrder = (orderId) => {
     axios
@@ -27,7 +38,7 @@ function AdminOrderPage() {
         setMessage(`Error confirming order: ${error.response?.data?.error || error.message}`);
       });
   };
-  
+
   const handleRejectOrder = (orderId) => {
     axios
       .patch(`http://localhost:3001/admin/orders/${orderId}/reject`)
@@ -42,7 +53,7 @@ function AdminOrderPage() {
     <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-white">
       <h2 className="text-3xl font-bold text-blue-400 mb-6">Manage Orders</h2>
       {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
-  
+
       <table className="w-full mt-6 border-collapse bg-white shadow-md rounded-lg">
         <thead>
           <tr className="bg-blue-100 text-blue-400">
@@ -53,7 +64,7 @@ function AdminOrderPage() {
             <th className="px-4 py-2">Quantity</th>
             <th className="px-4 py-2">Total Price</th>
             <th className="px-4 py-2">Date Ordered</th>
-            <th className="px-4 py-2">Status</th> {/* Added Status Column */}
+            <th className="px-4 py-2">Status</th>
             <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
@@ -68,7 +79,7 @@ function AdminOrderPage() {
                 <td className="px-4 py-2">{order.quantity || "N/A"}</td>
                 <td className="px-4 py-2">{order.totalPrice || "N/A"}</td>
                 <td className="px-4 py-2">{new Date(order.dateOrdered).toLocaleDateString()}</td>
-                <td className="px-4 py-2">{order.status || "N/A"}</td> {/* Added Status Display */}
+                <td className="px-4 py-2">{order.status || "N/A"}</td>
                 <td className="px-4 py-2">
                   <button
                     onClick={() => handleConfirmOrder(order._id)}

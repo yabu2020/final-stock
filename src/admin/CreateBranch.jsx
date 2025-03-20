@@ -74,12 +74,7 @@ function CreateBranch({ setBranches }) {
     <div className="flex items-center justify-center h-screen">
       <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-white">
         <h2 className="text-2xl font-bold mb-4 text-center text-blue-400">Create Branch</h2>
-        {error && <p className="text-red-500">{error}</p>}
-        {managers.length === 0 && (
-          <p className="text-red-500 mb-4">
-            No available managers. All managers are already assigned to branches.
-          </p>
-        )}
+       
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Branch Name Field */}
           <div>
