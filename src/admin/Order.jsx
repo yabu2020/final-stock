@@ -22,8 +22,11 @@ function AdminOrderPage() {
       })
       .then((response) => {
         setOrders(response.data);
+        setMessage(""); // Clear any previous messages
       })
-      .catch((error) => setMessage(`Error fetching orders: ${error.message}`));
+      .catch((error) => {
+        setMessage(`Error fetching orders: ${error.message}`);
+      });
   }, [branchManagerId]);
 
   // Confirm an order
@@ -98,7 +101,9 @@ function AdminOrderPage() {
             ))
           ) : (
             <tr>
-              <td colSpan="8" className="text-center py-4 text-blue-500">No orders available</td>
+              <td colSpan="9" className="text-center py-4 text-blue-500">
+                No orders available
+              </td>
             </tr>
           )}
         </tbody>

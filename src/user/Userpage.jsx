@@ -190,7 +190,7 @@ axios
   
     const totalPrice = product.saleprice * quantity;
   
-    // Retrieve the branchManagerId from the selected branch
+    // Retrieve the branch data for the selected branch
     const selectedBranchData = branches.find(branch => branch._id === selectedBranch);
     if (!selectedBranchData || !selectedBranchData.manager?._id) {
       setMessage("This branch does not have a manager assigned.");
@@ -198,6 +198,7 @@ axios
     }
   
     const branchManagerId = selectedBranchData.manager._id;
+    const branchId = selectedBranchData._id; // Extract the branchId
   
     // Use the current user's ID
     const userId = cUSer?._id; // Assuming `cUSer` contains the current user's data
@@ -209,6 +210,7 @@ axios
         totalPrice,
         userId, // Send userId
         branchManagerId, // Send branchManagerId
+        branchId, // Include branchId in the payload
       })
       .then(() => {
         setMessage("Order placed successfully");
