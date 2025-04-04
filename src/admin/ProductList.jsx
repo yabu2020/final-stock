@@ -9,6 +9,7 @@ const ProductList = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editData, setEditData] = useState({});
   const [message, setMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [alert, setAlert] = useState(""); // Alert state
 
   useEffect(() => {
@@ -164,6 +165,7 @@ const ProductList = () => {
               <table className="w-full min-w-[640px]">
                 <thead>
                   <tr>
+                  <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-600 py-2 px-3 bg-gray-50 text-left rounded-bl-md">Image</th>
                     <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-600 py-2 px-3 bg-gray-50 text-left rounded-bl-md">Product Name</th>
                     <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-600 py-2 px-3 bg-gray-50 text-left rounded-bl-md">Quantity</th>
                     <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-600 py-2 px-3 bg-gray-50 text-left rounded-bl-md">Purchase Price</th>
@@ -177,6 +179,7 @@ const ProductList = () => {
                   {categoryGroup.products.length > 0 ? (
                     categoryGroup.products.map((product) => (
                       <tr key={product._id}>
+                        <td className="py-2 px-4 border-b border-gray-200">{product.image ? ( <img src={`http://localhost:3001/${product.image}`}alt={product.name}className="w-16 h-16 object-cover rounded-md" /> ) : ( <span>No Image</span> )}</td>
                         <td className="py-2 px-4 border-b border-gray-200">{editingProduct === product._id ? <input type="text" name="name" value={editData.name} onChange={handleInputChange} className="border p-1 w-full" style={{ maxWidth: '120px' }} /> : product.name}</td>
                         <td className="py-2 px-4 border-b border-gray-200">{editingProduct === product._id ? <input type="number" name="quantity" value={editData.quantity} onChange={handleInputChange} className="border p-1 w-full" style={{ maxWidth: '120px' }} /> : product.quantity}</td>
                         <td className="py-2 px-4 border-b border-gray-200">{editingProduct === product._id ? <input type="number" name="purchaseprice" value={editData.purchaseprice} onChange={handleInputChange} className="border p-1 w-full" style={{ maxWidth: '120px' }} /> : product.purchaseprice}</td>
