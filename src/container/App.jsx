@@ -20,7 +20,7 @@ import BranchSidebar from '../branch/BranchSidebar';
 import CreateBranch from "../admin/CreateBranch";
 import BranchList from "../admin/BranchList";
 import NoAccess from "../branch/NoAccess";
-
+import UserSidebar from "../user/UserSidebar";
 
 function App() {
   const [cUSer, setCuser] = useState({});
@@ -28,15 +28,21 @@ function App() {
   const [branches, setBranches] = useState([]); // Add state for branches
 
   const renderSidebar = () => {
+    // Do not render sidebar on the login page ("/")
+    if (location.pathname === "/") {
+      return null;
+    }
+  
+    // Render sidebar based on user role for other routes
     if (!cUSer || !cUSer.role) {
-      return null; // Or return some default component or placeholder if necessary
+      return null; // No sidebar for unauthenticated users
     }
     if (cUSer.role === 'Admin') {
       return <AdminSidebar />;
     } else if (cUSer.role === 'manager') {
       return <BranchSidebar />;
-    // } else if (cUSer.role === 'asset approver') {
-    //   return <ApproverSidebar />;
+    } else if (cUSer.role === 'user') {
+      return <UserSidebar />;
     }
     return null;
   };
@@ -75,9 +81,9 @@ function App() {
 
 
             {/* user */}
-            <Route path="/userpage/:userId" element={<Userpage />} />
-            <Route path="/security-question/:userId" element={<Security />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/user/:userId" element={<UserSidebar />} />
+            <Route path="/Userpage" element={<Userpage />} />
+            <Route path="/security-question/:userId" element={<Security />} />            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
       </BrowserRouter>

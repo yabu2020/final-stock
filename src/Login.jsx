@@ -224,7 +224,7 @@ function Login({ setCuser }) {
               navigate(`/Admin/${userData._id}`);
               break;
             case "user":
-              navigate(`/userpage/${userData._id}`);
+              navigate(`/user/${userData._id}`);
               break;
             case "manager":
               navigate(`/manager/${userData._id}`);

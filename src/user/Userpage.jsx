@@ -243,7 +243,7 @@ axios
 
   return (
     <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-white">
-      <h2 className="text-3xl font-bold text-gray-400 mb-6">Welcome, {cUSer.name || "User"}!</h2>
+      <h2 className="text-3xl font-bold text-gray-400 mb-6">Welcome!</h2>
       {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
 
       {/* Branch Selection */}
@@ -251,18 +251,18 @@ axios
         <div className="flex items-center space-x-4">
           <label htmlFor="branch-select" className="block text-lg font-medium text-gray-500 mb-2">Select Branch:</label>
           <select
-  id="branch-select"
-  value={selectedBranch}
-  onChange={(e) => setSelectedBranch(e.target.value)}
-  className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
->
-  <option value="" disabled>Select a Branch</option>
-  {branches.map((branch) => (
-    <option key={branch._id} value={branch._id}>
-      {branch.branchName} - {branch.location}
-    </option>
-  ))}
-</select>
+            id="branch-select"
+            value={selectedBranch}
+            onChange={(e) => setSelectedBranch(e.target.value)}
+            className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            <option value="" disabled>Select a Branch</option>
+            {branches.map((branch) => (
+              <option key={branch._id} value={branch._id}>
+                {branch.branchName} - {branch.location}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -371,24 +371,6 @@ axios
           )}
         </tbody>
       </table>
-            <div className="mt-4 p-4 ml-10 bg-gray-100 w-80 shadow-md rounded-lg border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-500 mb-2">Manage Your Security Question</h3>         <p className="text-gray-600 text-sm mb-3">Update your security question to enhance your account security.</p>
-        <Link 
-          to={`/security-question/${userId}`} 
-          className="inline-block px-4 py-2 text-sm font-medium text-white bg-blue-400 rounded-md shadow-sm hover:bg-blue-300 transition duration-200"
-        >
-          Security Question Page
-        </Link>
-      </div>
-
-      <div className="mt-4 ml-10">
-        <Link 
-          to="/" 
-          className="inline-block px-4 py-2 text-sm font-medium text-white bg-blue-400 rounded-md shadow-sm hover:bg-blue-300 transition duration-200"
-        >
-          Sign Out
-        </Link>
-      </div>
     </div>
   );
 }

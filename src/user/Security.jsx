@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 
 function SecurityQuestionPage() {
   const { userId } = useParams();
+  console.log("User ID from useParams:", userId); // Log the userId
   const [securityQuestion, setSecurityQuestion] = useState('');
   const [securityAnswer, setSecurityAnswer] = useState('');
   const [newSecurityQuestion, setNewSecurityQuestion] = useState('');
@@ -22,34 +23,47 @@ function SecurityQuestionPage() {
 
   useEffect(() => {
     if (userId) {
+      console.log("Fetching security question for userId:", userId); // Log the userId
       fetchSecurityQuestion(userId);
+    } else {
+      console.error("User ID is undefined");
     }
   }, [userId]);
-
   const fetchSecurityQuestion = (userId) => {
+    console.log("Fetching security question for userId:", userId); // Log the userId being sent
+  
     axios
       .get('http://localhost:3001/security-question', { params: { userId } })
       .then((response) => {
+        console.log("Response from /security-question:", response.data); // Log the response
         const { securityQuestion, securityAnswer } = response.data;
         setSecurityQuestion(securityQuestion || 'No current security question');
         setSecurityAnswer(securityAnswer || '');
       })
-      .catch((error) => setUpdateError(`Error: ${error.message}`));
+      .catch((error) => {
+        console.error("Error fetching security question:", error.response?.data || error.message); // Log errors
+        setUpdateError(`Error: ${error.message}`);
+      });
   };
 
   const handleUpdateSecurityQuestion = (e) => {
     e.preventDefault();
     setUpdateMessage('');
     setUpdateError('');
-
+  
     if (!newSecurityQuestion || !newSecurityAnswer) {
       setUpdateError('Both question and answer are required.');
       return;
     }
-
+  
+    console.log("Updating security question for userId:", userId); // Log the userId
+    console.log("New security question:", newSecurityQuestion); // Log the new question
+    console.log("New security answer:", newSecurityAnswer); // Log the new answer
+  
     axios
       .post('http://localhost:3001/update-security-question', { userId, newSecurityQuestion, newSecurityAnswer })
       .then((response) => {
+        console.log("Response from /update-security-question:", response.data); // Log the response
         if (response.data.success) {
           setUpdateMessage('Security question updated successfully.');
           setSecurityQuestion(newSecurityQuestion);
@@ -60,7 +74,10 @@ function SecurityQuestionPage() {
           setUpdateError('Failed to update security question.');
         }
       })
-      .catch((error) => setUpdateError(`Error: ${error.message}`));
+      .catch((error) => {
+        console.error("Error updating security question:", error.response?.data || error.message); // Log errors
+        setUpdateError(`Error: ${error.message}`);
+      });
   };
 
   return (
