@@ -18,36 +18,31 @@ function AdminSidebar({ children }) {
     };
 
     const menuItem = [
-        {
-             path: "/adduser", 
-             name: "Create User", 
-             icon: <FaUserPlus /> 
-        },
-        {
-             path: "/users", 
-             name: "User List", 
-             icon: <FaUsers /> 
-        },
-        { 
-            path: "/addbranch", 
-            name: "Add Branch", 
-            icon: <FaProjectDiagram  />
-        },
-        {
-             path: "/branches",
-              name: "Branch List", 
-              icon: <FaBuilding /> 
-        },
-        {
-             path: "/reports",
-              name: "Report", 
-              icon: <FaChartBar /> 
-        },
-        { 
-            path: "/resetpassword", 
-            name: "Reset Password", 
-            icon: <FaLock />
-        }
+      {
+        path: "/admin/adduser",
+        name: "Create User",
+        icon: <FaUserPlus />,
+      },
+      {
+        path: "/admin/users",
+        name: "User List",
+        icon: <FaUsers />,
+      },
+      {
+        path: "/admin/branches",
+        name: "Branch List",
+        icon: <FaBuilding />,
+      },
+      {
+        path: "/admin/addbranch",
+        name: "Add Branch",
+        icon: <FaProjectDiagram />,
+      },
+      {
+        path: "/admin/reports",
+        name: "Report",
+        icon: <FaChartBar />,
+      },
     ];
 
     return (

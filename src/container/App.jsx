@@ -1,6 +1,6 @@
 import { useState,useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate,Outlet } from "react-router-dom";
 import Reset from "../user/Reset";
 import Userpage from "../user/Userpage";
 import Resetpassword from "../admin/Resetpassword";
@@ -21,6 +21,9 @@ import CreateBranch from "../admin/CreateBranch";
 import BranchList from "../admin/BranchList";
 import NoAccess from "../branch/NoAccess";
 import UserSidebar from "../user/UserSidebar";
+import Home from "../user/Home";
+import Signup from "../user/Signup";
+
 
 function App() {
   const [cUSer, setCuser] = useState({});
@@ -58,33 +61,63 @@ function App() {
       <BrowserRouter>
         {renderSidebar()}
         <div className="main-content">
-          <Routes>
-            <Route path="/" element={<Login setCuser={setCuser} />} />  
-            <Route path="/reset-password" element={<Reset />} />
-            {/* <Route path="/admin" element={<AdminSidebar cUSer={cUSer} />} /> */}
-            <Route path="/users" element={<UsersList users={users} />} />
-            <Route path="/adduser" element={<Createuser setUsers={setUsers} />} />
-            <Route path="/resetpassword" element={<Resetpassword />} />
-            {/* Admin */}
-            <Route path="/admin/:userId" element={<AdminSidebar cUSer={cUSer} />} />
-            <Route path="/productlist" element={<ProductList />} /> 
-            <Route path="/registerproduct" element={<RegisterProduct />} />
-            <Route path="/category" element={<Category />} />
-            <Route path="/sellproduct" element={<ProductSold />} />
-            <Route path="/reports" element={<Report />} />
-            <Route path="/order" element={<Order />} />
-            {/* branch manager */}
-            <Route path="/manager/:userId" element={<BranchSidebar  />} />
-            <Route path="/branches" element={<BranchList branches={branches} />} />
-            <Route path="/addbranch" element={<CreateBranch setBranches={setBranches} />} /> {/* Pass setBranches */}
-            <Route path="/no-access" element={<NoAccess />} />
+        <Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/login" element={<Login setCuser={setCuser} />} />
+  <Route path="/signup" element={<Signup setCuser={setCuser} />} />
+  <Route path="/reset-password" element={<Reset />} />
 
+  {/* Admin Layout */}
+  <Route
+    path="/admin/*"
+    element={
+      <AdminSidebar cUSer={cUSer}>
+        <Outlet /> {/* Renders child routes inside AdminSidebar */}
+      </AdminSidebar>
+    }
+  >
+    <Route path="adduser" element={<Createuser setUsers={setUsers} />} />
+    <Route path="users" element={<UsersList users={users} />} />
+    <Route path="branches" element={<BranchList branches={branches} />} />
+    <Route path="addbranch" element={<CreateBranch setBranches={setBranches} />} />
+    <Route path="resetpassword" element={<Resetpassword />} />
+    <Route path="reports" element={<Report />} />
+  </Route>
 
-            {/* user */}
-            <Route path="/user/:userId" element={<UserSidebar />} />
-            <Route path="/Userpage" element={<Userpage />} />
-            <Route path="/security-question/:userId" element={<Security />} />            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+  {/* Branch Manager Layout */}
+  <Route
+    path="/manager/*"
+    element={
+      <BranchSidebar>
+        <Outlet /> {/* Renders child routes inside BranchSidebar */}
+      </BranchSidebar>
+    }
+  >
+    <Route path="productlist" element={<ProductList />} />
+    <Route path="registerproduct" element={<RegisterProduct />} />
+    <Route path="category" element={<Category />} />
+    <Route path="sellproduct" element={<ProductSold />} />
+    <Route path="reports" element={<Report />} />
+    <Route path="order" element={<Order />} />
+    <Route path="no-access" element={<NoAccess />} />
+  </Route>
+
+  {/* User Layout */}
+  <Route
+    path="/user/*"
+    element={
+      <UserSidebar>
+        <Outlet /> {/* Renders child routes inside UserSidebar */}
+      </UserSidebar>
+    }
+  >
+    <Route path="Userpage" element={<Userpage />} />
+    <Route path="security-question/:userId" element={<Security />} />
+  </Route>
+
+  {/* Fallback Route */}
+  <Route path="*" element={<Navigate to="/" />} />
+</Routes>
         </div>
       </BrowserRouter>
     </UserContext.Provider>

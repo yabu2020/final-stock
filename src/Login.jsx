@@ -263,14 +263,17 @@ function Login({ setCuser }) {
   };
 
   return (
-    <div className="bg-white min-h-screen flex items-center justify-center">
-      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg relative">
-        <h1 className="text-2xl font-semibold text-center text-gray-500 mt-8 mb-6">
+    <div className="bg-gray-900 min-h-screen flex items-center justify-center dark:bg-gray-900">
+      <div className="max-w-md w-full p-6 bg-gray-800 rounded-lg shadow-lg relative dark:bg-gray-800">
+        <h1 className="text-2xl font-semibold text-center text-white mt-8 mb-6 dark:text-white">
           Login to Your Account
         </h1>
         <form onSubmit={handleSubmit}>
+          {/* Name Field */}
           <div className="mb-6">
-            <label htmlFor="name" className="block mb-2 text-sm text-gray-600">Name</label>
+            <label htmlFor="name" className="block mb-2 text-sm text-gray-300 dark:text-gray-300">
+              Name
+            </label>
             <input
               type="text"
               id="name"
@@ -278,13 +281,17 @@ function Login({ setCuser }) {
               placeholder="Enter UserName"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:text-white"
               required
             />
             {nameError && <p className="text-red-500">{nameError}</p>}
           </div>
+
+          {/* Password Field */}
           <div className="mb-6 relative">
-            <label htmlFor="password" className="block mb-2 text-sm text-gray-600">Password</label>
+            <label htmlFor="password" className="block mb-2 text-sm text-gray-300 dark:text-gray-300">
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -293,7 +300,7 @@ function Login({ setCuser }) {
                 placeholder="Enter Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
+                className="w-full px-4 py-2 border bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12 dark:bg-gray-700 dark:text-white"
                 required
               />
               <div
@@ -304,29 +311,49 @@ function Login({ setCuser }) {
                 style={{ height: '100%' }}
               >
                 {showPassword ? (
-                  <FaEyeSlash className="w-5 h-5 text-gray-500" />
+                  <FaEyeSlash className="w-5 h-5 text-gray-400 dark:text-gray-400" />
                 ) : (
-                  <FaEye className="w-5 h-5 text-gray-500" />
+                  <FaEye className="w-5 h-5 text-gray-400 dark:text-gray-400" />
                 )}
               </div>
               {tooltip && (
-                <div className="absolute top-full right-0 mt-1 bg-gray-700 text-white text-xs rounded py-1 px-2">
+                <div className="absolute top-full right-0 mt-1 bg-gray-700 text-white text-xs rounded py-1 px-2 dark:bg-gray-700 dark:text-white">
                   {tooltip}
                 </div>
               )}
             </div>
             {passwordError && <p className="text-red-500">{passwordError}</p>}
           </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-32 bg-blue-500 text-white py-2 rounded-lg mx-auto block hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mt-4 mb-6"
+            className="w-32 bg-blue-500 text-white py-2 rounded-lg mx-auto block hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mt-4 mb-6 dark:bg-blue-600 dark:hover:bg-blue-500"
           >
             Login
           </button>
         </form>
-        <div className="text-center">
-          <p className="text-sm text-cyan-600 cursor-pointer" onClick={handleForgotPassword}>
+
+        {/* Forgot Password Link */}
+        <div className="text-center mb-4">
+          <p
+            className="text-sm text-cyan-400 cursor-pointer dark:text-cyan-400"
+            onClick={handleForgotPassword}
+          >
             Forgot Password?
+          </p>
+        </div>
+
+        {/* Sign Up Link */}
+        <div className="text-center">
+          <p className="text-sm text-gray-400 dark:text-gray-400">
+            Don't have an account?{" "}
+            <span
+              className="text-blue-400 cursor-pointer hover:underline dark:text-blue-400"
+              onClick={() => navigate("/signup")} // Navigate to the signup page
+            >
+              Sign Up
+            </span>
           </p>
         </div>
       </div>
@@ -334,4 +361,4 @@ function Login({ setCuser }) {
   );
 }
 
-export default Login; // Ensure this line is present
+export default Login;
