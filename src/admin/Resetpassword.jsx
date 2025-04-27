@@ -66,64 +66,92 @@ function Resetpassword() {
   };
 
   return (
-    <div className="flex items-center ml-20 mt-20 justify-center">
-      <div className="w-full max-w-2xl p-8 rounded-lg shadow-lg" style={{ width: '60%', marginLeft: "200px", padding: '60px 60px' }}>
-        <form onSubmit={handlePasswordReset} className="w-full">
-          <h2 className="text-2xl text-center font-bold text-blue-400 mb-8">Reset Password</h2>
-          <div className="mb-4">
-            <label className="block text-gray-500" htmlFor="name" style={{ display: 'inline-block', width: '30%', marginBottom: '0', verticalAlign: 'middle' }}>Name</label>
+    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      {/* Form Container */}
+      <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-gray-800 border border-gray-700">
+        <form onSubmit={handlePasswordReset} className="space-y-6">
+          {/* Heading */}
+          <h2 className="text-2xl font-bold text-blue-400 text-center">Reset Password</h2>
+
+          {/* Name Input */}
+          <div>
+            <label htmlFor="name" className="block text-gray-300 font-medium mb-2">
+              Name
+            </label>
             <input
               type="text"
-              placeholder="Enter Name"
+              id="name"
+              placeholder="Enter your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={`w-full px-3 py-2 rounded bg-gray-100 focus:outline-none focus:ring focus:ring-blue-200 ${nameError ? 'border-red-500' : ''}`}
-              style={{ display: 'inline-block', width: '70%', marginBottom: '5px' }}
+              className={`w-full px-4 py-2 bg-gray-700 border ${
+                nameError ? "border-red-500" : "border-gray-600"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
             />
             {nameError && <p className="text-red-500 mt-2">{nameError}</p>}
           </div>
-          <div className="mb-4 relative">
-            <label className="block text-gray-500" htmlFor="newPassword" style={{ display: 'inline-block', width: '30%', marginBottom: '0', verticalAlign: 'middle' }}>New Password</label>
+
+          {/* New Password Input */}
+          <div className="relative">
+            <label htmlFor="newPassword" className="block text-gray-300 font-medium mb-2">
+              New Password
+            </label>
             <input
               type={showNewPassword ? "text" : "password"}
-              placeholder="Enter New Password"
+              id="newPassword"
+              placeholder="Enter new password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className={`w-full px-3 py-2 rounded bg-gray-100 focus:outline-none focus:ring focus:ring-blue-200 ${passwordError ? 'border-red-500' : ''}`}
-              style={{ display: 'inline-block', width: '70%' }}
+              className={`w-full px-4 py-2 bg-gray-700 border ${
+                passwordError ? "border-red-500" : "border-gray-600"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white pr-10`} // Added pr-10 for padding on the right
             />
             <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute top-[50%] transform -translate-y-1/2 right-3 flex items-center text-gray-400 hover:text-gray-300 cursor-pointer z-10"
               title={showNewPassword ? "Hide Password" : "Show Password"}
             >
-              {showNewPassword ? <FaEyeSlash className="text-gray-500 hover:text-gray-700" /> : <FaEye className="text-gray-500 hover:text-gray-700" />}
+              {showNewPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
-          <div className="mb-4 relative">
-            <label className="block text-gray-500" htmlFor="confirmPassword" style={{ display: 'inline-block', width: '30%', marginBottom: '0', verticalAlign: 'middle' }}>Confirm Password</label>
+
+          {/* Confirm Password Input */}
+          <div className="relative">
+            <label htmlFor="confirmPassword" className="block text-gray-300 font-medium mb-2">
+              Confirm Password
+            </label>
             <input
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password"
+              id="confirmPassword"
+              placeholder="Confirm password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className={`w-full px-3 py-2 rounded bg-gray-100 focus:outline-none focus:ring focus:ring-blue-200 ${passwordError ? 'border-red-500' : ''}`}
-              style={{ display: 'inline-block', width: '70%' }}
+              className={`w-full px-4 py-2 bg-gray-700 border ${
+                passwordError ? "border-red-500" : "border-gray-600"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white pr-10`} // Added pr-10 for padding on the right
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              className="absolute top-[50%] transform -translate-y-1/2 right-3 flex items-center text-gray-400 hover:text-gray-300 cursor-pointer z-10"
               title={showConfirmPassword ? "Hide Password" : "Show Password"}
             >
-              {showConfirmPassword ? <FaEyeSlash className="text-gray-500 hover:text-gray-700" /> : <FaEye className="text-gray-500 hover:text-gray-700" />}
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
 
-          <button type="submit" className="w-1/2 bg-blue-400 mt-4 ml-40 hover:bg-blue-300 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-blue-200">Reset Password</button>
-          {passwordError && <p className="text-red-500 mt-2">{passwordError}</p>}
-          {resetMessage && <p className="text-blue-500 mt-2">{resetMessage}</p>}
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+          >
+            Reset Password
+          </button>
+
+          {/* Success/Error Messages */}
+          {passwordError && <p className="text-red-500 text-sm text-center">{passwordError}</p>}
+          {resetMessage && <p className="text-green-500 text-sm text-center">{resetMessage}</p>}
         </form>
       </div>
     </div>

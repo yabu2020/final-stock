@@ -47,52 +47,78 @@ function Category() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-full max-w-xl p-8 rounded-lg shadow-lg" style={{ maxWidth: '500px' }}>
+    <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div
+        className="w-full max-w-xl p-8 rounded-lg shadow-lg"
+        style={{ maxWidth: '500px', backgroundColor: '#1c1c2e' }}
+      >
         <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">Set Category</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-wrap -mx-3 mb-6">
+            {/* Category Name Field */}
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="category" className="block ml-0 font-medium text-gray-600 mb-1">Category Name:</label>
+              <label htmlFor="category" className="block ml-0 font-medium text-gray-300 mb-1">
+                Category Name:
+              </label>
               <input
                 type="text"
                 id="category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
-                className="w-full px-3 ml-0 bg-gray-100 py-2  border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            {/* Code Field */}
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="code" className="block font-medium text-gray-600 mb-1">Code:</label>
+              <label htmlFor="code" className="block font-medium text-gray-300 mb-1">
+                Code:
+              </label>
               <input
                 type="text"
                 id="code"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
-                className="w-full px-3 py-2 bg-gray-100  border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
+
+          {/* Description Field */}
           <div>
-            <label htmlFor="description" className="block font-medium text-gray-600 mb-1">Description:</label>
+            <label htmlFor="description" className="block font-medium text-gray-300 mb-1">
+              Description:
+            </label>
             <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-100 border  border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="w-full ml-20 md:w-1/2 px-3">
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full mt-2 bg-blue-500 py-2 px-4 text-black rounded-md shadow hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-500 transition duration-300"
             >
               Register Category
             </button>
-          </div>  
-          {message && <p className="text-green-400 text-sm mt-4">{message}</p>}
+          </div>
+
+          {/* Success/Error Message */}
+          {message && (
+            <p
+              className={`text-sm mt-4 text-center ${
+                message.includes("successfully") ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {message}
+            </p>
+          )}
         </form>
       </div>
     </div>

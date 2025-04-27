@@ -325,14 +325,35 @@ function RegisterProduct() {
   };
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="w-full max-w-lg ml-20 p-8 rounded-lg shadow-lg" style={{ maxWidth: "780px" }}>
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">Register Product</h1>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <div
+        className="w-full max-w-lg p-8 rounded-lg shadow-lg"
+        style={{ maxWidth: "780px", backgroundColor: "#1c1c2e" }}
+      >
+        <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">
+          Register Product
+        </h1>
+
+        {/* Success/Error Message */}
+        {message && (
+          <p
+            className={`text-sm mt-4 text-center ${
+              message.includes("successfully") ? "text-green-500" : "text-red-500"
+            }`}
+          >
+            {message}
+          </p>
+        )}
+
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {message && <p className="text-blue-400 text-sm mt-4">{message}</p>}
+          {/* Row 1: Product Name & Quantity */}
           <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="name" className="block ml-0 font-medium text-gray-600 mb-1">
+            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+              <label
+                htmlFor="name"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Product Name:
               </label>
               <input
@@ -341,27 +362,34 @@ function RegisterProduct() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-3 ml-0 bg-gray-100 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="quantity" className="block ml-0 font-medium text-gray-600 mb-1">
+              <label
+                htmlFor="quantity"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Quantity:
               </label>
               <input
-                type="number" // Restrict input to numbers
+                type="number"
                 id="quantity"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 required
-                className="w-full px-3 py-2 bg-gray-100 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
           </div>
 
+          {/* Row 2: Category & Purchase Price */}
           <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+              <label
+                htmlFor="category"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Category:
               </label>
               <select
@@ -369,7 +397,7 @@ function RegisterProduct() {
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
-                className="w-full px-3 py-2 border bg-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 border-blue-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               >
                 <option value="">Select a category</option>
                 {categories.map((cat) => (
@@ -380,94 +408,120 @@ function RegisterProduct() {
               </select>
             </div>
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="purchaseprice" className="block font-medium text-gray-600 mb-1">
+              <label
+                htmlFor="purchaseprice"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Purchase Price:
               </label>
               <input
-                type="number" // Restrict input to numbers
+                type="number"
                 id="purchaseprice"
                 value={purchaseprice}
                 onChange={(e) => setPurchaseprice(e.target.value)}
                 required
-                className="w-full px-3 py-2 bg-gray-100 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
           </div>
+
+          {/* Row 3: Sale Price & Description */}
           <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="saleprice" className="block font-medium text-gray-600 mb-1">
+            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+              <label
+                htmlFor="saleprice"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Sale Price:
               </label>
               <input
-                type="number" // Restrict input to numbers
+                type="number"
                 id="saleprice"
                 value={saleprice}
                 onChange={(e) => setSaleprice(e.target.value)}
                 required
-                className="w-full px-3 py-2 bg-gray-100 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="description" className="block font-medium text-gray-600 mb-1">
+              <label
+                htmlFor="description"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Description:
               </label>
               <textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
           </div>
+
+          {/* Row 4: Status & Quantity Type */}
           <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="status" className="block font-medium text-gray-600 mb-1">
+            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+              <label
+                htmlFor="status"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Status:
               </label>
               <select
                 id="status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-200 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border-blue-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               >
                 <option value="Available">Available</option>
                 <option value="Low Stock">Low Stock</option>
               </select>
             </div>
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="quantityType" className="block font-medium text-gray-600 mb-1">
+              <label
+                htmlFor="quantityType"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Quantity Type:
               </label>
               <select
                 id="quantityType"
                 value={quantityType}
                 onChange={(e) => setQuantityType(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-200 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border-blue-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               >
                 <option value="whole">Whole Units</option>
                 <option value="pieces">Individual Pieces</option>
               </select>
             </div>
           </div>
+
+          {/* Row 5: Product Image */}
           <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="image" className="block font-medium text-gray-600 mb-1">
+            <div className="w-full px-3">
+              <label
+                htmlFor="image"
+                className="block font-medium text-gray-300 mb-1"
+              >
                 Product Image:
               </label>
               <input
                 type="file"
                 id="image"
-                accept="image/*" // Restrict to image files
-                onChange={(e) => setImage(e.target.files[0])} // Store the selected file
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
                 required
-                className="w-full px-3 py-2 bg-gray-100 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
           </div>
-          <div className="w-full ml-20 md:w-1/2 px-3">
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full mt-2 bg-blue-400 py-2 px-4 text-gray rounded-md shadow hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
             >
               Register Product
             </button>

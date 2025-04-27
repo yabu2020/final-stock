@@ -242,19 +242,21 @@ axios
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-white">
-      <h2 className="text-3xl font-bold text-gray-400 mb-6">Welcome!</h2>
+    <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-gray-900">
+      <h2 className="text-3xl font-bold text-blue-400 mb-6">Welcome!</h2>
       {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
 
       {/* Branch Selection */}
       <div className="mb-6">
         <div className="flex items-center space-x-4">
-          <label htmlFor="branch-select" className="block text-lg font-medium text-gray-500 mb-2">Select Branch:</label>
+          <label htmlFor="branch-select" className="block text-lg font-medium text-gray-300 mb-2">
+            Select Branch:
+          </label>
           <select
             id="branch-select"
             value={selectedBranch}
             onChange={(e) => setSelectedBranch(e.target.value)}
-            className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="" disabled>Select a Branch</option>
             {branches.map((branch) => (
@@ -269,13 +271,15 @@ axios
       {/* Search Bar */}
       <div className="mb-6">
         <div className="flex items-center space-x-4">
-          <label htmlFor="search" className="block text-lg font-medium text-gray-500 mb-2">Search Product:</label>
+          <label htmlFor="search" className="block text-lg font-medium text-gray-300 mb-2">
+            Search Product:
+          </label>
           <input
             type="text"
             id="search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Search for products"
           />
         </div>
@@ -284,12 +288,14 @@ axios
       {/* Product Selection */}
       <div className="mb-6">
         <div className="flex items-center space-x-4">
-          <label htmlFor="product-select" className="block text-lg font-medium text-gray-500 mb-2">Select Product:</label>
+          <label htmlFor="product-select" className="block text-lg font-medium text-gray-300 mb-2">
+            Select Product:
+          </label>
           <select
             id="product-select"
             value={selectedProduct}
             onChange={(e) => setSelectedProduct(e.target.value)}
-            className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="" disabled>Select a Product</option>
             {products.map((product) => (
@@ -304,7 +310,9 @@ axios
       {/* Quantity Input */}
       <div className="mb-6">
         <div className="flex items-center space-x-4">
-          <label htmlFor="quantity" className="block text-lg font-medium text-gray-500 mb-2">Quantity:</label>
+          <label htmlFor="quantity" className="block text-lg font-medium text-gray-300 mb-2">
+            Quantity:
+          </label>
           <input
             type="number"
             id="quantity"
@@ -319,7 +327,7 @@ axios
               }
             }}
             min="1"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter quantity"
           />
         </div>
@@ -328,16 +336,16 @@ axios
       {/* Place Order Button */}
       <button
         onClick={handlePlaceOrder}
-        className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-400 transition duration-300"
+        className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
       >
         Place Order
       </button>
 
       {/* Order History Table */}
-      <h3 className="text-xl font-semibold text-gray-500 mt-10">Order History</h3>
-      <table className="w-full mt-6 border-collapse bg-white shadow-md rounded-lg">
+      <h3 className="text-xl font-semibold text-blue-400 mt-10">Order History</h3>
+      <table className="w-full mt-6 border-collapse bg-gray-800 shadow-md rounded-lg">
         <thead>
-          <tr className="bg-gray-100 text-blue-400">
+          <tr className="bg-gray-700 text-gray-300">
             <th className="px-4 py-2">Product Name</th>
             <th className="px-4 py-2">Quantity</th>
             <th className="px-4 py-2">Total Price</th>
@@ -351,22 +359,26 @@ axios
         <tbody>
           {orderHistory.length > 0 ? (
             orderHistory.map((order, index) => (
-              <tr key={index} className="border-b">
-                <td className="px-4 py-2">{order.product?.name || "N/A"}</td>
-                <td className="px-4 py-2">{order.quantity || "N/A"}</td>
-                <td className="px-4 py-2">{order.totalPrice || "N/A"}</td>
-                <td className="px-4 py-2">{new Date(order.dateOrdered).toLocaleDateString()}</td>
-                <td className="px-4 py-2">{order.userId?.name || "N/A"}</td>
-                <td className="px-4 py-2">{order.userId?.address || "N/A"}</td>
-                <td className="px-4 py-2">{order.userId?.phone || "N/A"}</td>
-                <td className={`px-4 py-2 ${order.status === 'Confirmed' ? 'text-blue-500' : order.status === 'Rejected' ? 'text-red-500' : 'text-gray-500'}`}>
+              <tr key={index} className="border-b border-gray-600">
+                <td className="px-4 py-2 text-gray-300">{order.product?.name || "N/A"}</td>
+                <td className="px-4 py-2 text-gray-300">{order.quantity || "N/A"}</td>
+                <td className="px-4 py-2 text-gray-300">{order.totalPrice || "N/A"}</td>
+                <td className="px-4 py-2 text-gray-300">
+                  {new Date(order.dateOrdered).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-2 text-gray-300">{order.userId?.name || "N/A"}</td>
+                <td className="px-4 py-2 text-gray-300">{order.userId?.address || "N/A"}</td>
+                <td className="px-4 py-2 text-gray-300">{order.userId?.phone || "N/A"}</td>
+                <td className={`px-4 py-2 text-gray-300 ${order.status === 'Confirmed' ? 'text-blue-500' : order.status === 'Rejected' ? 'text-red-500' : 'text-gray-500'}`}>
                   {order.status || "Pending"}
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="8" className="text-center py-4">No orders placed</td>
+              <td colSpan="8" className="text-center py-4 text-gray-400">
+                No orders placed
+              </td>
             </tr>
           )}
         </tbody>
@@ -376,6 +388,5 @@ axios
 }
 
 export default Userpage;
-
 
 

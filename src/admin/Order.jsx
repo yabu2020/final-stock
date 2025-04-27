@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import  UserContext  from "../admin/UserContext"; // Adjust import path as needed
+import UserContext  from "../admin/UserContext"; // Adjust import path as needed
 
 function AdminOrderPage() {
   const { cUSer } = useContext(UserContext); // Access current user from context
@@ -53,61 +53,70 @@ function AdminOrderPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-white">
+    <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-gray-900">
       <h2 className="text-3xl font-bold text-blue-400 mb-6">Manage Orders</h2>
-      {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
+      {message && (
+        <p className={`text-lg mb-4 ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>
+          {message}
+        </p>
+      )}
 
-      <table className="w-full mt-6 border-collapse bg-white shadow-md rounded-lg">
-        <thead>
-          <tr className="bg-blue-100 text-blue-400">
-            <th className="px-4 py-2">Customer Name</th>
-            <th className="px-4 py-2">Address</th>
-            <th className="px-4 py-2">Phone</th>
-            <th className="px-4 py-2">Product</th>
-            <th className="px-4 py-2">Quantity</th>
-            <th className="px-4 py-2">Total Price</th>
-            <th className="px-4 py-2">Date Ordered</th>
-            <th className="px-4 py-2">Status</th>
-            <th className="px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.length > 0 ? (
-            orders.map((order) => (
-              <tr key={order._id} className="border-b">
-                <td className="px-4 py-2">{order.userId?.name || "N/A"}</td>
-                <td className="px-4 py-2">{order.userId?.address || "N/A"}</td>
-                <td className="px-4 py-2">{order.userId?.phone || "N/A"}</td>
-                <td className="px-4 py-2">{order.product?.name || "N/A"}</td>
-                <td className="px-4 py-2">{order.quantity || "N/A"}</td>
-                <td className="px-4 py-2">{order.totalPrice || "N/A"}</td>
-                <td className="px-4 py-2">{new Date(order.dateOrdered).toLocaleDateString()}</td>
-                <td className="px-4 py-2">{order.status || "N/A"}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => handleConfirmOrder(order._id)}
-                    className="px-4 py-2 bg-blue-400 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300 mr-2"
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    onClick={() => handleRejectOrder(order._id)}
-                    className="px-4 py-2 bg-red-400 text-white font-semibold rounded-md shadow-md hover:bg-red-500 transition duration-300"
-                  >
-                    Reject
-                  </button>
+      {/* Centered Table Container */}
+      <div className="w-full">
+        <table className="w-full mt-6 border-collapse bg-gray-800 shadow-md rounded-lg">
+          <thead>
+            <tr className="bg-gray-700 text-gray-300">
+              <th className="px-4 py-2 text-left w-1/12">Customer Name</th>
+              <th className="px-4 py-2 text-left w-1/12">Address</th>
+              <th className="px-4 py-2 text-left w-1/12">Phone</th>
+              <th className="px-4 py-2 text-left w-1/12">Product</th>
+              <th className="px-4 py-2 text-left w-1/12">Quantity</th>
+              <th className="px-4 py-2 text-left w-1/12">Total Price</th>
+              <th className="px-4 py-2 text-left w-1/12">Date Ordered</th>
+              <th className="px-4 py-2 text-left w-1/12">Status</th>
+              <th className="px-4 py-2 text-left w-1/12">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.length > 0 ? (
+              orders.map((order) => (
+                <tr key={order._id} className="border-b border-gray-600 hover:bg-gray-600 transition duration-300">
+                  <td className="px-4 py-2 text-gray-300 truncate">{order.userId?.name || "N/A"}</td>
+                  <td className="px-4 py-2 text-gray-300 truncate">{order.userId?.address || "N/A"}</td>
+                  <td className="px-4 py-2 text-gray-300 truncate">{order.userId?.phone || "N/A"}</td>
+                  <td className="px-4 py-2 text-gray-300 truncate">{order.product?.name || "N/A"}</td>
+                  <td className="px-4 py-2 text-gray-300">{order.quantity || "N/A"}</td>
+                  <td className="px-4 py-2 text-gray-300">{order.totalPrice || "N/A"}</td>
+                  <td className="px-4 py-2 text-gray-300">
+                    {new Date(order.dateOrdered).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300">{order.status || "N/A"}</td>
+                  <td className="px-4 py-2 flex flex-col items-center space-y-2">
+                    <button
+                      onClick={() => handleConfirmOrder(order._id)}
+                      className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={() => handleRejectOrder(order._id)}
+                      className="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-500 transition duration-300"
+                    >
+                      Reject
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="9" className="text-center py-4 text-gray-400">
+                  No orders available
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="9" className="text-center py-4 text-blue-500">
-                No orders available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

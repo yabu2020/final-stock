@@ -4,193 +4,265 @@ import axios from "axios";
 import { FaEdit, FaTrash } from "react-icons/fa";
 
 function UsersList() {
-  const [users, setUsers] = useState([]);
-  const [editingUserId, setEditingUserId] = useState(null);
-  const [userEditData, setUserEditData] = useState({});
+    const [users, setUsers] = useState([]);
+    const [editingUserId, setEditingUserId] = useState(null);
+    const [userEditData, setUserEditData] = useState({});
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/users")
-      .then((response) => setUsers(response.data))
-      .catch((err) => console.log("Error fetching users", err));
-  }, []);
+    useEffect(() => {
+        axios
+            .get("http://localhost:3001/users")
+            .then((response) => setUsers(response.data))
+            .catch((err) => console.log("Error fetching users", err));
+    }, []);
 
-  const handleEditClick = (user) => {
-    setEditingUserId(user._id);
-    setUserEditData({ ...user });
-  };
+    const handleEditClick = (user) => {
+        setEditingUserId(user._id);
+        setUserEditData({ ...user });
+    };
 
-  const handleSaveClick = () => {
-    axios
-      .put(`http://localhost:3001/users/${editingUserId}`, userEditData)
-      .then((response) => {
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user._id === editingUserId ? response.data : user
-          )
-        );
+    const handleSaveClick = () => {
+        axios
+            .put(`http://localhost:3001/users/${editingUserId}`, userEditData)
+            .then((response) => {
+                setUsers((prevUsers) =>
+                    prevUsers.map((user) =>
+                        user._id === editingUserId ? response.data : user
+                    )
+                );
+                setEditingUserId(null);
+                setUserEditData({});
+            })
+            .catch((err) => console.log("Error updating user", err));
+    };
+
+    const handleCancelClick = () => {
         setEditingUserId(null);
         setUserEditData({});
-      })
-      .catch((err) => console.log("Error updating user", err));
-  };
+    };
 
-  const handleCancelClick = () => {
-    setEditingUserId(null);
-    setUserEditData({});
-  };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setUserEditData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUserEditData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+    const handleDelete = (id) => {
+        axios
+            .delete(`http://localhost:3001/users/${id}`)
+            .then(() => {
+                setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id));
+                alert("User deleted successfully!");
+            })
+            .catch((err) => console.log("Error deleting user", err));
+    };
 
-  const handleDelete = (id) => {
-    axios
-      .delete(`http://localhost:3001/users/${id}`)
-      .then(() => {
-        setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id));
-        alert("User deleted successfully!");
-      })
-      .catch((err) => console.log("Error deleting user", err));
-  };
+    return (
+        <section style={{ backgroundColor: "#1f2937", padding: "1rem" }}>
+            <div style={{ marginLeft: "60px", marginTop: "2rem" }}>
+                <div
+                    style={{
+                        backgroundColor: "#1c1c2e",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                        overflow: "hidden",
+                    }}
+                >
+                    {/* Header Section */}
+                    <div style={{ padding: "1rem", borderBottom: "1px solid #4a5568" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <h3 style={{ color: "white", fontSize: "1.5rem", fontWeight: "bold" }}>List of Users</h3>
+                            <Link to="/admin/adduser">
+                                <button
+                                    style={{
+                                        backgroundColor: "#3b82f6",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "4px",
+                                        padding: "0.5rem 1rem",
+                                        cursor: "pointer",
+                                        transition: "background-color 0.3s ease",
+                                    }}
+                                    onMouseOver={(e) => (e.target.style.backgroundColor = "#2c7ae0")}
+                                    onMouseOut={(e) => (e.target.style.backgroundColor = "#3b82f6")}
+                                >
+                                    New User
+                                </button>
+                            </Link>
+                        </div>
+                    </div>
 
-  return (
-    <section className="py-1 bg-gray-900">
-      <div className="w-full xl:w-10/12 mb-12 xl:mb-0 px-4 ml-60 mt-8"> {/* Reduced top margin */}
-        <div className="relative flex flex-col min-w-0 break-words bg-gray-800 w-full mb-6 shadow-lg rounded-lg overflow-hidden">
-          <div className="mb-0 px-4 py-3 border-0">
-            <div className="flex flex-wrap items-center">
-              <div className="relative w-full px-4 max-w-full flex-grow flex-1">
-                <h3 className="font-semibold text-xl text-white">List of Users</h3>
-              </div>
-              <div className="flex-grow self-end text-right">
-                <Link to="/adduser">
-                  <button className="bg-blue-400 w-28 h-11 justify-around hover:text-blue items-center hover:bg-blue-300 text-white">
-                    New User
-                  </button>
-                </Link>
-              </div>
+                    {/* Table Section */}
+                    <div style={{ padding: "1rem" }}>
+                        <div style={{ display: "flex", justifyContent: "center" }}>
+                            <table
+                                style={{
+                                    width: "90%",
+                                    borderCollapse: "collapse",
+                                    backgroundColor: "#1f2937",
+                                    borderRadius: "8px",
+                                    overflow: "hidden",
+                                }}
+                            >
+                                <thead>
+                                    <tr>
+                                        <th style={tableHeaderStyle}>Name</th>
+                                        <th style={tableHeaderStyle}>Role</th>
+                                        <th style={tableHeaderStyle}>Phone</th>
+                                        <th style={tableHeaderStyle}>Address</th>
+                                        <th style={tableHeaderStyle}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.map((user, index) => (
+                                        <tr
+                                            key={user._id}
+                                            style={{
+                                                backgroundColor: index % 2 === 0 ? "#1c1c2e" : "#1f2937",
+                                                transition: "background-color 0.3s ease",
+                                            }}
+                                            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#2d3748")}
+                                            onMouseOut={(e) =>
+                                                (e.currentTarget.style.backgroundColor =
+                                                    index % 2 === 0 ? "#1c1c2e" : "#1f2937")
+                                            }
+                                        >
+                                            <td style={tableCellStyle}>
+                                                {editingUserId === user._id ? (
+                                                    <input
+                                                        type="text"
+                                                        name="name"
+                                                        value={userEditData.name || ""}
+                                                        onChange={handleInputChange}
+                                                        style={inputStyle}
+                                                    />
+                                                ) : (
+                                                    user.name
+                                                )}
+                                            </td>
+                                            <td style={tableCellStyle}>
+                                                {editingUserId === user._id ? (
+                                                    <input
+                                                        type="text"
+                                                        name="role"
+                                                        value={userEditData.role || ""}
+                                                        onChange={handleInputChange}
+                                                        style={inputStyle}
+                                                    />
+                                                ) : (
+                                                    user.role
+                                                )}
+                                            </td>
+                                            <td style={tableCellStyle}>
+                                                {editingUserId === user._id ? (
+                                                    <input
+                                                        type="text"
+                                                        name="phone"
+                                                        value={userEditData.phone || ""}
+                                                        onChange={handleInputChange}
+                                                        style={inputStyle}
+                                                    />
+                                                ) : (
+                                                    user.phone
+                                                )}
+                                            </td>
+                                            <td style={tableCellStyle}>
+                                                {editingUserId === user._id ? (
+                                                    <input
+                                                        type="text"
+                                                        name="address"
+                                                        value={userEditData.address || ""}
+                                                        onChange={handleInputChange}
+                                                        style={inputStyle}
+                                                    />
+                                                ) : (
+                                                    user.address
+                                                )}
+                                            </td>
+                                            <td style={tableCellStyle}>
+                                                {editingUserId === user._id ? (
+                                                    <>
+                                                        <button
+                                                            onClick={handleSaveClick}
+                                                            style={{
+                                                                color: "#22c55e",
+                                                                cursor: "pointer",
+                                                                marginRight: "0.5rem",
+                                                                textDecoration: "underline",
+                                                            }}
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCancelClick}
+                                                            style={{
+                                                                color: "#ef4444",
+                                                                cursor: "pointer",
+                                                                textDecoration: "underline",
+                                                            }}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <FaEdit
+                                                            style={iconStyle}
+                                                            onClick={() => handleEditClick(user)}
+                                                        />
+                                                        <FaTrash
+                                                            style={iconStyle}
+                                                            onClick={() => handleDelete(user._id)}
+                                                        />
+                                                    </>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div className="block w-full overflow-x-auto">
-            <table className="items-center bg-transparent w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="px-6 bg-gray-800 text-white align-middle border border-solid border-gray-700 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                    Name
-                  </th>
-                  <th className="px-6 bg-gray-800 text-white align-middle border border-solid border-gray-700 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                    Role
-                  </th>
-                  <th className="px-6 bg-gray-800 text-white align-middle border border-solid border-gray-700 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                    Phone
-                  </th>
-                  <th className="px-6 bg-gray-800 text-white align-middle border border-solid border-gray-700 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                    Address
-                  </th>
-                  <th className="px-6 bg-gray-800 text-white align-middle border border-solid border-gray-700 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {users.map((user, index) => (
-                  <tr
-                    key={user._id}
-                    className={`border-b border-gray-700 ${
-                      index % 2 === 0 ? "bg-gray-800" : "bg-gray-900"
-                    }`}
-                  >
-                    <td className="px-6 py-4 text-sm text-white border-t-0 border-l-0 border-r-0 align-middle whitespace-nowrap">
-                      {editingUserId === user._id ? (
-                        <input
-                          type="text"
-                          name="name"
-                          value={userEditData.name || ""}
-                          onChange={handleInputChange}
-                          className="border p-1 bg-gray-700 text-white"
-                        />
-                      ) : (
-                        user.name
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-white border-t-0 border-l-0 border-r-0 align-middle whitespace-nowrap">
-                      {editingUserId === user._id ? (
-                        <input
-                          type="text"
-                          name="role"
-                          value={userEditData.role || ""}
-                          onChange={handleInputChange}
-                          className="border p-1 bg-gray-700 text-white"
-                        />
-                      ) : (
-                        user.role
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-white border-t-0 border-l-0 border-r-0 align-middle whitespace-nowrap">
-                      {editingUserId === user._id ? (
-                        <input
-                          type="text"
-                          name="phone"
-                          value={userEditData.phone || ""}
-                          onChange={handleInputChange}
-                          className="border p-1 bg-gray-700 text-white"
-                        />
-                      ) : (
-                        user.phone
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-white border-t-0 border-l-0 border-r-0 align-middle whitespace-nowrap">
-                      {editingUserId === user._id ? (
-                        <input
-                          type="text"
-                          name="address"
-                          value={userEditData.address || ""}
-                          onChange={handleInputChange}
-                          className="border p-1 bg-gray-700 text-white"
-                        />
-                      ) : (
-                        user.address
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-white border-t-0 border-l-0 border-r-0 align-middle whitespace-nowrap">
-                      {editingUserId === user._id ? (
-                        <>
-                          <button onClick={handleSaveClick} className="text-green-500 hover:text-green-700 mr-4">
-                            Save
-                          </button>
-                          <button onClick={handleCancelClick} className="text-red-500 hover:text-red-700">
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <FaEdit
-                            className="hover:text-blue-700 hover:cursor-pointer mr-4"
-                            onClick={() => handleEditClick(user)}
-                          />
-                          <FaTrash
-                            className="hover:text-red-500 hover:cursor-pointer"
-                            onClick={() => handleDelete(user._id)}
-                          />
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+        </section>
+    );
 }
+
+// Shared Styles
+const tableHeaderStyle = {
+    color: "white",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    padding: "0.75rem",
+    textAlign: "left",
+    borderBottom: "1px solid #4a5568",
+};
+
+const tableCellStyle = {
+    color: "white",
+    padding: "0.75rem",
+    borderBottom: "1px solid #4a5568",
+    verticalAlign: "middle",
+};
+
+const inputStyle = {
+    width: "100%",
+    padding: "0.5rem",
+    border: "1px solid #4a5568",
+    borderRadius: "4px",
+    backgroundColor: "#2d3748",
+    color: "white",
+    transition: "border-color 0.3s ease",
+};
+
+const iconStyle = {
+    fontSize: "1.2rem",
+    cursor: "pointer",
+    transition: "color 0.3s ease",
+    marginRight: "0.5rem",
+};
 
 export default UsersList;

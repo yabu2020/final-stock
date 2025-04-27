@@ -16,33 +16,33 @@ function CreateBranch({ setBranches }) {
       .then(([managersResponse, branchesResponse]) => {
         console.log("Managers response:", managersResponse.data);
         console.log("Branches response:", branchesResponse.data);
-  
+
         // Extract assigned manager IDs
         const assignedManagerIds = branchesResponse.data
           .map(branch => branch.manager?._id || branch.manager) // Handle both object and string formats
           .filter(id => id); // Filter out null or undefined values
         console.log("Assigned manager IDs:", assignedManagerIds);
-  
+
         // Filter available managers
         const availableManagers = managersResponse.data
           .filter(manager => manager.role === "manager") // Ensure only managers are included
           .filter(manager => !assignedManagerIds.includes(manager._id)); // Exclude assigned managers
         console.log("Available managers:", availableManagers);
-  
+
         setManagers(availableManagers);
       })
       .catch(err => console.error("Error fetching managers or branches", err));
   }, []);
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-  
+
     if (!branchName || !location) {
       setError("Branch name and location are required.");
       return;
     }
-  
+
     axios.post("http://localhost:3001/addbranch", { branchName, location, managerId })
       .then(response => {
         if (response.status === 201) {
@@ -70,43 +70,50 @@ function CreateBranch({ setBranches }) {
         }
       });
   };
+
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-white">
+    <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-gray-800 text-white">
         <h2 className="text-2xl font-bold mb-4 text-center text-blue-400">Create Branch</h2>
-       
+
+        {error && (
+          <p className="text-red-400 mb-4">{error}</p>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Branch Name Field */}
           <div>
-            <label htmlFor="branchName" className="block font-medium text-gray-600 mb-1">Branch Name:</label>
+            <label htmlFor="branchName" className="block font-medium text-gray-300 mb-1">Branch Name:</label>
             <input
               type="text"
               id="branchName"
               value={branchName}
               onChange={(e) => setBranchName(e.target.value)}
               required
-              className="w-full px-3 py-2 bg-gray-100 border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-3 py-2 bg-gray-700 border-gray-600 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           {/* Location Field */}
           <div>
-            <label htmlFor="location" className="block font-medium text-gray-600 mb-1">Location:</label>
+            <label htmlFor="location" className="block font-medium text-gray-300 mb-1">Location:</label>
             <input
               type="text"
               id="location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               required
-              className="w-full px-3 py-2 bg-gray-100 border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-3 py-2 bg-gray-700 border-gray-600 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           {/* Manager Dropdown */}
           <div>
-            <label htmlFor="manager" className="block font-medium text-gray-600 mb-1">Manager:</label>
+            <label htmlFor="manager" className="block font-medium text-gray-300 mb-1">Manager:</label>
             <select
               value={managerId}
               onChange={(e) => setManagerId(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-100 border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-3 py-2 bg-gray-700 border-gray-600 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
               <option value="">Select Manager</option>
@@ -121,10 +128,11 @@ function CreateBranch({ setBranches }) {
               )}
             </select>
           </div>
+
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full mt-4 bg-blue-500 py-2 px-4 text-white rounded-md shadow hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="w-full mt-4 bg-blue-600 py-2 px-4 text-white rounded-md shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Add Branch
           </button>
