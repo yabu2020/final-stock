@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt ,FaLock} from "react-icons/fa";
+import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock } from "react-icons/fa";
 
 function AdminSidebar({ children }) {
     const [isOpen, setIsOpen] = useState(true);
@@ -43,10 +43,10 @@ function AdminSidebar({ children }) {
             name: "Report",
             icon: <FaChartBar />,
         },
-        { 
-            path: "/admin/resetpassword", 
-            name: "Reset Password", 
-            icon: <FaLock />
+        {
+            path: "/admin/resetpassword",
+            name: "Reset Password",
+            icon: <FaLock />,
         },
     ];
 
@@ -68,7 +68,7 @@ function AdminSidebar({ children }) {
                             left: 0,
                             bottom: 0,
                             width: isOpen ? '16rem' : '5rem',
-                            backgroundColor: '#1c1c2e',
+                            backgroundColor: '#1c1c2e', // Sidebar background color
                             color: 'white',
                             transition: 'all 300ms ease',
                             zIndex: 1000, /* Ensure it appears above other elements */
@@ -127,7 +127,7 @@ function AdminSidebar({ children }) {
                             overflowY: 'auto',
                             overflowX: 'hidden',
                             marginLeft: isOpen ? '16rem' : '5rem',
-                            backgroundColor: '#1f2937',
+                            backgroundColor: '#1c1c2e !important', // Add !important
                             padding: '1rem',
                             minHeight: '0vh',
                             transition: 'margin-left 300ms ease',

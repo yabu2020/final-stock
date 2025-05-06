@@ -56,13 +56,16 @@ function AdminOrderPage() {
     <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-gray-900">
       <h2 className="text-3xl font-bold text-blue-400 mb-6">Manage Orders</h2>
       {message && (
-        <p className={`text-lg mb-4 ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>
+        <p className={`text-lg mb-4 ${message.includes("successfully")
+          ? "text-green-500"
+          : "text-red-500"
+          }`}>
           {message}
         </p>
       )}
 
       {/* Centered Table Container */}
-      <div className="w-full">
+      <div className="w-full overflow-x-auto"> {/* Remove overflow-x-auto if not needed */}
         <table className="w-full mt-6 border-collapse bg-gray-800 shadow-md rounded-lg">
           <thead>
             <tr className="bg-gray-700 text-gray-300">
@@ -80,17 +83,34 @@ function AdminOrderPage() {
           <tbody>
             {orders.length > 0 ? (
               orders.map((order) => (
-                <tr key={order._id} className="border-b border-gray-600 hover:bg-gray-600 transition duration-300">
-                  <td className="px-4 py-2 text-gray-300 truncate">{order.userId?.name || "N/A"}</td>
-                  <td className="px-4 py-2 text-gray-300 truncate">{order.userId?.address || "N/A"}</td>
-                  <td className="px-4 py-2 text-gray-300 truncate">{order.userId?.phone || "N/A"}</td>
-                  <td className="px-4 py-2 text-gray-300 truncate">{order.product?.name || "N/A"}</td>
-                  <td className="px-4 py-2 text-gray-300">{order.quantity || "N/A"}</td>
-                  <td className="px-4 py-2 text-gray-300">{order.totalPrice || "N/A"}</td>
+                <tr
+                  key={order._id}
+                  className="border-b border-gray-600 hover:bg-gray-600 transition duration-300"
+                >
+                  <td className="px-4 py-2 text-gray-300 truncate">
+                    {order.userId?.name || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300 truncate">
+                    {order.userId?.address || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300 truncate">
+                    {order.userId?.phone || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300 truncate">
+                    {order.product?.name || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300">
+                    {order.quantity || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300">
+                    {order.totalPrice || "N/A"}
+                  </td>
                   <td className="px-4 py-2 text-gray-300">
                     {new Date(order.dateOrdered).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-2 text-gray-300">{order.status || "N/A"}</td>
+                  <td className="px-4 py-2 text-gray-300">
+                    {order.status || "N/A"}
+                  </td>
                   <td className="px-4 py-2 flex flex-col items-center space-y-2">
                     <button
                       onClick={() => handleConfirmOrder(order._id)}
@@ -109,7 +129,10 @@ function AdminOrderPage() {
               ))
             ) : (
               <tr>
-                <td colSpan="9" className="text-center py-4 text-gray-400">
+                <td
+                  colSpan="9"
+                  className="text-center py-4 text-gray-400"
+                >
                   No orders available
                 </td>
               </tr>

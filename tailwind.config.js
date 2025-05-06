@@ -8,5 +8,8 @@ export default {
     extend: {},
   },
   darkMode: "class",
-  plugins: [],
-}
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+  ],
+  }

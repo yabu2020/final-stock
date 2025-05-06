@@ -243,107 +243,108 @@ axios
 
   return (
     <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-gray-900">
-      <h2 className="text-3xl font-bold text-blue-400 mb-6">Welcome!</h2>
-      {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
-
-      {/* Branch Selection */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-4">
-          <label htmlFor="branch-select" className="block text-lg font-medium text-gray-300 mb-2">
-            Select Branch:
-          </label>
-          <select
-            id="branch-select"
-            value={selectedBranch}
-            onChange={(e) => setSelectedBranch(e.target.value)}
-            className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="" disabled>Select a Branch</option>
-            {branches.map((branch) => (
-              <option key={branch._id} value={branch._id}>
-                {branch.branchName} - {branch.location}
-              </option>
-            ))}
-          </select>
-        </div>
+    <h2 className="text-3xl font-bold text-blue-400 mb-6">Welcome!</h2>
+    {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
+  
+    {/* Branch Selection */}
+    <div className="mb-6">
+      <div className="flex items-center space-x-4">
+        <label htmlFor="branch-select" className="block text-lg font-medium text-gray-300 mb-2">
+          Select Branch:
+        </label>
+        <select
+          id="branch-select"
+          value={selectedBranch}
+          onChange={(e) => setSelectedBranch(e.target.value)}
+          className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="" disabled>Select a Branch</option>
+          {branches.map((branch) => (
+            <option key={branch._id} value={branch._id}>
+              {branch.branchName} - {branch.location}
+            </option>
+          ))}
+        </select>
       </div>
-
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-4">
-          <label htmlFor="search" className="block text-lg font-medium text-gray-300 mb-2">
-            Search Product:
-          </label>
-          <input
-            type="text"
-            id="search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Search for products"
-          />
-        </div>
+    </div>
+  
+    {/* Search Bar */}
+    <div className="mb-6">
+      <div className="flex items-center space-x-4">
+        <label htmlFor="search" className="block text-lg font-medium text-gray-300 mb-2">
+          Search Product:
+        </label>
+        <input
+          type="text"
+          id="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Search for products"
+        />
       </div>
-
-      {/* Product Selection */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-4">
-          <label htmlFor="product-select" className="block text-lg font-medium text-gray-300 mb-2">
-            Select Product:
-          </label>
-          <select
-            id="product-select"
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
-            className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="" disabled>Select a Product</option>
-            {products.map((product) => (
-              <option key={product._id} value={product._id}>
-                {product.name} - ${product.saleprice}
-              </option>
-            ))}
-          </select>
-        </div>
+    </div>
+  
+    {/* Product Selection */}
+    <div className="mb-6">
+      <div className="flex items-center space-x-4">
+        <label htmlFor="product-select" className="block text-lg font-medium text-gray-300 mb-2">
+          Select Product:
+        </label>
+        <select
+          id="product-select"
+          value={selectedProduct}
+          onChange={(e) => setSelectedProduct(e.target.value)}
+          className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="" disabled>Select a Product</option>
+          {products.map((product) => (
+            <option key={product._id} value={product._id}>
+              {product.name} - ${product.saleprice}
+            </option>
+          ))}
+        </select>
       </div>
-
-      {/* Quantity Input */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-4">
-          <label htmlFor="quantity" className="block text-lg font-medium text-gray-300 mb-2">
-            Quantity:
-          </label>
-          <input
-            type="number"
-            id="quantity"
-            value={quantity}
-            onChange={(e) => {
-              const newQuantity = parseInt(e.target.value, 10) || 1;
-              const product = products.find(p => p._id === selectedProduct);
-              if (product && newQuantity > product.quantity) {
-                setMessage(`You cannot order more than ${product.quantity} units.`);
-              } else {
-                setQuantity(newQuantity);
-              }
-            }}
-            min="1"
-            className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter quantity"
-          />
-        </div>
+    </div>
+  
+    {/* Quantity Input */}
+    <div className="mb-6">
+      <div className="flex items-center space-x-4">
+        <label htmlFor="quantity" className="block text-lg font-medium text-gray-300 mb-2">
+          Quantity:
+        </label>
+        <input
+          type="number"
+          id="quantity"
+          value={quantity}
+          onChange={(e) => {
+            const newQuantity = parseInt(e.target.value, 10) || 1;
+            const product = products.find(p => p._id === selectedProduct);
+            if (product && newQuantity > product.quantity) {
+              setMessage(`You cannot order more than ${product.quantity} units.`);
+            } else {
+              setQuantity(newQuantity);
+            }
+          }}
+          min="1"
+          className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter quantity"
+        />
       </div>
-
-      {/* Place Order Button */}
-      <button
-        onClick={handlePlaceOrder}
-        className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
-      >
-        Place Order
-      </button>
-
-      {/* Order History Table */}
-      <h3 className="text-xl font-semibold text-blue-400 mt-10">Order History</h3>
-      <table className="w-full mt-6 border-collapse bg-gray-800 shadow-md rounded-lg">
+    </div>
+  
+    {/* Place Order Button */}
+    <button
+      onClick={handlePlaceOrder}
+      className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
+    >
+      Place Order
+    </button>
+  
+    {/* Order History Table */}
+    <h3 className="text-xl font-semibold text-blue-400 mt-10">Order History</h3>
+    <div className="overflow-x-auto mt-6">
+      <table className="min-w-full table-auto border-collapse bg-gray-800 shadow-md rounded-lg">
         <thead>
           <tr className="bg-gray-700 text-gray-300">
             <th className="px-4 py-2">Product Name</th>
@@ -384,6 +385,8 @@ axios
         </tbody>
       </table>
     </div>
+  </div>
+  
   );
 }
 
