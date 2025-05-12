@@ -188,9 +188,13 @@ axios
       return;
     }
   
+    if (quantity > product.quantity) {
+      setMessage(`Only ${product.quantity} units available.`);
+      return;
+    }
+  
     const totalPrice = product.saleprice * quantity;
   
-    // Retrieve the branch data for the selected branch
     const selectedBranchData = branches.find(branch => branch._id === selectedBranch);
     if (!selectedBranchData || !selectedBranchData.manager?._id) {
       setMessage("This branch does not have a manager assigned.");
@@ -198,41 +202,36 @@ axios
     }
   
     const branchManagerId = selectedBranchData.manager._id;
-    const branchId = selectedBranchData._id; // Extract the branchId
+    const branchId = selectedBranchData._id;
+    const userId = cUSer?._id;
   
-    // Use the current user's ID
-    const userId = cUSer?._id; // Assuming `cUSer` contains the current user's data
+    // Prepare return URL with order data in query string
+    const returnUrl = `http://localhost:5173/payment-success?product=${selectedProduct}&quantity=${quantity}&totalPrice=${totalPrice}&userId=${userId}&branchManagerId=${branchManagerId}&branchId=${branchId}`;
   
+    const paymentPayload = {
+      amount: totalPrice,
+      email: cUSer.email,
+      first_name: cUSer.name.split(" ")[0],
+      last_name: cUSer.name.split(" ")[1] || "",
+      tx_ref: `txn-${Date.now()}`,
+      return_url: returnUrl,
+    };
+  
+    // Initiate Chapa payment
     axios
-      .post("http://localhost:3001/orders", {
-        product: selectedProduct,
-        quantity,
-        totalPrice,
-        userId, // Send userId
-        branchManagerId, // Send branchManagerId
-        branchId, // Include branchId in the payload
+      .post("http://localhost:3001/api/payments/initiate", paymentPayload)
+      .then((response) => {
+        // Redirect to Chapa payment page
+        window.location.href = response.data.checkout_url;
       })
-      .then(() => {
-        setMessage("Order placed successfully");
-        axios
-          .get(`http://localhost:3001/orders?userId=${userId}`)
-          .then((response) => {
-            setOrderHistory(response.data);
-          })
-          .catch((error) => setMessage(`Error fetching order history: ${error.message}`));
-        setSelectedProduct("");
-        setQuantity(1);
-      })
-      .catch((error) => {
-        const errorMsg = error.response?.data?.error || `Error placing order: ${error.message}`;
-        const remainingStock = error.response?.data?.remainingStock;
-        if (remainingStock) {
-          setMessage(`Insufficient stock. You can only order up to ${remainingStock} units.`);
-        } else {
-          setMessage(errorMsg);
-        }
+      .catch((err) => {
+        setMessage("Payment initialization failed. Please try again.");
+        console.error(err.response?.data || err.message);
       });
   };
+  
+  
+  
   if (loading) {
     return <p>Loading...</p>; // Show loading message while user data is being fetched
   }

@@ -127,7 +127,7 @@ function AdminSidebar({ children }) {
                             overflowY: 'auto',
                             overflowX: 'hidden',
                             marginLeft: isOpen ? '16rem' : '5rem',
-                            backgroundColor: '#1c1c2e !important', // Add !important
+                            backgroundColor: '#1f2937',
                             padding: '1rem',
                             minHeight: '0vh',
                             transition: 'margin-left 300ms ease',

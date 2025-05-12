@@ -5,11 +5,16 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        // Define Poppins as the default font family
+        poppins: ['Poppins', 'sans-serif'],
+      },
+    },
   },
   darkMode: "class",
   plugins: [
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
   ],
-  }
+};

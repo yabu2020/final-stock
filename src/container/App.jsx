@@ -21,6 +21,7 @@ import CreateBranch from "../admin/CreateBranch";
 import BranchList from "../admin/BranchList";
 import NoAccess from "../branch/NoAccess";
 import UserSidebar from "../user/UserSidebar";
+import PaymentSuccess from "../user/PaymentSuccess";
 import Home from "../user/Home";
 import Signup from "../user/Signup";
 
@@ -66,6 +67,8 @@ function App() {
   <Route path="/login" element={<Login setCuser={setCuser} />} />
   <Route path="/signup" element={<Signup setCuser={setCuser} />} />
   <Route path="/reset-password" element={<Reset />} />
+  <Route path="/payment-success" element={<PaymentSuccess />} />
+
 
   {/* Admin Layout */}
   <Route
@@ -113,6 +116,7 @@ function App() {
   >
     <Route path="Userpage" element={<Userpage />} />
     <Route path="security-question/:userId" element={<Security />} />
+    
   </Route>
 
   {/* Fallback Route */}
