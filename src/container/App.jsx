@@ -24,6 +24,9 @@ import UserSidebar from "../user/UserSidebar";
 import PaymentSuccess from "../user/PaymentSuccess";
 import Home from "../user/Home";
 import Signup from "../user/Signup";
+import Dashboard from "../admin/Dashboard";
+import { UserProvider } from "../admin/UserContext"; // Import UserProvider
+
 
 
 function App() {
@@ -58,73 +61,83 @@ function App() {
     }
   }, []);
   return (
-    <UserContext.Provider value={{ cUSer, setCuser }}>
-      <BrowserRouter>
-        {renderSidebar()}
-        <div className="main-content">
-        <Routes>
-  <Route path="/" element={<Home />} />
-  <Route path="/login" element={<Login setCuser={setCuser} />} />
-  <Route path="/signup" element={<Signup setCuser={setCuser} />} />
-  <Route path="/reset-password" element={<Reset />} />
-  <Route path="/payment-success" element={<PaymentSuccess />} />
+    <UserProvider>
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login setCuser={setCuser} />} />
+        <Route path="/signup" element={<Signup setCuser={setCuser} />} />
+        <Route path="/reset-password" element={<Resetpassword />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
+        {/* Admin Layout */}
+        <Route
+          path="/admin/*"
+          element={
+            cUSer?.role === "Admin" ? (
+              <AdminSidebar cUSer={cUSer}>
+                <Outlet />
+              </AdminSidebar>
+            ) : (
+              <Navigate to="/no-access" />
+            )
+          }
+        >
+          <Route index element={<Navigate to="/admin/dashboard" />} /> {/* Redirect to dashboard */}
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="adduser" element={<Createuser />} />
+          <Route path="users" element={<UsersList />} />
+          <Route path="branches" element={<BranchList />} />
+          <Route path="addbranch" element={<CreateBranch />} />
+          <Route path="resetpassword" element={<Resetpassword />} />
+          <Route path="reports" element={<Report />} />
+        </Route>
 
-  {/* Admin Layout */}
-  <Route
-    path="/admin/*"
-    element={
-      <AdminSidebar cUSer={cUSer}>
-        <Outlet /> {/* Renders child routes inside AdminSidebar */}
-      </AdminSidebar>
-    }
-  >
-    <Route path="adduser" element={<Createuser setUsers={setUsers} />} />
-    <Route path="users" element={<UsersList users={users} />} />
-    <Route path="branches" element={<BranchList branches={branches} />} />
-    <Route path="addbranch" element={<CreateBranch setBranches={setBranches} />} />
-    <Route path="resetpassword" element={<Resetpassword />} />
-    <Route path="reports" element={<Report />} />
-  </Route>
+        {/* Manager Layout */}
+        <Route
+          path="/manager/*"
+          element={
+            cUSer?.role === "manager" ? (
+              <AdminSidebar cUSer={cUSer}>
+                <Outlet />
+              </AdminSidebar>
+            ) : (
+              <Navigate to="/no-access" />
+            )
+          }
+        >
+          <Route path="productlist" element={<ProductList />} />
+          <Route path="registerproduct" element={<RegisterProduct />} />
+          <Route path="category" element={<Category />} />
+          <Route path="sellproduct" element={<ProductSold />} />
+          <Route path="reports" element={<Report />} />
+          <Route path="order" element={<Order />} />
+        </Route>
 
-  {/* Branch Manager Layout */}
-  <Route
-    path="/manager/*"
-    element={
-      <BranchSidebar>
-        <Outlet /> {/* Renders child routes inside BranchSidebar */}
-      </BranchSidebar>
-    }
-  >
-    <Route path="productlist" element={<ProductList />} />
-    <Route path="registerproduct" element={<RegisterProduct />} />
-    <Route path="category" element={<Category />} />
-    <Route path="sellproduct" element={<ProductSold />} />
-    <Route path="reports" element={<Report />} />
-    <Route path="order" element={<Order />} />
-    <Route path="no-access" element={<NoAccess />} />
-  </Route>
+        {/* User Layout */}
+        <Route
+          path="/user/*"
+          element={
+            cUSer?.role === "user" ? (
+              <AdminSidebar cUSer={cUSer}>
+                <Outlet />
+              </AdminSidebar>
+            ) : (
+              <Navigate to="/no-access" />
+            )
+          }
+        >
+          <Route path="userpage" element={<Userpage />} />
+          <Route path="security-question/:userId" element={<Security />} />
+        </Route>
 
-  {/* User Layout */}
-  <Route
-    path="/user/*"
-    element={
-      <UserSidebar>
-        <Outlet /> {/* Renders child routes inside UserSidebar */}
-      </UserSidebar>
-    }
-  >
-    <Route path="Userpage" element={<Userpage />} />
-    <Route path="security-question/:userId" element={<Security />} />
-    
-  </Route>
-
-  {/* Fallback Route */}
-  <Route path="*" element={<Navigate to="/" />} />
-</Routes>
-        </div>
-      </BrowserRouter>
-    </UserContext.Provider>
+        {/* Fallback Route */}
+        <Route path="/no-access" element={<NoAccess />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
+    </UserProvider>
   );
 }
 

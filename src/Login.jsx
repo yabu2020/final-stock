@@ -221,7 +221,7 @@ function Login({ setCuser }) {
           setCuser(userData);
           switch (userData.role) {
             case "Admin":
-              navigate(`/Admin/${userData._id}`);
+              navigate("/admin/dashboard"); // Redirect to dashboard for admins
               break;
             case "user":
               navigate(`/user/${userData._id}`);
