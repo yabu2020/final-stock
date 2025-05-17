@@ -11,24 +11,30 @@ function AdminOrderPage() {
   const branchManagerId = cUSer?._id; // Assuming the logged-in user is a branch manager
 
   useEffect(() => {
+    
     if (!branchManagerId) {
       setMessage("You must be logged in as a branch manager to view orders.");
       return;
     }
-
+  
     axios
       .get("http://localhost:3001/admin/orders", {
-        params: { branchManagerId }, // Pass the branchManagerId
+        params: { branchManagerId },
       })
       .then((response) => {
-        setOrders(response.data);
-        setMessage(""); // Clear any previous messages
+        console.log("Orders fetched:", response.data); // Log the response
+
+        if (Array.isArray(response.data) && response.data.length === 0) {
+          setMessage("No orders available.");
+        } else {
+          setOrders(response.data);
+          setMessage(""); // Clear any previous messages
+        }
       })
       .catch((error) => {
-        setMessage(`Error fetching orders: ${error.message}`);
+        setMessage(`Error fetching orders: ${error.response?.data?.error || error.message}`);
       });
   }, [branchManagerId]);
-
   // Confirm an order
   const handleConfirmOrder = (orderId) => {
     axios

@@ -9,7 +9,8 @@ import UsersList from '../admin/UsersList';
 import Login from "../Login";
 import AdminSidebar from '../admin/AdminSidebar'; 
 import ProductList from '../admin/ProductList'; 
-import RegisterProduct from '../admin/RegisterProduct'; 
+import AddProduct from '../branch/AddProduct'; 
+import BuyProduct from '../branch/BuyProduct'; 
 import Category from '../admin/Category';
 import ProductSold from '../admin/ProductSold';
 import Report from '../admin/Report';
@@ -108,11 +109,12 @@ function App() {
           }
         >
           <Route path="productlist" element={<ProductList />} />
-          <Route path="registerproduct" element={<RegisterProduct />} />
+          <Route path="addproduct" element={<AddProduct />} />
+          <Route path="buyproduct" element={<BuyProduct />} />
           <Route path="category" element={<Category />} />
           <Route path="sellproduct" element={<ProductSold />} />
           <Route path="reports" element={<Report />} />
-          <Route path="order" element={<Order />} />
+          <Route path="orders" element={<Order />} />
         </Route>
 
         {/* User Layout */}

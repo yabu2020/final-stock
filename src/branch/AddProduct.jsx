@@ -216,28 +216,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-function RegisterProduct() {
+function AddProduct() {
   const [name, setName] = useState("");
   const [purchaseprice, setPurchaseprice] = useState("");
-  const [saleprice, setSaleprice] = useState(""); // Changed to saleprice
-  const [quantity, setQuantity] = useState("");
+  const [saleprice, setSaleprice] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("Available");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
-  const [quantityType, setQuantityType] = useState("whole");
-  const [image, setImage] = useState(null); // State for the uploaded image
+  const [image, setImage] = useState(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     const branchManagerId = currentUser?._id;
-
+  
     if (!branchManagerId) {
       setMessage("You must be logged in as a branch manager to register products.");
       return;
     }
-
+  
     axios
       .get("http://localhost:3001/categories", {
         params: { branchManagerId }, // Pass branchManagerId as a query parameter
@@ -252,41 +249,16 @@ function RegisterProduct() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!name || !quantity || !purchaseprice || !saleprice || !category || !image) {
+    if (!name || !purchaseprice || !saleprice || !category || !image) {
       setMessage("Please fill in all fields and upload an image.");
       return;
     }
 
-    // Validate numeric values
-    const parsedQuantity = parseInt(quantity, 10);
     const purchasePrice = parseFloat(purchaseprice);
     const salePrice = parseFloat(saleprice);
 
-    if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
-      setMessage("Quantity must be a positive number.");
-      return;
-    }
-
-    if (isNaN(purchasePrice) || purchasePrice <= 0) {
-      setMessage("Purchase price must be a positive number.");
-      return;
-    }
-
-    if (isNaN(salePrice) || salePrice <= 0) {
-      setMessage("Sale price must be a positive number.");
-      return;
-    }
-
-    let warningMessage = "";
-    if (salePrice < purchasePrice) {
-      warningMessage = "Warning: Sale price is less than purchase price.";
-    }
-
-    const currentUser = JSON.parse(localStorage.getItem("currentUser")); // Get the logged-in user
-    const branchManagerId = currentUser?._id; // Extract the branch manager's ID
-
-    if (!branchManagerId) {
-      setMessage("You must be logged in as a branch manager to register products.");
+    if (isNaN(purchasePrice) || isNaN(salePrice)) {
+      setMessage("Purchase price and sale price must be valid numbers.");
       return;
     }
 
@@ -295,32 +267,24 @@ function RegisterProduct() {
     formData.append("description", description);
     formData.append("purchaseprice", purchasePrice);
     formData.append("saleprice", salePrice);
-    formData.append("status", status);
     formData.append("category", category);
-    formData.append("quantity", parsedQuantity);
-    formData.append("branchManagerId", branchManagerId);
-    formData.append("image", image); // Append the image file
+    formData.append("image", image);
 
     axios
-      .post("http://localhost:3001/registerproduct", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // Required for file uploads
-        },
+      .post("http://localhost:3001/addproduct", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
       .then((response) => {
-        setMessage(`Products registered successfully. ${warningMessage}`);
+        setMessage("Product added successfully.");
         setName("");
-        setQuantity("");
         setPurchaseprice("");
         setSaleprice("");
         setDescription("");
-        setStatus("Available");
         setCategory("");
-        setQuantityType("whole");
-        setImage(null); // Clear the image state
+        setImage(null);
       })
       .catch((error) => {
-        setMessage(`Error: ${error.response ? error.response.data.error : error.message}`);
+        setMessage(`Error: ${error.response?.data?.error || error.message}`);
       });
   };
 
@@ -331,7 +295,7 @@ function RegisterProduct() {
         style={{ maxWidth: "780px", backgroundColor: "#1f2937" }}
       >
         <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">
-          Register Product
+          Add Product
         </h1>
 
         {/* Success/Error Message */}
@@ -347,7 +311,7 @@ function RegisterProduct() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Row 1: Product Name & Quantity */}
+          {/* Row 1: Product Name & Category */}
           <div className="flex flex-wrap -mx-3 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
@@ -366,26 +330,6 @@ function RegisterProduct() {
               />
             </div>
             <div className="w-full md:w-1/2 px-3">
-              <label
-                htmlFor="quantity"
-                className="block font-medium text-gray-300 mb-1"
-              >
-                Quantity:
-              </label>
-              <input
-                type="number"
-                id="quantity"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                required
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: Category & Purchase Price */}
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 htmlFor="category"
                 className="block font-medium text-gray-300 mb-1"
@@ -407,7 +351,11 @@ function RegisterProduct() {
                 ))}
               </select>
             </div>
-            <div className="w-full md:w-1/2 px-3">
+          </div>
+
+          {/* Row 2: Purchase Price & Sale Price */}
+          <div className="flex flex-wrap -mx-3 mb-6">
+            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 htmlFor="purchaseprice"
                 className="block font-medium text-gray-300 mb-1"
@@ -423,11 +371,7 @@ function RegisterProduct() {
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
-          </div>
-
-          {/* Row 3: Sale Price & Description */}
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+            <div className="w-full md:w-1/2 px-3">
               <label
                 htmlFor="saleprice"
                 className="block font-medium text-gray-300 mb-1"
@@ -443,7 +387,11 @@ function RegisterProduct() {
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
-            <div className="w-full md:w-1/2 px-3">
+          </div>
+
+          {/* Row 3: Description & Image */}
+          <div className="flex flex-wrap -mx-3 mb-6">
+            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
               <label
                 htmlFor="description"
                 className="block font-medium text-gray-300 mb-1"
@@ -457,49 +405,7 @@ function RegisterProduct() {
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
-          </div>
-
-          {/* Row 4: Status & Quantity Type */}
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label
-                htmlFor="status"
-                className="block font-medium text-gray-300 mb-1"
-              >
-                Status:
-              </label>
-              <select
-                id="status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-              >
-                <option value="Available">Available</option>
-                <option value="Low Stock">Low Stock</option>
-              </select>
-            </div>
             <div className="w-full md:w-1/2 px-3">
-              <label
-                htmlFor="quantityType"
-                className="block font-medium text-gray-300 mb-1"
-              >
-                Quantity Type:
-              </label>
-              <select
-                id="quantityType"
-                value={quantityType}
-                onChange={(e) => setQuantityType(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-              >
-                <option value="whole">Whole Units</option>
-                <option value="pieces">Individual Pieces</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Row 5: Product Image */}
-          <div className="flex flex-wrap -mx-3 mb-6">
-            <div className="w-full px-3">
               <label
                 htmlFor="image"
                 className="block font-medium text-gray-300 mb-1"
@@ -523,7 +429,7 @@ function RegisterProduct() {
               type="submit"
               className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
             >
-              Register Product
+              Add Product
             </button>
           </div>
         </form>
@@ -532,4 +438,4 @@ function RegisterProduct() {
   );
 }
 
-export default RegisterProduct;
+export default AddProduct;

@@ -62,29 +62,29 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
 function Dashboard() {
   return (
-    <div className="p-4">
+    <div className="bg-gray-900 min-h-screen text-white p-4">
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {statsData.map((stat, index) => (
           <div
             key={index}
-            className="bg-white rounded-lg shadow p-4 flex items-center justify-between"
+            className={`bg-gray-800 rounded-lg shadow-lg p-4 flex items-center justify-between`}
+            style={{ borderColor: stat.color }}
           >
             <div>
               <span
-                className="text-xl font-bold text-gray-800"
+                className="text-xl font-bold"
                 style={{ color: stat.color }}
               >
                 {stat.icon} {stat.title}
               </span>
-              <h2 className="text-2xl font-semibold text-gray-800 mt-1">
-                {stat.value}
-              </h2>
+              <h2 className="text-2xl font-semibold mt-1">{stat.value}</h2>
             </div>
-            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-xl font-bold text-gray-800">
-                {stat.value}
-              </span>
+            <div
+              className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center"
+              style={{ borderColor: stat.color }}
+            >
+              <span className="text-xl font-bold">{stat.value}</span>
             </div>
           </div>
         ))}
@@ -93,14 +93,16 @@ function Dashboard() {
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bar Chart */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-semibold mb-4">Revenue by Month</h3>
+        <div className="bg-gray-800 rounded-lg shadow-lg p-4">
+          <h3 className="text-lg font-semibold mb-4 text-gray-200">
+            Revenue by Month
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={barChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+              <XAxis dataKey="month" stroke="#ccc" />
+              <YAxis stroke="#ccc" />
+              <Tooltip contentStyle={{ backgroundColor: "#222", color: "#fff" }} />
               <Legend />
               <Bar dataKey="revenue" fill="#007bff" />
             </BarChart>
@@ -108,8 +110,10 @@ function Dashboard() {
         </div>
 
         {/* Pie Chart */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-semibold mb-4">Data Breakdown</h3>
+        <div className="bg-gray-800 rounded-lg shadow-lg p-4">
+          <h3 className="text-lg font-semibold mb-4 text-gray-200">
+            Data Breakdown
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -125,7 +129,7 @@ function Dashboard() {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip contentStyle={{ backgroundColor: "#222", color: "#fff" }} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

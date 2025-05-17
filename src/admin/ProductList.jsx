@@ -23,20 +23,21 @@ const ProductList = () => {
           return;
         }
   
-        // console.log("Fetching products for branchManagerId:", branchManagerId); // Log the branchManagerId
-  
         const [productsResponse, categoriesResponse] = await Promise.all([
           axios.get("http://localhost:3001/productlist", {
-            params: { branchManagerId }, // Pass branchManagerId as a query parameter
+            params: { branchManagerId },
           }),
           axios.get("http://localhost:3001/categories", {
-            params: { branchManagerId }, // Pass branchManagerId as a query parameter
+            params: { branchManagerId },
           }),
         ]);
+  
+        console.log("Products Response:", productsResponse.data); // Log the response
+        console.log("Categories Response:", categoriesResponse.data);
+  
         setProducts(productsResponse.data.products);
         setCategories(categoriesResponse.data);
   
-        // Check stock levels
         checkStockLevels(productsResponse.data.products);
       } catch (error) {
         setMessage(`Error: ${error.response ? error.response.data.message : error.message}`);

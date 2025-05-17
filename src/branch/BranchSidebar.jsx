@@ -65,7 +65,7 @@ function BranchSidebar({ children }) {
       icon: <FaShoppingCart />,
     },
     {
-      path: "/manager/order",
+      path: "/manager/orders",
       name: "Orders",
       icon: <FaClipboardList />,
     },
