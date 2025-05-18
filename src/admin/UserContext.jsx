@@ -7,26 +7,28 @@ export const UserProvider = ({ children }) => {
   const [cUSer, setCUSer] = useState(null);
 
   useEffect(() => {
-    // Try to get user data from local storage
+    axios.defaults.withCredentials = true;
+
     const storedUser = JSON.parse(localStorage.getItem('currentUser'));
     if (storedUser) {
       setCUSer(storedUser);
     } else {
-      // If no user in local storage, fetch from backend
-      axios.get('/api/current_user')
-        .then(response => {
-          setCUSer(response.data);
-          localStorage.setItem('currentUser', JSON.stringify(response.data));
+      axios.get("http://localhost:3001/api/current_user")
+        .then(res => {
+          setCUSer(res.data);
+          localStorage.setItem("currentUser", JSON.stringify(res.data));
         })
-        .catch(err => console.error('Failed to fetch user:', err));
+        .catch(err => {
+          console.error("Failed to fetch user:", err);
+        });
     }
   }, []);
 
   return (
-    <UserContext.Provider value={{ cUSer }}>
+    <UserContext.Provider value={{ cUSer, setCUSer }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-export default UserContext;                  
+export default UserContext;

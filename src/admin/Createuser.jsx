@@ -1,204 +1,113 @@
-import React, { useState, useEffect } from "react";
+// CreateUser.js
+import React, { useState } from "react";
 import axios from "axios";
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import icons
 
-function Createuser({ setUsers }) {
-  const [role, setRole] = useState("user");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+function CreateUser() {
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [password, setPassword] = useState("");
-  const [nameError, setNameError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [addressError, setAddressError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [formError, setFormError] = useState(""); // New state for general form errors
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [formError, setFormError] = useState("");
 
-  const validatePhone = (phone) => {
-    const re = /^(09|07)\d{8}$/;
-    return re.test(phone);
-  };
-
-  const validatePassword = (password) => {
-    const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
-    return re.test(password);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setNameError("");
-    setPhoneError("");
-    setAddressError("");
-    setPasswordError("");
-    setFormError(""); // Clear general form error
+    setFormError("");
 
-    if (!name) {
-      setNameError("Name is required");
-      return;
-    }
-    if (!phone) {
-      setPhoneError("Phone number is required");
-      return;
-    }
-    if (!validatePhone(phone)) {
-      setPhoneError("Phone number must start with 09 or 07 and be 10 digits long");
-      return;
-    }
-    if (!address) {
-      setAddressError("Address is required");
-      return;
-    }
-    if (!password) {
-      setPasswordError("Password is required");
-      return;
-    }
-    if (!validatePassword(password)) {
-      setPasswordError("Password must be at least 6 characters long and include letters and numbers");
+    if (!customerName || !customerPhone || !customerAddress || !password) {
+      setFormError("All fields are required");
       return;
     }
 
-    axios
-      .post("http://localhost:3001/adduser", { role, name, phone, password, address })
-      .then((result) => {
-        setUsers(prevUsers => [...prevUsers, result.data]);
-        alert("User added successfully!");
-        setName("");
-        setPhone("");
-        setPassword("");
-        setAddress("");
-      })
-      .catch((err) => {
-        if (err.response && err.response.data && err.response.data.error) {
-          setFormError(err.response.data.error); // Set general form error
-        } else {
-          console.log(err);
-          setFormError("Error adding user");
-        }
-      });
+    try {
+      const payload = {
+        type: "user", // Customer type
+        name: customerName,
+        phone: customerPhone,
+        password,
+        address: customerAddress,
+      };
+
+      console.log("Payload being sent:", payload); // Debugging
+
+      await axios.post("http://localhost:3001/adduser", payload);
+      alert("Customer account created successfully!");
+      setCustomerName("");
+      setCustomerPhone("");
+      setCustomerAddress("");
+      setPassword("");
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || "Error creating user";
+      console.error(errorMessage);
+      setFormError(errorMessage);
+    }
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-900 min-h-screen">
-        <div
-            className="w-full p-8 rounded-lg shadow-lg CreateUserContainer"
-            style={{
-                maxWidth: '600px',
-                backgroundColor: '#1c1c2e', // Slightly lighter than main background
-            }}
-        >
-            <h2 className="text-2xl font-bold text-center mb-6 text-blue-400">
-                Create User
-            </h2>
-            {formError && <p className="text-red-500 mb-4 text-center">{formError}</p>}
-      
-                <form onSubmit={handleSubmit}>
-                    <div className="flex flex-wrap -mx-3 mb-6">
-                        {/* Name Field */}
-                        <div className="w-full md:w-1/2 px-3">
-                            <label className="block font-bold mb-2 text-gray-300" htmlFor="name">
-                                Name
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Enter Name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className={`w-full px-3 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring focus:ring-blue-400 border ${nameError ? 'border-red-500' : 'border-gray-600'}`}
-                            />
-                            {nameError && <p className="text-red-500 mt-2">{nameError}</p>}
-                        </div>
+    <div className="p-8 bg-gray-900 min-h-screen text-white">
+      <h2 className="text-2xl font-bold mb-6 text-center">Create Customer Account</h2>
 
-                        {/* Phone Field */}
-                        <div className="w-full md:w-1/2 px-3">
-                            <label className="block font-bold mb-2 text-gray-300" htmlFor="phone">
-                                Phone
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Enter Phone"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className={`w-full px-3 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring focus:ring-blue-400 border ${phoneError ? 'border-red-500' : 'border-gray-600'}`}
-                            />
-                            {phoneError && <p className="text-red-500 mt-2">{phoneError}</p>}
-                        </div>
-                    </div>
-
-                    {/* Password Field */}
-                    <div className="flex flex-wrap -mx-3 mb-6">
-                        <div className="w-full md:w-1/2 px-3">
-                            <label className="block font-bold mb-2 text-gray-300" htmlFor="password">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="Enter Password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className={`w-full px-3 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring focus:ring-blue-400 border ${passwordError ? 'border-red-500' : 'border-gray-600'}`}
-                                />
-                                <div
-                                    className="absolute inset-y-0 right-0 flex items-center px-2 cursor-pointer"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    title={showPassword ? 'Hide Password' : 'Show Password'}
-                                >
-                                    {showPassword ? (
-                                        <FaEyeSlash className="text-gray-400" />
-                                    ) : (
-                                        <FaEye className="text-gray-400" />
-                                    )}
-                                </div>
-                            </div>
-                            {passwordError && <p className="text-red-500 mt-2">{passwordError}</p>}
-                        </div>
-
-                        {/* Address Field */}
-                        <div className="w-full md:w-1/2 px-3">
-                            <label className="block font-bold mb-2 text-gray-300" htmlFor="address">
-                                Address
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Enter Address"
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                                className={`w-full px-3 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring focus:ring-blue-400 border ${addressError ? 'border-red-500' : 'border-gray-600'}`}
-                            />
-                            {addressError && <p className="text-red-500 mt-2">{addressError}</p>}
-                        </div>
-                    </div>
-
-                    {/* Role Dropdown */}
-                    <div className="mb-4">
-                        <label className="block font-bold mb-2 text-gray-300" htmlFor="role">
-                            Role
-                        </label>
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            className="w-full px-3 py-2 rounded-md shadow-sm bg-gray-700 text-white focus:outline-none focus:ring focus:ring-blue-400 border border-gray-600"
-                        >
-                            <option value="user">User</option>
-                            <option value="Admin">Admin</option>
-                            <option value="manager">Branch Manager</option>
-                        </select>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="mb-4 w-full md:w-1/2 ml-40 px-3">
-                        <button
-                            type="submit"
-                            className="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-blue-200 dark:bg-blue-600 dark:hover:bg-blue-500"
-                        >
-                            Add User
-                        </button>
-                    </div>
-                </form>
-            </div>
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+        {/* Customer Name */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Customer Name</label>
+          <input
+            type="text"
+            placeholder="Enter customer name"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            className="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-    );
+
+        {/* Customer Phone */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Customer Phone</label>
+          <input
+            type="text"
+            placeholder="Enter customer phone"
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(e.target.value)}
+            className="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Customer Address */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Customer Address</label>
+          <input
+            type="text"
+            placeholder="Enter customer address"
+            value={customerAddress}
+            onChange={(e) => setCustomerAddress(e.target.value)}
+            className="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Password */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Password</label>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Create Customer Account
+        </button>
+
+        {/* Error Message */}
+        {formError && <p className="text-red-500 mt-4 text-center">{formError}</p>}
+      </form>
+    </div>
+  );
 }
 
-export default Createuser;
+export default CreateUser;

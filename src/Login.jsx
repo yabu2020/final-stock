@@ -224,10 +224,10 @@ function Login({ setCuser }) {
               navigate("/admin/dashboard"); // Redirect to dashboard for admins
               break;
             case "user":
-              navigate(`/user/${userData._id}`);
+              navigate("/user/CDashboard"); // Redirect to dashboard for admins
               break;
             case "manager":
-              navigate(`/manager/${userData._id}`);
+              navigate("/manager/DashBoard"); // Redirect to dashboard for admins
               break;
             default:
               alert("You are not registered");

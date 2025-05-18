@@ -1,6 +1,7 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { BrowserRouter, Routes, Route, Navigate,Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+
 import Reset from "../user/Reset";
 import Userpage from "../user/Userpage";
 import Resetpassword from "../admin/Resetpassword";
@@ -8,13 +9,13 @@ import Createuser from '../admin/Createuser';
 import UsersList from '../admin/UsersList';
 import Login from "../Login";
 import AdminSidebar from '../admin/AdminSidebar'; 
-import ProductList from '../admin/ProductList'; 
+import ProductList from '../branch/ProductList'; 
 import AddProduct from '../branch/AddProduct'; 
 import BuyProduct from '../branch/BuyProduct'; 
-import Category from '../admin/Category';
-import ProductSold from '../admin/ProductSold';
+import Category from '../branch/Category';
+import ProductSold from '../branch/ProductSold';
 import Report from '../admin/Report';
-import Order from '../admin/Order';
+import Order from '../branch/Order';
 import Security from '../user/Security';
 import UserContext from '../admin/UserContext';
 import BranchSidebar from '../branch/BranchSidebar'; 
@@ -25,50 +26,29 @@ import UserSidebar from "../user/UserSidebar";
 import PaymentSuccess from "../user/PaymentSuccess";
 import Home from "../user/Home";
 import Signup from "../user/Signup";
+import CDashboard from "../user/CDashboard"
 import Dashboard from "../admin/Dashboard";
-import { UserProvider } from "../admin/UserContext"; // Import UserProvider
+import EmployeeManagement from "../admin/EmployeeManagement";
+import DashBoard from "../branch/DashBoard";
+import { UserProvider } from "../admin/UserContext";
 
+function InnerApp() {
+  const { cUSer, setCUSer } = useContext(UserContext);
 
-
-function App() {
-  const [cUSer, setCuser] = useState({});
-  const [users, setUsers] = useState([]);
-  const [branches, setBranches] = useState([]); // Add state for branches
-
-  const renderSidebar = () => {
-    // Do not render sidebar on the login page ("/")
-    if (location.pathname === "/") {
-      return null;
-    }
-  
-    // Render sidebar based on user role for other routes
-    if (!cUSer || !cUSer.role) {
-      return null; // No sidebar for unauthenticated users
-    }
-    if (cUSer.role === 'Admin') {
-      return <AdminSidebar />;
-    } else if (cUSer.role === 'manager') {
-      return <BranchSidebar />;
-    } else if (cUSer.role === 'user') {
-      return <UserSidebar />;
-    }
-    return null;
-  };
   useEffect(() => {
-    // Check for user data in local storage
     const storedUser = JSON.parse(localStorage.getItem('currentUser'));
     if (storedUser) {
-      setCuser(storedUser);
+      setCUSer(storedUser);
     }
   }, []);
+
   return (
-    <UserProvider>
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login setCuser={setCuser} />} />
-        <Route path="/signup" element={<Signup setCuser={setCuser} />} />
+        <Route path="/login" element={<Login setCuser={setCUSer} />} />
+        <Route path="/signup" element={<Signup setCuser={setCUSer} />} />
         <Route path="/reset-password" element={<Resetpassword />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
 
@@ -85,9 +65,10 @@ function App() {
             )
           }
         >
-          <Route index element={<Navigate to="/admin/dashboard" />} /> {/* Redirect to dashboard */}
+          <Route index element={<Navigate to="/admin/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="adduser" element={<Createuser />} />
+          <Route path="employees" element={<EmployeeManagement />} />
           <Route path="users" element={<UsersList />} />
           <Route path="branches" element={<BranchList />} />
           <Route path="addbranch" element={<CreateBranch />} />
@@ -108,6 +89,8 @@ function App() {
             )
           }
         >
+          <Route index element={<Navigate to="/manager/DashBoard" />} />
+          <Route path="DashBoard" element={<DashBoard />} />
           <Route path="productlist" element={<ProductList />} />
           <Route path="addproduct" element={<AddProduct />} />
           <Route path="buyproduct" element={<BuyProduct />} />
@@ -130,7 +113,9 @@ function App() {
             )
           }
         >
+          <Route index element={<Navigate to="/user/dashboard" />} />
           <Route path="userpage" element={<Userpage />} />
+          <Route path="CDashboard" element={<CDashboard />} />
           <Route path="security-question/:userId" element={<Security />} />
         </Route>
 
@@ -139,8 +124,13 @@ function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
-    </UserProvider>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <UserProvider>
+      <InnerApp />
+    </UserProvider>
+  );
+}

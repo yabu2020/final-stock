@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock, FaShoppingBasket, FaPlus, FaTag, FaShoppingCart, FaUser, FaPlusSquare, FaBox, FaClipboardList } from "react-icons/fa";
+import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock, FaShoppingBasket, FaUsersCog, FaTag, FaShoppingCart, FaUser, FaPlusSquare, FaBox, FaClipboardList } from "react-icons/fa";
 
 // Helper functions to define role-based menu items
 const getAdminMenu = () => [
@@ -8,6 +8,11 @@ const getAdminMenu = () => [
     path: "/admin/dashboard",
     name: "Dashboard",
     icon: <FaBars />,
+  },
+  {
+    path: "/admin/employees",
+    name: "Employee Management",
+    icon: <FaUsersCog />,
   },
   {
     path: "/admin/adduser",
@@ -19,15 +24,16 @@ const getAdminMenu = () => [
     name: "User List",
     icon: <FaUsers />,
   },
-  {
-    path: "/admin/branches",
-    name: "Branch List",
-    icon: <FaBuilding />,
-  },
+ 
   {
     path: "/admin/addbranch",
     name: "Add Branch",
     icon: <FaProjectDiagram />,
+  },
+  {
+    path: "/admin/branches",
+    name: "Branch List",
+    icon: <FaBuilding />,
   },
   {
     path: "/admin/reports",
@@ -42,6 +48,11 @@ const getAdminMenu = () => [
 ];
 
 const getManagerMenu = () => [
+  {
+    path: "/manager/DashBoard",
+    name: "Dashboard",
+    icon: <FaBars />,
+  },
   {
     path: "/manager/addproduct",
     name: "Add Product",
@@ -80,6 +91,11 @@ const getManagerMenu = () => [
 ];
 
 const getUserMenu = (cUSer) => [
+  {
+    path: "/user/CDashboard",
+    name: "Dashboard",
+    icon: <FaBars />,
+  },
   {
     path: "/user/Userpage",
     name: "Place Order",
