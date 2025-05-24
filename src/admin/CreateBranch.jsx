@@ -5,7 +5,9 @@ function CreateBranch({ setBranches }) {
   const [branchName, setBranchName] = useState("");
   const [location, setLocation] = useState("");
   const [managers, setManagers] = useState([]);
+  const [filteredManagers, setFilteredManagers] = useState([]);
   const [managerId, setManagerId] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -19,20 +21,29 @@ function CreateBranch({ setBranches }) {
 
         // Extract assigned manager IDs
         const assignedManagerIds = branchesResponse.data
-          .map(branch => branch.manager?._id || branch.manager) // Handle both object and string formats
-          .filter(id => id); // Filter out null or undefined values
+          .map(branch => branch.manager?._id || branch.manager)
+          .filter(id => id);
         console.log("Assigned manager IDs:", assignedManagerIds);
 
         // Filter available managers
         const availableManagers = managersResponse.data
-          .filter(manager => manager.role === "manager") // Ensure only managers are included
-          .filter(manager => !assignedManagerIds.includes(manager._id)); // Exclude assigned managers
+          .filter(manager => manager.role === "manager")
+          .filter(manager => !assignedManagerIds.includes(manager._id));
         console.log("Available managers:", availableManagers);
 
         setManagers(availableManagers);
+        setFilteredManagers(availableManagers); // Initialize filtered list
       })
       .catch(err => console.error("Error fetching managers or branches", err));
   }, []);
+
+  useEffect(() => {
+    // Filter managers based on search query
+    const filtered = managers.filter(manager =>
+      manager.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredManagers(filtered);
+  }, [managers, searchQuery]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -46,7 +57,10 @@ function CreateBranch({ setBranches }) {
     axios.post("http://localhost:3001/addbranch", { branchName, location, managerId })
       .then(response => {
         if (response.status === 201) {
-          setBranches(prev => [...prev, response.data]); // Update branches list
+          // Update branches list only if setBranches is a function
+          if (typeof setBranches === "function") {
+            setBranches(prev => [...prev, response.data]);
+          }
           alert("Branch created successfully!");
           setBranchName("");
           setLocation("");
@@ -107,24 +121,41 @@ function CreateBranch({ setBranches }) {
             />
           </div>
 
-          {/* Manager Dropdown */}
-          <div>
+          {/* Manager Dropdown with Search */}
+          <div className="relative">
             <label htmlFor="manager" className="block font-medium text-gray-300 mb-1">Manager:</label>
+            <div className="flex items-center">
+              {/* Search Input */}
+              <input
+                type="text"
+                placeholder="Search manager..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border-gray-600 rounded-l-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              {/* Dropdown Arrow */}
+              <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+              </span>
+            </div>
+
+            {/* Manager Dropdown */}
             <select
               value={managerId}
               onChange={(e) => setManagerId(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-700 border-gray-600 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-gray-700 border-gray-600 rounded-r-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
               <option value="">Select Manager</option>
-              {managers.length > 0 ? (
-                managers.map(manager => (
+              {filteredManagers.length > 0 ? (
+                filteredManagers.map(manager => (
                   <option key={manager._id} value={manager._id}>
                     {manager.name}
                   </option>
                 ))
               ) : (
-                <option disabled>No available managers</option>
+                <option disabled>No results found</option>
               )}
             </select>
           </div>

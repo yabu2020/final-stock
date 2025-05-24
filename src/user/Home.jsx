@@ -105,7 +105,7 @@ function Home() {
         <img
           src="/stock.jpeg"
           alt="Warehouse Inventory"
-          className="rounded-lg shadow-xl border border-gray-700 hover:border-indigo-500 transition duration-300 w-full h-auto object-cover"
+          className="rounded-lg shadow-xl border border-gray-700 hover:border-indigo-500 transition duration-300 w-full h-80 object-cover"
         />
       </div>
 

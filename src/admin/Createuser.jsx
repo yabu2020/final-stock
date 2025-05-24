@@ -1,6 +1,8 @@
 // CreateUser.js
 import React, { useState } from "react";
 import axios from "axios";
+import io from "socket.io-client";
+
 
 function CreateUser() {
   const [customerName, setCustomerName] = useState("");
@@ -35,6 +37,7 @@ function CreateUser() {
       setCustomerPhone("");
       setCustomerAddress("");
       setPassword("");
+
     } catch (err) {
       const errorMessage = err.response?.data?.error || "Error creating user";
       console.error(errorMessage);

@@ -37,7 +37,7 @@ function Signup() {
     setAddressError("");
     setPasswordError("");
     setFormError("");
-
+  
     if (!name) {
       setNameError("Name is required");
       return;
@@ -62,25 +62,32 @@ function Signup() {
       setPasswordError("Password must be at least 6 characters long and include letters and numbers");
       return;
     }
-
-    // Send data to backend for signup
+  
     axios
-      .post("http://localhost:3001/signup", { name, phone, password, address })
-      .then((result) => {
-        alert("User registered successfully!");
-        setName("");
-        setPhone("");
-        setPassword("");
-        setAddress("");
-      })
-      .catch((err) => {
-        if (err.response && err.response.data && err.response.data.error) {
-          setFormError(err.response.data.error); // Set general form error
-        } else {
-          console.log(err);
-          setFormError("Error registering user");
-        }
-      });
+  .post("http://localhost:3001/signup", {
+    name,
+    phone,
+    password,
+    address,
+    type: "user" // 👈 Add this line
+  })
+  .then((result) => {
+    // Show success message
+    setFormError("Successfully registered! Redirecting to login...");
+    
+    // Delay navigation using setTimeout
+    setTimeout(() => {
+      navigate("/login");
+    }, 2000); // 2000 milliseconds = 2 seconds
+  })
+  .catch((err) => {
+    if (err.response && err.response.data && err.response.data.error) {
+      setFormError(err.response.data.error);
+    } else {
+      console.log(err);
+      setFormError("Error registering user");
+    }
+  });
   };
 
   return (

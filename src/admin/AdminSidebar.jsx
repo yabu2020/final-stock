@@ -11,7 +11,7 @@ const getAdminMenu = () => [
   },
   {
     path: "/admin/employees",
-    name: "Employee Management",
+    name: "Employee",
     icon: <FaUsersCog />,
   },
   {
@@ -103,7 +103,7 @@ const getUserMenu = (cUSer) => [
   },
   {
     path: `/user/security-question/${cUSer?._id}`, // Dynamically include userId
-    name: "Manage Security Question",
+    name: "Security Question",
     icon: <FaLock />,
   },
 ];
@@ -179,22 +179,29 @@ function AdminSidebar({ children, cUSer }) {
             {/* Menu Items */}
             {menuItem.map((item, index) => (
               <NavLink
-                to={item.path}
-                key={index}
-                className={({ isActive }) =>
-                  `link flex items-center py-2 px-4 rounded transition-colors ${
-                    isActive ? "bg-blue-700 text-white" : "hover:bg-blue-600 text-gray-400"
-                  }`
-                }
+              to={item.path}
+              key={index}
+              className={({ isActive }) =>
+                `link flex items-center py-2 px-4 rounded transition-colors ${
+                  isActive ? "bg-blue-700 text-white" : "hover:bg-blue-600 text-gray-400"
+                }`
+              }
+              style={{
+                justifyContent: isOpen ? "flex-start" : "center", // Center icons when collapsed
+              }}
+            >
+              <span
+                className="text-xl mr-2 inline-block"
                 style={{
-                  justifyContent: isOpen ? "flex-start" : "center", // Center icons when collapsed
+                  fontSize: "1.5rem", // Ensure consistent icon size
                 }}
               >
                 {item.icon} {/* Always show the icon */}
-                <span className={`text-xl mr-2 ${isOpen ? "block" : "hidden"}`}>
-                  {item.name}
-                </span>
-              </NavLink>
+              </span>
+              <span className={`text-xl ${isOpen ? "block" : "hidden"}`}>
+                {item.name}
+              </span>
+            </NavLink>
             ))}
 
             {/* Logout Button */}
