@@ -195,12 +195,12 @@ function Login({ setCuser }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     setNameError("");
     setPasswordError("");
-
+  
     let hasError = false;
-
+  
     if (!name) {
       setNameError("Name is required");
       hasError = true;
@@ -209,30 +209,39 @@ function Login({ setCuser }) {
       setPasswordError("Password is required");
       hasError = true;
     }
-
+  
     if (hasError) return;
-
+  
     axios.post("http://localhost:3001", { name, password })
       .then(result => {
         const response = result.data;
-        if (response[0] === "good") {
-          const userData = response[1];
+  
+        // Check for success
+        if (response.message === "Login successful") {
+          const userData = response.user; // Extract user data from the response
+          const token = response.token; // Extract the token
+  
+          // Store user data and token in localStorage
           localStorage.setItem('currentUser', JSON.stringify(userData));
+          localStorage.setItem('token', token); // Store the token separately
           setCuser(userData);
+  
+          // Redirect based on the user's role
           switch (userData.role) {
             case "Admin":
-              navigate("/admin/dashboard"); // Redirect to dashboard for admins
+              navigate("/admin/dashboard");
               break;
             case "user":
-              navigate("/user/CDashboard"); // Redirect to dashboard for admins
+              navigate("/user/CDashboard");
               break;
             case "manager":
-              navigate("/manager/DashBoard"); // Redirect to dashboard for admins
+              navigate("/manager/DashBoard");
               break;
             default:
               alert("You are not registered");
           }
         } else {
+          // Handle specific error messages
           if (response.message === "Incorrect password") {
             setPasswordError("Incorrect password");
           } else if (response.message === "No record found with this name") {

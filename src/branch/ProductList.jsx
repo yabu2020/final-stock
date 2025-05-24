@@ -1,7 +1,10 @@
-import { Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -9,20 +12,22 @@ const ProductList = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editData, setEditData] = useState({});
   const [message, setMessage] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [alert, setAlert] = useState(""); // Alert state
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem("currentUser"));
         const branchManagerId = currentUser?._id;
-  
+
         if (!branchManagerId) {
           setMessage("You must be logged in as a branch manager to view products.");
           return;
         }
-  
+
         const [productsResponse, categoriesResponse] = await Promise.all([
           axios.get("http://localhost:3001/productlist", {
             params: { branchManagerId },
@@ -31,13 +36,13 @@ const ProductList = () => {
             params: { branchManagerId },
           }),
         ]);
-  
+
         console.log("Products Response:", productsResponse.data); // Log the response
         console.log("Categories Response:", categoriesResponse.data);
-  
+
         setProducts(productsResponse.data.products);
         setCategories(categoriesResponse.data);
-  
+
         checkStockLevels(productsResponse.data.products);
       } catch (error) {
         setMessage(`Error: ${error.response ? error.response.data.message : error.message}`);
@@ -103,7 +108,7 @@ const ProductList = () => {
         checkStockLevels(products); // Check stock levels after saving
         setEditingProduct(null);
         setEditData({});
-        setMessage("Product updated successfully");
+        toast.success("Product updated successfully"); // ✅ Show success toast
       })
       .catch((error) => {
         setMessage(`Error: ${error.response ? error.response.data.message : error.message}`);
@@ -125,10 +130,10 @@ const ProductList = () => {
               ...categoryGroup,
               products: categoryGroup.products.filter((product) => product._id !== productId),
             }))
-            .filter((categoryGroup) => categoryGroup.products.length > 0) // Remove empty categories
+            .filter((categoryGroup) => categoryGroup.products.length > 0)
         );
         checkStockLevels(products); // Check stock levels after deleting
-        setMessage("Product deleted successfully");
+        toast.success("Product deleted successfully"); // ✅ Show success toast
       })
       .catch((error) => {
         setMessage(`Error: ${error.response ? error.response.data.message : error.message}`);
@@ -139,6 +144,16 @@ const ProductList = () => {
     map[category._id] = category.category;
     return map;
   }, {});
+
+  // Filter products based on the search query
+  const filteredProducts = products.map(categoryGroup => ({
+    ...categoryGroup,
+    products: categoryGroup.products.filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      categoryMap[product.category]?.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+  })).filter(categoryGroup => categoryGroup.products.length > 0); // Remove empty categories
 
   return (
     <div className="mt-10 ml-80 lg:ml-20">
@@ -160,56 +175,70 @@ const ProductList = () => {
       {/* Alert Section */}
       {alert && <p className="text-red-500 font-bold mb-6">{alert}</p>}
 
+      {/* Search Bar */}
+      <div className="bg-gray-900 p-4 rounded-lg shadow-md mb-6">
+        <input
+          type="text"
+          placeholder="Search products by name, description, or category..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-600 bg-gray-700 text-white focus:outline-none focus:border-blue-500"
+        />
+      </div>
+
       {/* Product List */}
       <div className="bg-gray-900 p-6 rounded-lg shadow-md overflow-x-auto">
-        {products.length > 0 ? (
-          products.map((categoryGroup, index) => (
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((categoryGroup, index) => (
             <div key={index} className="mb-6">
               <h2 className="text-xl font-semibold mb-4 text-blue-400">
                 {categoryMap[categoryGroup._id] || "Unknown Category"}
               </h2>
-              <table className="w-full min-w-[640px] bg-gray-800 rounded-lg overflow-hidden">
-                <thead>
-                  <tr>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Image
-                    </th>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Product Name
-                    </th>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Quantity
-                    </th>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Purchase Price
-                    </th>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Selling Price
-                    </th>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Description
-                    </th>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Status
-                    </th>
-                    <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categoryGroup.products.length > 0 ? (
-                    categoryGroup.products.map((product) => (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px] bg-gray-800 rounded-lg">
+                  <thead>
+                    <tr>
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                        Image
+                      </th>
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                        Product Name
+                      </th>
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                        Quantity
+                      </th>
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                        Purchase Price
+                      </th>
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                        Selling Price
+                      </th>
+                      <th
+                        className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left"
+                        style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}
+                      >
+                        Description
+                      </th>
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                        Status
+                      </th>
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {categoryGroup.products.map((product) => (
                       <tr
                         key={product._id}
                         className="hover:bg-gray-600 transition duration-300"
                       >
-                        <td className="py-2 px-4 border-b border-gray-600">
+                        <td className="py-2 px-4 border-b border-gray-600 text-center">
                           {product.image ? (
                             <img
-                              src={`http://localhost:3001/${product.image}`}
+                              src={`http://localhost:3001${product.image}`} // Prepend the backend URL
                               alt={product.name}
-                              className="w-16 h-16 object-cover rounded-md"
+                              className="w-16 h-16 object-cover rounded"
                             />
                           ) : (
                             <span className="text-gray-400">No Image</span>
@@ -324,7 +353,7 @@ const ProductList = () => {
                                 <FaEdit />
                               </button>
                               <button
-                                onClick={() => deleteProduct(product._id)}
+                                onClick={() => setConfirmDeleteId(product._id)}
                                 className="hover:text-red-400 hover:cursor-pointer"
                               >
                                 <FaTrash />
@@ -333,27 +362,97 @@ const ProductList = () => {
                           )}
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="8"
-                        className="py-2 px-4 border-b border-gray-600 text-center text-gray-400"
-                      >
-                        No products found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ))
         ) : (
-          <p className="text-center text-blue-400">Loading products...</p>
+          <p className="text-center text-gray-400">No products found.</p>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmDeleteId && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#1f2937",
+              padding: "1.5rem",
+              borderRadius: "8px",
+              maxWidth: "400px",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+            }}
+          >
+            <h3 style={{ color: "white", marginBottom: "1rem" }}>
+              Are you sure you want to delete this product?
+            </h3>
+            <div>
+              <button
+                onClick={() => {
+                  handleDelete(confirmDeleteId);
+                  setConfirmDeleteId(null);
+                }}
+                style={{
+                  backgroundColor: "#ef4444",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "0.5rem 1rem",
+                  marginRight: "1rem",
+                  cursor: "pointer",
+                }}
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                style={{
+                  backgroundColor: "#6b7280",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "0.5rem 1rem",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Container */}
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
-}
+};
 
 export default ProductList;

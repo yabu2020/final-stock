@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock, FaShoppingBasket, FaUsersCog, FaTag, FaShoppingCart, FaUser, FaPlusSquare, FaBox, FaClipboardList } from "react-icons/fa";
+import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock, FaShoppingBasket, FaUsersCog, FaTag, FaShoppingCart, FaHome, FaPlusSquare, FaBox, FaClipboardList } from "react-icons/fa";
 
 // Helper functions to define role-based menu items
 const getAdminMenu = () => [
   {
     path: "/admin/dashboard",
     name: "Dashboard",
-    icon: <FaBars />,
+    icon: <FaHome />
   },
   {
     path: "/admin/employees",
@@ -51,7 +51,7 @@ const getManagerMenu = () => [
   {
     path: "/manager/DashBoard",
     name: "Dashboard",
-    icon: <FaBars />,
+    icon: <FaHome />,
   },
   {
     path: "/manager/addproduct",
@@ -94,7 +94,7 @@ const getUserMenu = (cUSer) => [
   {
     path: "/user/CDashboard",
     name: "Dashboard",
-    icon: <FaBars />,
+    icon: <FaHome />,
   },
   {
     path: "/user/Userpage",
