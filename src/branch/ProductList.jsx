@@ -161,7 +161,7 @@ const ProductList = () => {
       <div className="bg-gray-900 p-4 rounded-lg shadow-md mb-6">
         <div className="flex justify-between items-center">
           <h1 className="font-semibold text-2xl text-blue-400">List of Products</h1>
-          <Link to="/manager/registerproduct">
+          <Link to="/manager/addproduct">
             <button className="bg-blue-600 w-28 h-11 justify-around text-white hover:bg-blue-500 transition duration-300 rounded-md">
               New Products
             </button>
@@ -198,9 +198,9 @@ const ProductList = () => {
                 <table className="w-full min-w-[640px] bg-gray-800 rounded-lg">
                   <thead>
                     <tr>
-                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
+                      {/* <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
                         Image
-                      </th>
+                      </th> */}
                       <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
                         Product Name
                       </th>
@@ -233,7 +233,7 @@ const ProductList = () => {
                         key={product._id}
                         className="hover:bg-gray-600 transition duration-300"
                       >
-                        <td className="py-2 px-4 border-b border-gray-600 text-center">
+                        {/* <td className="py-2 px-4 border-b border-gray-600 text-center">
                           {product.image ? (
                             <img
                               src={`http://localhost:3001${product.image}`} // Prepend the backend URL
@@ -243,7 +243,7 @@ const ProductList = () => {
                           ) : (
                             <span className="text-gray-400">No Image</span>
                           )}
-                        </td>
+                        </td> */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <input

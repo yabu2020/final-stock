@@ -14,7 +14,7 @@ import AddProduct from '../branch/AddProduct';
 import BuyProduct from '../branch/BuyProduct'; 
 import Category from '../branch/Category';
 import ProductSold from '../branch/ProductSold';
-import Report from '../admin/Report';
+import Report from '../branch/Report';
 import Order from '../branch/Order';
 import Security from '../user/Security';
 import UserContext from '../admin/UserContext';
@@ -29,6 +29,7 @@ import Signup from "../user/Signup";
 import CDashboard from "../user/CDashboard"
 import Dashboard from "../admin/Dashboard";
 import EmployeeManagement from "../admin/EmployeeManagement";
+import AdminReports from "../admin/AdminReports";
 import DashBoard from "../branch/DashBoard";
 import { UserProvider } from "../admin/UserContext";
 
@@ -73,7 +74,7 @@ function InnerApp() {
           <Route path="branches" element={<BranchList />} />
           <Route path="addbranch" element={<CreateBranch />} />
           <Route path="resetpassword" element={<Resetpassword />} />
-          <Route path="reports" element={<Report />} />
+          <Route path="reports" element={<AdminReports />} />
         </Route>
 
         {/* Manager Layout */}

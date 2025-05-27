@@ -208,7 +208,7 @@ function ProductSold() {
       <table className="w-full mt-6 border-collapse bg-gray-800 shadow-md rounded-lg">
         <thead>
           <tr className="bg-gray-700 text-gray-300">
-            <th className="px-4 py-2">Product ID</th>
+            {/* <th className="px-4 py-2">Product ID</th> */}
             <th className="px-4 py-2">Product Name</th>
             <th className="px-4 py-2">Sale Price</th>
             <th className="px-4 py-2">Cost Price</th>
@@ -221,7 +221,7 @@ function ProductSold() {
           {assignedProducts.length > 0 ? (
             assignedProducts.map((assignment, index) => (
               <tr key={index} className="border-b border-gray-600">
-                <td className="px-4 py-2 text-gray-300">{assignment.product?.productno || "N/A"}</td>
+                {/* <td className="px-4 py-2 text-gray-300">{assignment.product?.productno || "N/A"}</td> */}
                 <td className="px-4 py-2 text-gray-300">{assignment.product?.name || "N/A"}</td>
                 <td className="px-4 py-2 text-gray-300">{assignment.product?.saleprice || "N/A"}</td>
                 <td className="px-4 py-2 text-gray-300">{assignment.costPrice || "N/A"}</td>
