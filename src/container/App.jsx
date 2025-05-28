@@ -17,6 +17,7 @@ import ProductSold from '../branch/ProductSold';
 import Report from '../branch/Report';
 import Order from '../branch/Order';
 import Security from '../user/Security';
+import EditProfilePage from '../user/EditProfilePage';
 import UserContext from '../admin/UserContext';
 import BranchSidebar from '../branch/BranchSidebar'; 
 import CreateBranch from "../admin/CreateBranch";
@@ -26,11 +27,11 @@ import UserSidebar from "../user/UserSidebar";
 import PaymentSuccess from "../user/PaymentSuccess";
 import Home from "../user/Home";
 import Signup from "../user/Signup";
-import CDashboard from "../user/CDashboard"
-import Dashboard from "../admin/Dashboard";
+import CustomerDashboard from "../user/CustomerDashboard"
+import AdminDashboard from "../admin/AdminDashboard";
 import EmployeeManagement from "../admin/EmployeeManagement";
 import AdminReports from "../admin/AdminReports";
-import DashBoard from "../branch/DashBoard";
+import ManagerDashboard from "../branch/ManagerDashboard";
 import { UserProvider } from "../admin/UserContext";
 
 function InnerApp() {
@@ -66,8 +67,8 @@ function InnerApp() {
             )
           }
         >
-          <Route index element={<Navigate to="/admin/dashboard" />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route index element={<Navigate to="/admin/admin-dashboard" />} />
+          <Route path="admin-dashboard" element={<AdminDashboard />} />
           <Route path="adduser" element={<Createuser />} />
           <Route path="employees" element={<EmployeeManagement />} />
           <Route path="users" element={<UsersList />} />
@@ -90,8 +91,8 @@ function InnerApp() {
             )
           }
         >
-          <Route index element={<Navigate to="/manager/DashBoard" />} />
-          <Route path="DashBoard" element={<DashBoard />} />
+          <Route index element={<Navigate to="/manager/manager-dasboard" />} />
+          <Route path="manager-dasboard" element={<ManagerDashboard />} />
           <Route path="productlist" element={<ProductList />} />
           <Route path="addproduct" element={<AddProduct />} />
           <Route path="buyproduct" element={<BuyProduct />} />
@@ -114,11 +115,13 @@ function InnerApp() {
             )
           }
         >
-          <Route index element={<Navigate to="/user/dashboard" />} />
+          <Route index element={<Navigate to="/user/customer-dashboard" />} />
+          <Route path="customer-dashboard" element={<CustomerDashboard />} />
           <Route path="userpage" element={<Userpage />} />
-          <Route path="CDashboard" element={<CDashboard />} />
           <Route path="security-question/:userId" element={<Security />} />
+          <Route path="edit-profile/:userId" element={<EditProfilePage />} />
           <Route path="payment-success" element={<PaymentSuccess />} />
+          <Route path="reset" element={<Reset />} />
         </Route>
 
         {/* Fallback Route */}

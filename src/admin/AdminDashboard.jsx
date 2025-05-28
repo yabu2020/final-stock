@@ -15,26 +15,18 @@ import {
 } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
-
-function Dashboard() {
+function AdminDashboard() {
   const [statsData, setStatsData] = useState([]);
-  const [barChartData, setBarChartData] = useState([
-    { month: "Jan", revenue: 65 },
-    { month: "Feb", revenue: 59 },
-    { month: "Mar", revenue: 80 },
-    { month: "Apr", revenue: 81 },
-    { month: "May", revenue: 56 },
-    { month: "Jun", revenue: 55 },
-    { month: "Jul", revenue: 40 },
-  ]);
+  const [barChartData, setBarChartData] = useState([]);
   const [pieChartData, setPieChartData] = useState([]);
+  const [reportsData, setReportsData] = useState([]); // New state for reports
   const [loading, setLoading] = useState(true);
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/api/stats");
-
-      const { totalUsers, totalEmployees, totalBranches, totalReports } = response.data;
+      // Fetch basic stats
+      const statsResponse = await axios.get("http://localhost:3001/api/stats");
+      const { totalUsers, totalEmployees, totalBranches, totalReports } = statsResponse.data;
 
       setStatsData([
         {
@@ -56,19 +48,28 @@ function Dashboard() {
           color: "#17a2b8"
         },
         {
-          title: "Total Reports",
+          title: "Reports to Review",
           value: totalReports,
           icon: <i className="fas fa-file-alt"></i>,
           color: "#6f42c1"
         },
       ]);
 
+      // Fetch real revenue data
+      const revenueResponse = await axios.get("http://localhost:3001/api/revenue-stats");
+      setBarChartData(revenueResponse.data);
+
+      // Fetch user breakdown
       const breakdownResponse = await axios.get("http://localhost:3001/api/user-breakdown");
       setPieChartData(breakdownResponse.data);
+
+      // Fetch reports sent to admin
+      const reportsResponse = await axios.get("http://localhost:3001/api/admin/reports");
+      setReportsData(reportsResponse.data);
       
     } catch (err) {
-      console.error("Error fetching stats:", err);
-
+      console.error("Error fetching dashboard data:", err);
+      
       // Fallback static data
       setStatsData([
         {
@@ -96,8 +97,13 @@ function Dashboard() {
           color: "#6f42c1"
         },
       ]);
+      setBarChartData([
+        { month: "Jan", revenue: 0 },
+        // ... other months
+      ]);
 
       setPieChartData([{ name: "No Data", value: 1 }]);
+      setReportsData([]);
     } finally {
       setLoading(false);
     }
@@ -199,4 +205,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default AdminDashboard;

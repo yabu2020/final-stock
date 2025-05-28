@@ -5,7 +5,7 @@ import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, 
 // Helper functions to define role-based menu items
 const getAdminMenu = () => [
   {
-    path: "/admin/dashboard",
+    path: "/admin/admin-dashboard",
     name: "Dashboard",
     icon: <FaHome />
   },
@@ -49,7 +49,7 @@ const getAdminMenu = () => [
 
 const getManagerMenu = () => [
   {
-    path: "/manager/DashBoard",
+    path: "/manager/manager-dasboard",
     name: "Dashboard",
     icon: <FaHome />,
   },
@@ -92,7 +92,7 @@ const getManagerMenu = () => [
 
 const getUserMenu = (cUSer) => [
   {
-    path: "/user/CDashboard",
+    path: "/user/customer-dashboard",
     name: "Dashboard",
     icon: <FaHome />,
   },
@@ -101,12 +101,81 @@ const getUserMenu = (cUSer) => [
     name: "Place Order",
     icon: <FaShoppingCart />,
   },
-  // {
-  //   path: `/user/security-question/${cUSer?._id}`, // Dynamically include userId
-  //   name: "Security Question",
-  //   icon: <FaLock />,
-  // },
+  {
+    name: "Settings",
+    icon: <FaLock />,
+    submenu: [
+      {
+        path: `/user/security-question/${cUSer?._id}`,
+        name: "Security Question",
+        icon: <FaLock />,
+      },
+      {
+        path: `/user/edit-profile/${cUSer?._id}`,
+        name: "Edit Profile",
+        icon: <FaUserPlus />,
+      }
+    ]
+  }
 ];
+const SubMenu = ({ item, isOpen }) => {
+  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const toggleSubMenu = () => {
+    setIsSubMenuOpen(!isSubMenuOpen);
+  };
+
+  return (
+    <div>
+      <div
+        onClick={toggleSubMenu}
+        className={`link flex items-center py-2 px-4 rounded transition-colors cursor-pointer ${
+          location.pathname.includes(item.path) || 
+          item.submenu.some(subItem => location.pathname === subItem.path)
+            ? "bg-blue-700 text-white"
+            : "hover:bg-blue-600 text-gray-400"
+        }`}
+        style={{
+          justifyContent: isOpen ? "flex-start" : "center",
+        }}
+      >
+        <span className="text-xl mr-2 inline-block" style={{ fontSize: "1.5rem" }}>
+          {item.icon}
+        </span>
+        <span className={`text-xl ${isOpen ? "block" : "hidden"}`}>
+          {item.name}
+        </span>
+        {isOpen && (
+          <span className="ml-auto transition-transform duration-200">
+            {isSubMenuOpen ? "▼" : "▶"}
+          </span>
+        )}
+      </div>
+      
+      {isSubMenuOpen && isOpen && (
+        <div className="bg-gray-800 ml-6 rounded">
+          {item.submenu.map((subItem, subIndex) => (
+            <NavLink
+              to={subItem.path}
+              key={subIndex}
+              className={({ isActive }) =>
+                `block py-2 px-6 rounded transition-colors ${
+                  isActive ? "bg-blue-600 text-white" : "hover:bg-blue-500 text-gray-400"
+                }`
+              }
+            >
+              <div className="flex items-center">
+                <span className="text-lg mr-2">{subItem.icon}</span>
+                <span>{subItem.name}</span>
+              </div>
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 function AdminSidebar({ children, cUSer }) {
   const [isOpen, setIsOpen] = useState(true);
@@ -178,31 +247,31 @@ function AdminSidebar({ children, cUSer }) {
 
             {/* Menu Items */}
             {menuItem.map((item, index) => (
-              <NavLink
-              to={item.path}
-              key={index}
-              className={({ isActive }) =>
-                `link flex items-center py-2 px-4 rounded transition-colors ${
-                  isActive ? "bg-blue-700 text-white" : "hover:bg-blue-600 text-gray-400"
-                }`
-              }
-              style={{
-                justifyContent: isOpen ? "flex-start" : "center", // Center icons when collapsed
-              }}
-            >
-              <span
-                className="text-xl mr-2 inline-block"
-                style={{
-                  fontSize: "1.5rem", // Ensure consistent icon size
-                }}
-              >
-                {item.icon} {/* Always show the icon */}
-              </span>
-              <span className={`text-xl ${isOpen ? "block" : "hidden"}`}>
-                {item.name}
-              </span>
-            </NavLink>
-            ))}
+  <div key={index}>
+    {item.submenu ? (
+      <SubMenu item={item} isOpen={isOpen} />
+    ) : (
+      <NavLink
+        to={item.path}
+        className={({ isActive }) =>
+          `link flex items-center py-2 px-4 rounded transition-colors ${
+            isActive ? "bg-blue-700 text-white" : "hover:bg-blue-600 text-gray-400"
+          }`
+        }
+        style={{
+          justifyContent: isOpen ? "flex-start" : "center",
+        }}
+      >
+        <span className="text-xl mr-2 inline-block" style={{ fontSize: "1.5rem" }}>
+          {item.icon}
+        </span>
+        <span className={`text-xl ${isOpen ? "block" : "hidden"}`}>
+          {item.name}
+        </span>
+      </NavLink>
+    )}
+     </div>
+))}
 
             {/* Logout Button */}
             <button

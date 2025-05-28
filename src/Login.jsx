@@ -229,13 +229,13 @@ function Login({ setCuser }) {
           // Redirect based on the user's role
           switch (userData.role) {
             case "Admin":
-              navigate("/admin/dashboard");
+              navigate("/admin/admin-dashboard");
               break;
             case "user":
-              navigate("/user/CDashboard");
+              navigate("/user/customer-dashboard");
               break;
             case "manager":
-              navigate("/manager/DashBoard");
+              navigate("/manager/manager-dasboard");
               break;
             default:
               alert("You are not registered");
