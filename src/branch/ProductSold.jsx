@@ -11,6 +11,8 @@ function ProductSold() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [message, setMessage] = useState("");
   const [assignedProducts, setAssignedProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // new state
+
 
   // Fetch products and assigned products on mount
   useEffect(() => {
@@ -204,7 +206,17 @@ function ProductSold() {
         Sell Product
       </button>
 
+
       <h3 className="text-xl font-semibold text-gray-300 mt-10">Sold Products</h3>
+      <div className="mb-4 mt-6">
+  <input
+    type="text"
+    placeholder="Search sold products..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="w-full px-4 py-2 border border-gray-600 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+</div>
       <table className="w-full mt-6 border-collapse bg-gray-800 shadow-md rounded-lg">
         <thead>
           <tr className="bg-gray-700 text-gray-300">
@@ -218,26 +230,31 @@ function ProductSold() {
           </tr>
         </thead>
         <tbody>
-          {assignedProducts.length > 0 ? (
-            assignedProducts.map((assignment, index) => (
-              <tr key={index} className="border-b border-gray-600">
-                {/* <td className="px-4 py-2 text-gray-300">{assignment.product?.productno || "N/A"}</td> */}
-                <td className="px-4 py-2 text-gray-300">{assignment.product?.name || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{assignment.product?.saleprice || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{assignment.costPrice || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{assignment.quantity || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{assignment.totalPrice || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{new Date(assignment.dateAssigned).toLocaleDateString()}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="7" className="text-center py-4 text-gray-400">
-                No products sold
-              </td>
-            </tr>
-          )}
-        </tbody>
+  {assignedProducts
+    .filter((assignment) =>
+      assignment.product?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .map((assignment, index) => (
+      <tr key={index} className="border-b border-gray-600">
+        <td className="px-4 py-2 text-gray-300">{assignment.product?.name || "N/A"}</td>
+        <td className="px-4 py-2 text-gray-300">{assignment.product?.saleprice || "N/A"}</td>
+        <td className="px-4 py-2 text-gray-300">{assignment.costPrice || "N/A"}</td>
+        <td className="px-4 py-2 text-gray-300">{assignment.quantity || "N/A"}</td>
+        <td className="px-4 py-2 text-gray-300">{assignment.totalPrice || "N/A"}</td>
+        <td className="px-4 py-2 text-gray-300">{new Date(assignment.dateAssigned).toLocaleDateString()}</td>
+      </tr>
+    ))}
+  {assignedProducts.filter((assignment) =>
+    assignment.product?.name.toLowerCase().includes(searchTerm.toLowerCase())
+  ).length === 0 && (
+    <tr>
+      <td colSpan="7" className="text-center py-4 text-gray-400">
+        No matching sold products
+      </td>
+    </tr>
+  )}
+</tbody>
+
       </table>
     </div>
   );

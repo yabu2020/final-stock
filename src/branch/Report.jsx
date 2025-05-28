@@ -38,25 +38,55 @@ function Report() {
   const generateReport = () => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     const branchManagerId = currentUser?._id;
-
+  
     if (!branchManagerId) {
       alert("You must be logged in as a branch manager to generate reports.");
       return;
     }
-
+  
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates");
+      return;
+    }
+  
+    // Create dates in local timezone without time components
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+  
     axios
-      .post("http://localhost:3001/reports", { startDate, endDate, branchManagerId })
+      .post("http://localhost:3001/reports", { 
+        startDate: start.toISOString(), 
+        endDate: end.toISOString(),
+        branchManagerId 
+      })
       .then(() => {
         alert("Report generated successfully!");
         fetchReports();
       })
       .catch((error) => {
-        if (error.response && error.response.data) {
-          alert(error.response.data.error || "Failed to generate report");
-        } else {
-          console.error("Error generating report:", error);
-          alert("Failed to generate report");
+        let errorMessage = "Failed to generate report";
+        
+        if (error.response) {
+          console.error("Server response:", error.response.data);
+          
+          if (error.response.data.error === 'No sales data found for the selected date range') {
+            errorMessage = `No sales data found between ${new Date(startDate).toLocaleDateString()} and ${new Date(endDate).toLocaleDateString()}`;
+            
+            // Show additional debug info if available
+            if (error.response.data.counts) {
+              errorMessage += `\n\nFound ${error.response.data.counts.orders} orders and ${error.response.data.counts.assignments} assignments`;
+            }
+          } else {
+            errorMessage = error.response.data.error || error.response.data.message || errorMessage;
+          }
+        } else if (error.request) {
+          errorMessage = "No response from server. Please check your connection.";
         }
+        
+        alert(errorMessage);
       });
   };
 

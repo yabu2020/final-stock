@@ -262,35 +262,30 @@ useEffect(() => {
   className="w-full sm:w-64 text-white"
   isSearchable
   styles={{
-    control: (base) => ({
-      ...base,
-      backgroundColor: "#1f2937",
-      borderColor: "#4b5563",
-      color: "#fff",
-      minHeight: "40px", // Ensure sufficient height
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: "#374151", // Tailwind bg-gray-700
+      borderColor: "#4B5563", // Tailwind border-gray-600
+      color: "white",
     }),
-    input: (base) => ({
-      ...base,
-      color: "#fff",
+    input: (provided) => ({
+      ...provided,
+      color: "white",
+      opacity: 1,
     }),
-    singleValue: (base) => ({
-      ...base,
-      color: "#fff",
-      fontSize: "14px", // Ensure readable font size
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: "#374151",
     }),
-    menu: (base) => ({
-      ...base,
-      backgroundColor: "#1f2937",
-      color: "#fff",
+    singleValue: (provided) => ({
+      ...provided,
+      color: "white",
     }),
-    option: (base, state) => ({
-      ...base,
-      backgroundColor: state.isFocused ? "#3b82f6" : "#1f2937",
-      color: "#fff",
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: "#9ca3af", // Light gray placeholder text
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#2563EB" : "#374151",
+      color: "white",
+      cursor: "pointer",
     }),
   }}
 />
@@ -316,38 +311,33 @@ useEffect(() => {
             className="w-full sm:w-64 text-white"
             isSearchable
             styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#1f2937",
-                borderColor: "#4b5563",
-                color: "#fff",
+              control: (provided) => ({
+                ...provided,
+                backgroundColor: "#374151", // Tailwind bg-gray-700
+                borderColor: "#4B5563", // Tailwind border-gray-600
+                color: "white",
               }),
-              input: (base) => ({
-                ...base,
-                color: "#fff",
+              input: (provided) => ({
+                ...provided,
+                color: "white",
+                opacity: 1,
               }),
-              singleValue: (base) => ({
-                ...base,
-                color: "#fff",
+              menu: (provided) => ({
+                ...provided,
+                backgroundColor: "#374151",
               }),
-              menu: (base) => ({
-                ...base,
-                backgroundColor: "#1f2937",
-                borderColor: "#4b5563",
+              singleValue: (provided) => ({
+                ...provided,
+                color: "white",
               }),
-              option: (base, state) => ({
-                ...base,
-                backgroundColor: state.isFocused ? "#3b82f6" : "#1f2937",
-                color: "#fff",
-                ':active': {
-                  backgroundColor: "#3b82f6",
-                },
-              }),
-              placeholder: (base) => ({
-                ...base,
-                color: "#9ca3af",
+              option: (provided, state) => ({
+                ...provided,
+                backgroundColor: state.isFocused ? "#2563EB" : "#374151",
+                color: "white",
+                cursor: "pointer",
               }),
             }}
+          />
           />
         </div>
       </div>
