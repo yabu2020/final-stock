@@ -1,92 +1,10 @@
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { useParams, Link } from 'react-router-dom';
 
-// function UserPage() {
-//   const { userId } = useParams();
-//   const [assignedAssets, setAssignedAssets] = useState([]);
-//   const [message, setMessage] = useState('');
-//   const [hasError, setHasError] = useState(false);
-
-//   useEffect(() => {
-//     if (userId) {
-//       fetchAssignedAssets(userId);
-//     }
-//   }, [userId]);
-
-//   const fetchAssignedAssets = async (userId) => {
-//     try {
-//       const response = await axios.get(`http://localhost:3001/assigned-assets/${userId}`);
-//       if (response.data.length === 0) {
-//         setMessage('No assets assigned');
-//         setAssignedAssets([]);
-//       } else {
-//         setAssignedAssets(response.data);
-//         setMessage('');
-//       }
-//     } catch (error) {
-//       setMessage(`Error: ${error.message}`);
-//       setAssignedAssets([]);
-//       setHasError(true);
-//     }
-//   };
-
-//   return (
-//     <div className="p-6 font-sans bg-gray-50 min-h-screen">
-//       <h2 className="text-2xl font-bold text-gray-500 ml-10 mb-6">Your Assigned Assets</h2>
-//       {hasError && <p className="text-red-600 text-lg mb-4">{message}</p>}
-//       {!hasError && assignedAssets.length === 0 && <p className="text-gray-500 text-lg mb-4">{message}</p>}
-      
-//       {assignedAssets.length > 0 && (
-//         <table className="w-full border-collapse ml-10 bg-white shadow-md rounded">
-//           <thead className="bg-gray-200">
-//             <tr>
-//               <th className="py-3 px-4 text-left text-green-400">Asset Name</th>
-//               <th className="py-3 px-4 text-left text-green-400">Asset SerialNo</th>
-//               <th className="py-3 px-4 text-left text-green-400">Date Assigned</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {assignedAssets.map((assignment, index) => (
-//               <tr key={index} className="border-b hover:bg-gray-50">
-//                 <td className="py-3 px-4 text-gray-700">{assignment.asset?.name || 'N/A'}</td>
-//                 <td className="py-3 px-4 text-gray-700">{assignment.asset?.serialno || 'N/A'}</td>
-//                 <td className="py-3 px-4 text-gray-700">{new Date(assignment.dateAssigned).toLocaleDateString() || 'N/A'}</td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       )}
-
-//       <div className="mt-4 p-4 ml-10 bg-gray-100 w-80 shadow-md rounded-lg border border-gray-200">
-//         <h3 className="text-lg font-semibold text-gray-500 mb-2">Manage Your Security Question</h3>
-//         <p className="text-gray-600 text-sm mb-3">Update your security question to enhance your account security.</p>
-//         <Link 
-//           to={`/security-question/${userId}`} 
-//           className="inline-block px-4 py-2 text-sm font-medium text-white bg-green-400 rounded-md shadow-sm hover:bg-green-500 transition duration-200"
-//         >
-//           Security Question Page
-//         </Link>
-//       </div>
-
-//       <div className="mt-4 ml-10">
-//         <Link 
-//           to="/" 
-//           className="inline-block px-4 py-2 text-sm font-medium text-white bg-green-400 rounded-md shadow-sm hover:bg-gray-400 transition duration-200"
-//         >
-//           Sign Out
-//         </Link>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default UserPage;
-import React, { useState, useEffect, useCallback, useContext } from "react";
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useContext ,useRef} from "react";
+import { useParams, Link,useLocation } from 'react-router-dom';
 import axios from "axios";
 import debounce from 'lodash.debounce';
 import UserContext from '../admin/UserContext'; // Adjust import path as needed
+import Select from "react-select";
 
 function Userpage() {
   const { userId } = useParams();
@@ -100,6 +18,46 @@ function Userpage() {
   const [orderHistory, setOrderHistory] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true); // Add loading state
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // Add at the top
+  const hasFetchedRef = useRef(false);
+
+  const location = useLocation();
+const locationState = location.state;
+
+useEffect(() => {
+  if (locationState?.paymentSuccess) {
+    setMessage("Order placed successfully!");
+    
+    // Clear any pending order from storage
+    sessionStorage.removeItem('pendingOrder');
+    
+    if (cUSer?._id) {
+      // Use a dedicated function to prevent duplicate fetches
+      const fetchOrderHistory = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3001/orders?userId=${cUSer._id}&sort=-createdAt`);
+          
+          // More robust deduplication
+          const orderMap = new Map();
+          response.data.forEach(order => {
+            if (!orderMap.has(order._id)) {
+              orderMap.set(order._id, order);
+            }
+          });
+          
+          setOrderHistory(Array.from(orderMap.values()));
+        } catch (error) {
+          console.error("Error refreshing orders:", error);
+        }
+      };
+      
+      fetchOrderHistory();
+    }
+  } else if (locationState?.paymentError) {
+    setMessage(`Payment failed: ${locationState.paymentError}`);
+    sessionStorage.removeItem('pendingOrder');
+  }
+}, [cUSer, locationState]);
 
   // Fetch branches on component mount
   useEffect(() => {
@@ -112,62 +70,77 @@ function Userpage() {
   }, []);
   console.log("Branches fetched:", branches);
   // Define fetchProducts function with debounce
-  const fetchProducts = useCallback(debounce(() => {
-    if (!selectedBranch) return; // Only fetch products if a branch is selected
-    console.log("Selected branch ID:", selectedBranch);
-    // Find the branchManagerId for the selected branch
-    const selectedBranchData = branches.find(branch => branch._id === selectedBranch);
+ // Update your fetchProducts function to log more details
+const fetchProducts = useCallback(debounce(() => {
+  if (!selectedBranch) {
+    console.log("No branch selected - skipping product fetch");
+    return;
+  }
+  
+  console.log("Selected branch ID:", selectedBranch);
+  const selectedBranchData = branches.find(branch => branch._id === selectedBranch);
+  console.log("Selected branch data:", selectedBranchData);
 
-// Check if the selected branch has a valid manager
-if (!selectedBranchData || !selectedBranchData.manager?._id) {
-  setMessage("This branch does not have a manager assigned.");
-  return;
-}
+  if (!selectedBranchData || !selectedBranchData.manager?._id) {
+    console.warn("No manager assigned to branch:", selectedBranch);
+    setMessage("This branch does not have a manager assigned.");
+    return;
+  }
 
-// Extract the branch manager ID from the manager object
-const branchManagerId = selectedBranchData.manager._id;
+  const branchManagerId = selectedBranchData.manager._id;
+  console.log("Fetching products for manager:", branchManagerId);
 
-// Fetch products for the selected branch manager
-axios
-  .get("http://localhost:3001/productlist", { 
+  axios.get("http://localhost:3001/productlist", { 
     params: { 
       search: searchTerm,
-      branchManagerId: branchManagerId // Pass the branch manager ID
+      branchManagerId: branchManagerId
     } 
   })
   .then((response) => {
-    console.log('Products fetched:', response.data); // Debugging line
-    const allProducts = response.data.products.flatMap(category => category.products);
+    console.log('Full API response:', response);
+    console.log('Products data structure:', response.data);
+    
+    const allProducts = response.data.products.flatMap(category => {
+      console.log('Processing category:', category);
+      return category.products.map(product => ({
+        ...product,
+        categoryName: category.categoryName
+      }));
+    });
 
-    // Filter out products that are 'Out Of Stock'
+    console.log('All products before filtering:', allProducts);
+    
     const filteredProducts = allProducts.filter(product =>
       product.status === 'Available' || product.status === 'Low Stock'
     );
 
+    console.log('Filtered products:', filteredProducts);
     setProducts(filteredProducts);
   })
-  .catch((error) => setMessage(`Error fetching products: ${error.message}`));
-  }, 300), [selectedBranch, searchTerm, branches]);
+  .catch((error) => {
+    console.error("Error fetching products:", error);
+    setMessage(`Error fetching products: ${error.message}`);
+  });
+}, 300), [selectedBranch, searchTerm, branches]);
+useEffect(() => {
+  fetchProducts();
+}, [fetchProducts]);
+
 
   // Fetch products when branch or search term changes
   useEffect(() => {
-    if (selectedBranch) {
-      fetchProducts();
-    }
-  }, [fetchProducts, selectedBranch]);
-
-  // Fetch order history on component mount
-  useEffect(() => {
-    const userId = cUSer?._id; // Get the userId from the current logged-in user
-    if (userId) {
+    const userId = cUSer?._id;
+    if (userId && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
       axios
-        .get(`http://localhost:3001/orders?userId=${userId}`) // Fetch orders for the current user
+        .get(`http://localhost:3001/orders?userId=${userId}`)
         .then((response) => {
-          setOrderHistory(response.data);
+          const uniqueOrders = Array.from(new Map(response.data.map(order => [order._id, order])).values());
+          setOrderHistory(uniqueOrders);
         })
         .catch((error) => setMessage(`Error fetching order history: ${error.message}`));
     }
-  }, [cUSer]); // Re-fetch orders when the current user changes
+  }, [cUSer]);
 
   // Handle loading state
   useEffect(() => {
@@ -177,61 +150,85 @@ axios
   }, [cUSer]);
 
   const handlePlaceOrder = () => {
+    if (isPlacingOrder) return;
+    setIsPlacingOrder(true);
+  
     if (!selectedProduct || quantity <= 0) {
       setMessage("Please select a product and enter a valid quantity.");
+      setIsPlacingOrder(false);
       return;
     }
   
     const product = products.find(p => p._id === selectedProduct);
     if (!product) {
       setMessage("Selected product not found.");
+      setIsPlacingOrder(false);
       return;
     }
   
     if (quantity > product.quantity) {
       setMessage(`Only ${product.quantity} units available.`);
+      setIsPlacingOrder(false);
       return;
     }
   
     const totalPrice = product.saleprice * quantity;
-  
     const selectedBranchData = branches.find(branch => branch._id === selectedBranch);
     if (!selectedBranchData || !selectedBranchData.manager?._id) {
       setMessage("This branch does not have a manager assigned.");
+      setIsPlacingOrder(false);
       return;
     }
   
-    const branchManagerId = selectedBranchData.manager._id;
-    const branchId = selectedBranchData._id;
-    const userId = cUSer?._id;
+    const tx_ref = `txn-${Date.now()}`;
+    const orderData = {
+      product: selectedProduct,
+      productName: product.name,
+      quantity,
+      totalPrice,
+      userId: cUSer._id,
+      userEmail: cUSer.email,
+      userName: cUSer.name,
+      branchManagerId: selectedBranchData.manager._id,
+      branchId: selectedBranchData._id,
+      branchName: selectedBranchData.branchName,
+      tx_ref,
+      createdAt: new Date().toISOString(),
+      status: 'Pending',
+    };
   
-    // Prepare return URL with order data in query string
-    const returnUrl = `http://localhost:5173/payment-success?product=${selectedProduct}&quantity=${quantity}&totalPrice=${totalPrice}&userId=${userId}&branchManagerId=${branchManagerId}&branchId=${branchId}`;
+    // Store the pending order in both localStorage and sessionStorage
+    // Store in both storage mechanisms
+    sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+
   
     const paymentPayload = {
       amount: totalPrice,
       email: cUSer.email,
       first_name: cUSer.name.split(" ")[0],
       last_name: cUSer.name.split(" ")[1] || "",
-      tx_ref: `txn-${Date.now()}`,
-      return_url: returnUrl,
+      tx_ref,
+      metadata: { // Add metadata to payment
+        orderId: orderData._id,
+        userId: orderData.userId,
+        branchId: orderData.branchId},
+        return_url: "http://localhost:5173/payment-success",
+      callback_url: "http://localhost:5173/payment-success",
     };
   
-    // Initiate Chapa payment
     axios
       .post("http://localhost:3001/api/payments/initiate", paymentPayload)
       .then((response) => {
-        // Redirect to Chapa payment page
         window.location.href = response.data.checkout_url;
       })
       .catch((err) => {
+        localStorage.removeItem('pendingOrder');
+        sessionStorage.removeItem('pendingOrder');
         setMessage("Payment initialization failed. Please try again.");
-        console.error(err.response?.data || err.message);
+        setIsPlacingOrder(false);
       });
   };
-  
-  
-  
   if (loading) {
     return <p>Loading...</p>; // Show loading message while user data is being fetched
   }
@@ -239,6 +236,7 @@ axios
   if (!cUSer) {
     return <p>Unable to load user data. Please try again later.</p>; // Show error if user data is still missing
   }
+  
 
   return (
     <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-gray-900">
@@ -247,64 +245,112 @@ axios
   
     {/* Branch Selection */}
     <div className="mb-6">
-      <div className="flex items-center space-x-4">
-        <label htmlFor="branch-select" className="block text-lg font-medium text-gray-300 mb-2">
-          Select Branch:
-        </label>
-        <select
-          id="branch-select"
-          value={selectedBranch}
-          onChange={(e) => setSelectedBranch(e.target.value)}
-          className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="" disabled>Select a Branch</option>
-          {branches.map((branch) => (
-            <option key={branch._id} value={branch._id}>
-              {branch.branchName} - {branch.location}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center space-x-4">
+          <label htmlFor="branch-select" className="block text-lg font-medium text-gray-300 mb-2">
+            Select Branch:
+          </label>
+          <Select
+  id="branch-select"
+  value={branches.find(branch => branch._id === selectedBranch) || null}
+  onChange={(selectedOption) => setSelectedBranch(selectedOption?._id || "")}
+  options={branches.map(branch => ({
+    label: `${branch.branchName} - ${branch.location}`,
+    value: branch._id,
+    _id: branch._id
+  }))}
+  placeholder="Select a Branch"
+  className="w-full sm:w-64 text-white"
+  isSearchable
+  styles={{
+    control: (base) => ({
+      ...base,
+      backgroundColor: "#1f2937",
+      borderColor: "#4b5563",
+      color: "#fff",
+      minHeight: "40px", // Ensure sufficient height
+    }),
+    input: (base) => ({
+      ...base,
+      color: "#fff",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: "#fff",
+      fontSize: "14px", // Ensure readable font size
+    }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: "#1f2937",
+      color: "#fff",
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#3b82f6" : "#1f2937",
+      color: "#fff",
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: "#9ca3af", // Light gray placeholder text
+    }),
+  }}
+/>
+        </div>
       </div>
-    </div>
   
-    {/* Search Bar */}
-    <div className="mb-6">
-      <div className="flex items-center space-x-4">
-        <label htmlFor="search" className="block text-lg font-medium text-gray-300 mb-2">
-          Search Product:
-        </label>
-        <input
-          type="text"
-          id="search"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Search for products"
-        />
+   {/* Product Selection */}
+      <div className="mb-6">
+        <div className="flex items-center space-x-4">
+          <label htmlFor="product-select" className="block text-lg font-medium text-gray-300 mb-2">
+            Select Product:
+          </label>
+          <Select
+            id="product-select"
+            value={products.find(product => product._id === selectedProduct) || null}
+            onChange={(selectedOption) => setSelectedProduct(selectedOption?._id || "")}
+            options={products.map(product => ({
+              label: `${product.name} - $${product.saleprice}`,
+              value: product._id,
+              _id: product._id
+            }))}
+            placeholder="Select a Product"
+            className="w-full sm:w-64 text-white"
+            isSearchable
+            styles={{
+              control: (base) => ({
+                ...base,
+                backgroundColor: "#1f2937",
+                borderColor: "#4b5563",
+                color: "#fff",
+              }),
+              input: (base) => ({
+                ...base,
+                color: "#fff",
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: "#fff",
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: "#1f2937",
+                borderColor: "#4b5563",
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isFocused ? "#3b82f6" : "#1f2937",
+                color: "#fff",
+                ':active': {
+                  backgroundColor: "#3b82f6",
+                },
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: "#9ca3af",
+              }),
+            }}
+          />
+        </div>
       </div>
-    </div>
-  
-    {/* Product Selection */}
-    <div className="mb-6">
-      <div className="flex items-center space-x-4">
-        <label htmlFor="product-select" className="block text-lg font-medium text-gray-300 mb-2">
-          Select Product:
-        </label>
-        <select
-          id="product-select"
-          value={selectedProduct}
-          onChange={(e) => setSelectedProduct(e.target.value)}
-          className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="" disabled>Select a Product</option>
-          {products.map((product) => (
-            <option key={product._id} value={product._id}>
-              {product.name} - ${product.saleprice}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
   
     {/* Quantity Input */}
     <div className="mb-6">
@@ -334,11 +380,15 @@ axios
   
     {/* Place Order Button */}
     <button
-      onClick={handlePlaceOrder}
-      className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
-    >
-      Place Order
-    </button>
+  onClick={handlePlaceOrder}
+  disabled={isPlacingOrder}
+  className={`px-6 py-3 ${
+    isPlacingOrder ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500"
+  } text-white font-semibold rounded-md shadow-md transition duration-300`}
+>
+  {isPlacingOrder ? "Processing..." : "Place Order"}
+</button>
+
   
     {/* Order History Table */}
     <h3 className="text-xl font-semibold text-blue-400 mt-10">Order History</h3>

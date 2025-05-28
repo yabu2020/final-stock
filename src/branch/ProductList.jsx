@@ -404,10 +404,11 @@ const ProductList = () => {
             </h3>
             <div>
               <button
-                onClick={() => {
-                  handleDelete(confirmDeleteId);
-                  setConfirmDeleteId(null);
-                }}
+               onClick={() => {
+                deleteProduct(confirmDeleteId);
+                setConfirmDeleteId(null);
+              }}
+              
                 style={{
                   backgroundColor: "#ef4444",
                   color: "white",

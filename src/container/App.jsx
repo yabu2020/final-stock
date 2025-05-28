@@ -118,6 +118,7 @@ function InnerApp() {
           <Route path="userpage" element={<Userpage />} />
           <Route path="CDashboard" element={<CDashboard />} />
           <Route path="security-question/:userId" element={<Security />} />
+          <Route path="payment-success" element={<PaymentSuccess />} />
         </Route>
 
         {/* Fallback Route */}

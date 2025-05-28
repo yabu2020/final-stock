@@ -1,56 +1,171 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState ,useRef} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-
 function PaymentSuccess() {
   const navigate = useNavigate();
   const { search } = useLocation();
-  const [message, setMessage] = useState("Finalizing your order...");
+  const [status, setStatus] = useState("processing");
+  const [message, setMessage] = useState("Verifying your payment...");
+  const [txRef, setTxRef] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
+  const hasProcessedRef = useRef(false); // Add this ref to track processing
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(search);
-    const product = queryParams.get("product");
-    const quantity = parseInt(queryParams.get("quantity"), 10);
-    const totalPrice = parseFloat(queryParams.get("totalPrice"));
-    const userId = queryParams.get("userId");
-    const branchManagerId = queryParams.get("branchManagerId");
-    const branchId = queryParams.get("branchId");
+    const processPayment = async () => {
+      if (hasProcessedRef.current) return; // Prevent duplicate processing
+      hasProcessedRef.current = true;
 
-    if (product && userId) {
-      axios
-        .post("http://localhost:3001/orders", {
-          product,
-          quantity,
-          totalPrice,
-          userId,
-          branchManagerId,
-          branchId,
-        })
-        .then(() => {
-          navigate(`/userpage/${userId}?status=success`);
-        })
-        .catch((error) => {
-          const errorMsg =
-            error.response?.data?.error || `Error placing order: ${error.message}`;
-          const remainingStock = error.response?.data?.remainingStock;
+      try {
+        const params = new URLSearchParams(search);
+        const tx_ref = params.get("tx_ref") || 
+                      JSON.parse(sessionStorage.getItem('pendingOrder'))?.tx_ref;
 
-          if (remainingStock) {
-            setMessage(`Insufficient stock. You can only order up to ${remainingStock} units.`);
-          } else {
-            setMessage(errorMsg);
+        if (!tx_ref) {
+          throw new Error("Transaction reference not found");
+        }
+
+        setTxRef(tx_ref);
+        setMessage(`Verifying payment ${tx_ref}...`);
+
+        // Verify payment with retry logic
+        const verifyPayment = async (attempt = 1) => {
+          try {
+            const response = await axios.post('http://localhost:3001/api/payments/verify', {
+              tx_ref: tx_ref
+            }, {
+              timeout: 8000
+            });
+
+            if (!response.data.success) {
+              throw new Error(response.data.error || 'Payment verification failed');
+            }
+
+            return response.data.data;
+          } catch (error) {
+            if (attempt < 3) {
+              console.log(`Retrying verification (attempt ${attempt + 1})...`);
+              await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+              return verifyPayment(attempt + 1);
+            }
+            throw error;
           }
+        };
 
-          // Delay so user can read error
-          setTimeout(() => {
-            navigate(`/userpage/${userId}?status=fail`);
-          }, 3000);
+        const paymentData = await verifyPayment();
+
+        // Get order data from storage
+        const orderData = JSON.parse(sessionStorage.getItem('pendingOrder'));
+
+        if (!orderData) {
+          throw new Error("Order data not found");
+        }
+
+        // Create the order
+        setMessage("Creating your order...");
+        const orderResponse = await axios.post('http://localhost:3001/orders', {
+          ...orderData,
+          paymentVerified: true,
+          paymentData: paymentData
         });
-    }
-  }, [navigate, search]);
+
+        // Clean up storage immediately after successful order creation
+        sessionStorage.removeItem('pendingOrder');
+
+        setStatus("success");
+        setMessage("Payment and order processed successfully!");
+
+        // Redirect after delay
+        setTimeout(() => {
+          navigate('/user/Userpage', {
+            state: {
+              paymentSuccess: true,
+              order: orderResponse.data
+            },
+            replace: true // Add replace to prevent duplicate navigation
+          });
+        }, 3000);
+
+      } catch (error) {
+        console.error("Payment processing error:", error);
+        setStatus("error");
+        setMessage(
+          error.response?.data?.error ||
+          error.message ||
+          "Payment processing failed"
+        );
+        
+        if (error.message.includes("not found") || error.message.includes("timeout")) {
+          setRetryCount(prev => prev + 1);
+        } else {
+          setTimeout(() => {
+            navigate('/user/Userpage', {
+              state: {
+                paymentError: message
+              },
+              replace: true
+            });
+          }, 5000);
+        }
+      }
+    };
+
+    processPayment();
+  }, [search, navigate, retryCount]);
+
+  const handleRetry = () => {
+    setStatus("processing");
+    setMessage("Retrying payment verification...");
+    setRetryCount(prev => prev + 1);
+  };
+
+  const handleCancel = () => {
+    localStorage.removeItem('pendingOrder');
+    sessionStorage.removeItem('pendingOrder');
+    navigate('/user/Userpage');
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-      <p className="text-lg">{message}</p>
+      <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4">
+          {status === "success" ? "✅ Payment Successful" : 
+           status === "error" ? "❌ Payment Error" : "Processing Payment"}
+        </h2>
+        
+        <div className="mb-6">
+          <p className="mb-2">{message}</p>
+          {txRef && (
+            <p className="text-sm text-gray-400">
+              Transaction: {txRef}
+            </p>
+          )}
+        </div>
+
+        {status === "error" && retryCount < 3 && (
+          <div className="flex gap-4">
+            <button
+              onClick={handleRetry}
+              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {status === "success" && (
+          <p className="text-green-300">Redirecting to your orders...</p>
+        )}
+
+        {status === "error" && retryCount >= 3 && (
+          <p className="text-red-300">Please contact support with your transaction reference.</p>
+        )}
+      </div>
     </div>
   );
 }

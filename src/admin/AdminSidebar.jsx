@@ -101,11 +101,11 @@ const getUserMenu = (cUSer) => [
     name: "Place Order",
     icon: <FaShoppingCart />,
   },
-  {
-    path: `/user/security-question/${cUSer?._id}`, // Dynamically include userId
-    name: "Security Question",
-    icon: <FaLock />,
-  },
+  // {
+  //   path: `/user/security-question/${cUSer?._id}`, // Dynamically include userId
+  //   name: "Security Question",
+  //   icon: <FaLock />,
+  // },
 ];
 
 function AdminSidebar({ children, cUSer }) {
