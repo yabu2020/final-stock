@@ -307,7 +307,7 @@ useEffect(() => {
                   <div className="relative h-48 bg-gray-700 overflow-hidden">
                     {product.image ? (
                       <img 
-                        src={`http://localhost:3001/${product.image}`} // Adjust this path based on your server setup
+                        src={`http://localhost:3001${product.image}`} // Adjust this path based on your server setup
                         alt={product.name}
                         className="w-full h-full object-contain p-4"
                         onError={(e) => {
