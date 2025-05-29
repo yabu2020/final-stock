@@ -28,6 +28,7 @@ import PaymentSuccess from "../user/PaymentSuccess";
 import OrderHistory from "../user/OrderHistory";
 import Home from "../user/Home";
 import Signup from "../user/Signup";
+import Help from "../user/Help";
 import CustomerDashboard from "../user/CustomerDashboard"
 import AdminDashboard from "../admin/AdminDashboard";
 import EmployeeManagement from "../admin/EmployeeManagement";
@@ -54,6 +55,8 @@ function InnerApp() {
         <Route path="/signup" element={<Signup setCuser={setCUSer} />} />
         <Route path="/reset-password" element={<Resetpassword />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/reset" element={<Reset />} />
+
 
         {/* Admin Layout */}
         <Route
@@ -122,8 +125,8 @@ function InnerApp() {
           <Route path="order-history" element={<OrderHistory />} />
           <Route path="security-question/:userId" element={<Security />} />
           <Route path="edit-profile/:userId" element={<EditProfilePage />} />
+          <Route path="help/:userId" element={<Help />} />
           <Route path="payment-success" element={<PaymentSuccess />} />
-          <Route path="reset" element={<Reset />} />
         </Route>
 
         {/* Fallback Route */}

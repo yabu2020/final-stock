@@ -103,12 +103,12 @@ function Home() {
         >
           Get Started
         </Link>
-        <Link
+        {/* <Link
           to="/login"
           className="border-2 border-indigo-400 text-indigo-400 px-6 py-3 rounded-full text-md font-semibold hover:bg-indigo-400 hover:text-white transition duration-300 shadow-lg transform hover:scale-105"
         >
           Live Demo
-        </Link>
+        </Link> */}
       </div>
     </div>
   </div>

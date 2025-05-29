@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock, FaShoppingBasket, FaUsersCog, FaTag, FaShoppingCart, FaHome, FaPlusSquare, FaBox, FaClipboardList } from "react-icons/fa";
+import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock, FaShoppingBasket, FaUsersCog, FaTag, FaShoppingCart, FaHome, FaPlusSquare, FaBox, FaClipboardList ,FaCog,FaQuestionCircle,FaUserEdit} from "react-icons/fa";
 
 // Helper functions to define role-based menu items
 const getAdminMenu = () => [
@@ -108,7 +108,7 @@ const getUserMenu = (cUSer) => [
   },
   {
     name: "Settings",
-    icon: <FaLock />,
+    icon: <FaCog />,
     submenu: [
       {
         path: `/user/security-question/${cUSer?._id}`,
@@ -118,7 +118,12 @@ const getUserMenu = (cUSer) => [
       {
         path: `/user/edit-profile/${cUSer?._id}`,
         name: "Edit Profile",
-        icon: <FaUserPlus />,
+        icon: <FaUserEdit />,
+      },
+      {
+        path: `/user/help/${cUSer?._id}`,
+        name: "Help",
+        icon: <FaQuestionCircle />,
       }
     ]
   }

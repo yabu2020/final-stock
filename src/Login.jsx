@@ -268,7 +268,7 @@ function Login({ setCuser }) {
   };
 
   const handleForgotPassword = () => {
-    navigate("/reset-password");
+    navigate("/reset");
   };
 
   return (
