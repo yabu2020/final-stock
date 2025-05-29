@@ -1,135 +1,106 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import emailjs from "@emailjs/browser";
 
 function Help() {
   const { userId } = useParams();
+  const formRef = useRef();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     description: "",
   });
 
-  const [formErrors, setFormErrors] = useState({
-    name: "",
-    email: "",
-    description: "",
-  });
-
+  const [formErrors, setFormErrors] = useState({});
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (formErrors[name]) {
-      setFormErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    setMessage("");
+    setError("");
   };
 
-  const validateForm = () => {
-    let valid = true;
-    const newErrors = { name: "", email: "", description: "" };
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-      valid = false;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Enter a valid email address";
-      valid = false;
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-      valid = false;
-    }
-
-    setFormErrors(newErrors);
-    return valid;
+  const validate = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = "Name is required.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = "Enter a valid email address.";
+    if (!formData.description.trim()) errors.description = "Description is required.";
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setMessage("");
-    setError("");
+    if (!validate()) return;
 
-    if (!validateForm()) return;
-
-    const payload = { ...formData, userId };
-
-    axios
-      .post("http://localhost:3001/contact", payload)
-      .then((response) => {
-        setMessage(response.data.message || "Your message has been sent successfully!");
-        setFormData({ name: "", email: "", description: "" });
+    emailjs
+      .sendForm("service_wwi5cng", "template_w3an7ta", formRef.current, {
+        publicKey: "zA4kezC0h1AJ81NYZ",
       })
-      .catch((err) => {
-        const errorMsg = err.response?.data?.message || err.message || "Failed to send message";
-        setError(errorMsg);
-      });
+      .then(
+        () => {
+          setFormData({ name: "", email: "", description: "" });
+          setMessage("Message sent successfully!");
+        },
+        (err) => {
+          console.error("EmailJS Error:", err.text);
+          setError("Failed to send message. Please try again.");
+        }
+      );
   };
 
   return (
     <div className="max-w-2xl mx-auto p-8 bg-gray-900 rounded-lg shadow-lg">
       <h2 className="text-3xl font-semibold text-blue-400 mb-6">Contact Us</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+        {/* Name Field */}
         <div>
-          <label className="block text-lg font-medium text-gray-300 mb-2">Name</label>
+          <label className="block text-lg text-gray-300 mb-2">Name</label>
           <input
             type="text"
             name="name"
             value={formData.name}
-            onChange={handleInputChange}
-            className={`w-full p-3 bg-gray-800 border ${
-              formErrors.name ? "border-red-500" : "border-gray-600"
-            } rounded-md text-white`}
+            onChange={handleChange}
             placeholder="Your Name"
+            className={`w-full p-3 bg-gray-800 border ${formErrors.name ? "border-red-500" : "border-gray-600"} rounded-md text-white`}
           />
           {formErrors.name && <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>}
         </div>
 
+        {/* Email Field */}
         <div>
-          <label className="block text-lg font-medium text-gray-300 mb-2">Email</label>
+          <label className="block text-lg text-gray-300 mb-2">Email</label>
           <input
             type="email"
             name="email"
             value={formData.email}
-            onChange={handleInputChange}
-            className={`w-full p-3 bg-gray-800 border ${
-              formErrors.email ? "border-red-500" : "border-gray-600"
-            } rounded-md text-white`}
+            onChange={handleChange}
             placeholder="you@example.com"
+            className={`w-full p-3 bg-gray-800 border ${formErrors.email ? "border-red-500" : "border-gray-600"} rounded-md text-white`}
           />
           {formErrors.email && <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>}
         </div>
 
+        {/* Description Field */}
         <div>
-          <label className="block text-lg font-medium text-gray-300 mb-2">Description</label>
+          <label className="block text-lg text-gray-300 mb-2">Description</label>
           <textarea
             name="description"
             value={formData.description}
-            onChange={handleInputChange}
+            onChange={handleChange}
             rows="5"
-            className={`w-full p-3 bg-gray-800 border ${
-              formErrors.description ? "border-red-500" : "border-gray-600"
-            } rounded-md text-white`}
             placeholder="Describe your issue or inquiry here..."
+            className={`w-full p-3 bg-gray-800 border ${formErrors.description ? "border-red-500" : "border-gray-600"} rounded-md text-white`}
           />
-          {formErrors.description && (
-            <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
-          )}
+          {formErrors.description && <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>}
         </div>
 
+        {/* Submit Button */}
         <div className="flex justify-end">
           <button
             type="submit"
@@ -139,8 +110,9 @@ function Help() {
           </button>
         </div>
 
-        {message && <div className="p-3 bg-green-100 text-green-800 rounded-md">{message}</div>}
-        {error && <div className="p-3 bg-red-100 text-red-800 rounded-md">{error}</div>}
+        {/* Feedback Messages */}
+        {message && <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md">{message}</div>}
+        {error && <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md">{error}</div>}
       </form>
     </div>
   );
