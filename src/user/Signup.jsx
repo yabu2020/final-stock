@@ -29,19 +29,32 @@ function Signup() {
     return re.test(password);
   };
 
-  // Handle form submission
+  const validateName = (name) => /^[A-Za-z\s]+$/.test(name);
+
+  // Validate address: not numbers only
+  const validateAddress = (address) => /[A-Za-z]/.test(address); // Must contain at least one letter
+  
   const handleSubmit = (e) => {
     e.preventDefault();
+  
+    // Clear previous errors
     setNameError("");
     setPhoneError("");
     setAddressError("");
     setPasswordError("");
     setFormError("");
   
+    // Name validation
     if (!name) {
       setNameError("Name is required");
       return;
     }
+    if (!validateName(name)) {
+      setNameError("Name must contain letters only");
+      return;
+    }
+  
+    // Phone validation
     if (!phone) {
       setPhoneError("Phone number is required");
       return;
@@ -50,10 +63,18 @@ function Signup() {
       setPhoneError("Phone number must start with 09 or 07 and be 10 digits long");
       return;
     }
+  
+    // Address validation
     if (!address) {
       setAddressError("Address is required");
       return;
     }
+    if (!validateAddress(address)) {
+      setAddressError("Address must contain letters (cannot be numbers only)");
+      return;
+    }
+  
+    // Password validation
     if (!password) {
       setPasswordError("Password is required");
       return;

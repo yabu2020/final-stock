@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect, useCallback, useContext ,useRef} from "react";
-import { useParams, Link,useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useContext, useRef } from "react";
+import { useParams, Link, useLocation } from 'react-router-dom';
 import axios from "axios";
 import debounce from 'lodash.debounce';
-import UserContext from '../admin/UserContext'; // Adjust import path as needed
+import UserContext from '../admin/UserContext';
 import Select from "react-select";
-
+import { FaClipboardList, FaShoppingCart } from "react-icons/fa";
 function Userpage() {
   const { userId } = useParams();
   const { cUSer } = useContext(UserContext); // Access current user from context
@@ -240,7 +240,6 @@ useEffect(() => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-gray-900">
-    <h2 className="text-3xl font-bold text-blue-400 mb-6">Welcome!</h2>
     {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
   
     {/* Branch Selection */}
@@ -292,140 +291,103 @@ useEffect(() => {
         </div>
       </div>
   
-   {/* Product Selection */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-4">
-          <label htmlFor="product-select" className="block text-lg font-medium text-gray-300 mb-2">
-            Select Product:
-          </label>
-          <Select
-            id="product-select"
-            value={products.find(product => product._id === selectedProduct) || null}
-            onChange={(selectedOption) => setSelectedProduct(selectedOption?._id || "")}
-            options={products.map(product => ({
-              label: `${product.name} - $${product.saleprice}`,
-              value: product._id,
-              _id: product._id
-            }))}
-            placeholder="Select a Product"
-            className="w-full sm:w-64 text-white"
-            isSearchable
-            styles={{
-              control: (provided) => ({
-                ...provided,
-                backgroundColor: "#374151", // Tailwind bg-gray-700
-                borderColor: "#4B5563", // Tailwind border-gray-600
-                color: "white",
-              }),
-              input: (provided) => ({
-                ...provided,
-                color: "white",
-                opacity: 1,
-              }),
-              menu: (provided) => ({
-                ...provided,
-                backgroundColor: "#374151",
-              }),
-              singleValue: (provided) => ({
-                ...provided,
-                color: "white",
-              }),
-              option: (provided, state) => ({
-                ...provided,
-                backgroundColor: state.isFocused ? "#2563EB" : "#374151",
-                color: "white",
-                cursor: "pointer",
-              }),
-            }}
-          />
+      {/* Products Grid */}
+      {selectedBranch && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Available Products</h2>
           
-        </div>
-      </div>
-  
-    {/* Quantity Input */}
-    <div className="mb-6">
-      <div className="flex items-center space-x-4">
-        <label htmlFor="quantity" className="block text-lg font-medium text-gray-300 mb-2">
-          Quantity:
-        </label>
-        <input
-          type="number"
-          id="quantity"
-          value={quantity}
-          onChange={(e) => {
-            const newQuantity = parseInt(e.target.value, 10) || 1;
-            const product = products.find(p => p._id === selectedProduct);
-            if (product && newQuantity > product.quantity) {
-              setMessage(`You cannot order more than ${product.quantity} units.`);
-            } else {
-              setQuantity(newQuantity);
-            }
-          }}
-          min="1"
-          className="flex-1 px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter quantity"
-        />
-      </div>
-    </div>
-  
-    {/* Place Order Button */}
-    <button
-  onClick={handlePlaceOrder}
-  disabled={isPlacingOrder}
-  className={`px-6 py-3 ${
-    isPlacingOrder ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500"
-  } text-white font-semibold rounded-md shadow-md transition duration-300`}
->
-  {isPlacingOrder ? "Processing..." : "Place Order"}
-</button>
-
-  
-    {/* Order History Table */}
-    <h3 className="text-xl font-semibold text-blue-400 mt-10">Order History</h3>
-    <div className="overflow-x-auto mt-6">
-      <table className="min-w-full table-auto border-collapse bg-gray-800 shadow-md rounded-lg">
-        <thead>
-          <tr className="bg-gray-700 text-gray-300">
-            <th className="px-4 py-2">Product Name</th>
-            <th className="px-4 py-2">Quantity</th>
-            <th className="px-4 py-2">Total Price</th>
-            <th className="px-4 py-2">Date</th>
-            <th className="px-4 py-2">User Name</th>
-            <th className="px-4 py-2">User Address</th>
-            <th className="px-4 py-2">User Phone</th>
-            <th className="px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orderHistory.length > 0 ? (
-            orderHistory.map((order, index) => (
-              <tr key={index} className="border-b border-gray-600">
-                <td className="px-4 py-2 text-gray-300">{order.product?.name || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{order.quantity || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{order.totalPrice || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">
-                  {new Date(order.dateOrdered).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-2 text-gray-300">{order.userId?.name || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{order.userId?.address || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{order.userId?.phone || "N/A"}</td>
-                <td className={`px-4 py-2 text-gray-300 ${order.status === 'Confirmed' ? 'text-blue-500' : order.status === 'Rejected' ? 'text-red-500' : 'text-gray-500'}`}>
-                  {order.status || "Pending"}
-                </td>
-              </tr>
-            ))
+          {products.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <div 
+                  key={product._id} 
+                  className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition duration-300"
+                >
+                  {/* Product Image - Updated with proper URL handling */}
+                  <div className="relative h-48 bg-gray-700 overflow-hidden">
+                    {product.image ? (
+                      <img 
+                        src={`http://localhost:3001/${product.image}`} // Adjust this path based on your server setup
+                        alt={product.name}
+                        className="w-full h-full object-contain p-4"
+                        onError={(e) => {
+                          e.target.src = '/default-product.png';
+                          e.target.className = "w-full h-full object-cover";
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <span>No Image Available</span>
+                      </div>
+                    )}
+                    {product.status === 'Low Stock' && (
+                      <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                        Low Stock
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-white">{product.name}</h3>
+                    <p className="text-gray-400 text-sm mb-2">{product.categoryName}</p>
+                    <p className="text-blue-400 font-bold">${product.saleprice?.toFixed(2)}</p>
+                    
+                    <div className="mt-4 flex items-center justify-between">
+                      <input
+                        type="number"
+                        min="1"
+                        max={product.quantity}
+                        value={selectedProduct === product._id ? quantity : 1}
+                        onChange={(e) => {
+                          const newQuantity = Math.min(
+                            parseInt(e.target.value, 10) || 1,
+                            product.quantity
+                          );
+                          setQuantity(newQuantity);
+                          setSelectedProduct(product._id);
+                        }}
+                        className="w-20 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                      />
+                      
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(product._id);
+                          handlePlaceOrder();
+                        }}
+                        disabled={isPlacingOrder && selectedProduct === product._id}
+                        className={`px-4 py-2 rounded-md flex items-center ${
+                          isPlacingOrder && selectedProduct === product._id 
+                            ? "bg-gray-600 cursor-not-allowed" 
+                            : "bg-blue-600 hover:bg-blue-500"
+                        } text-white`}
+                      >
+                        <FaShoppingCart className="mr-2" />
+                        {isPlacingOrder && selectedProduct === product._id ? "Processing..." : "Order"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
-            <tr>
-              <td colSpan="8" className="text-center py-4 text-gray-400">
-                No orders placed
-              </td>
-            </tr>
+            <p className="text-gray-400 text-center py-8">
+              {selectedBranch ? "No products available in this branch" : "Please select a branch to view products"}
+            </p>
           )}
-        </tbody>
-      </table>
+        </div>
+      )}
+
+      {/* Order History Link */}
+      <div className="mt-8 text-center">
+        <Link 
+          to="/user/order-history" 
+          className="inline-flex items-center bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-md text-lg font-medium transition duration-300"
+        >
+          <FaClipboardList className="mr-2" />
+          View Order History
+        </Link>
+      </div>
     </div>
-  </div>
-  
   );
 }
 

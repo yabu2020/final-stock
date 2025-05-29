@@ -25,6 +25,7 @@ import BranchList from "../admin/BranchList";
 import NoAccess from "../branch/NoAccess";
 import UserSidebar from "../user/UserSidebar";
 import PaymentSuccess from "../user/PaymentSuccess";
+import OrderHistory from "../user/OrderHistory";
 import Home from "../user/Home";
 import Signup from "../user/Signup";
 import CustomerDashboard from "../user/CustomerDashboard"
@@ -118,6 +119,7 @@ function InnerApp() {
           <Route index element={<Navigate to="/user/customer-dashboard" />} />
           <Route path="customer-dashboard" element={<CustomerDashboard />} />
           <Route path="userpage" element={<Userpage />} />
+          <Route path="order-history" element={<OrderHistory />} />
           <Route path="security-question/:userId" element={<Security />} />
           <Route path="edit-profile/:userId" element={<EditProfilePage />} />
           <Route path="payment-success" element={<PaymentSuccess />} />

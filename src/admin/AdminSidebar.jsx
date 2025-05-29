@@ -102,6 +102,11 @@ const getUserMenu = (cUSer) => [
     icon: <FaShoppingCart />,
   },
   {
+    path: "/user/order-history",
+    name: "Order History",
+    icon: <FaClipboardList />,
+  },
+  {
     name: "Settings",
     icon: <FaLock />,
     submenu: [
