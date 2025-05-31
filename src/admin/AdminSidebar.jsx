@@ -47,8 +47,10 @@ const getAdminMenu = () => [
   },
 ];
 
-const getManagerMenu = () => [
-  {
+const getManagerMenu = (cUSer) => {
+  console.log("Current user in getManagerMenu:", cUSer); // Debug log
+  
+  return [  {
     path: "/manager/manager-dasboard",
     name: "Dashboard",
     icon: <FaHome />,
@@ -88,7 +90,29 @@ const getManagerMenu = () => [
     name: "Report",
     icon: <FaChartBar />,
   },
+  {
+    name: "Settings",
+    icon: <FaCog />,
+    submenu: [
+      {
+        path: `/manager/security-question/${cUSer?._id}`,
+        name: "Security Question",
+        icon: <FaLock />,
+      },
+      {
+        path: `/manager/edit-profile/${cUSer?._id}`,
+        name: "Edit Profile",
+        icon: <FaUserEdit />,
+      },
+      {
+        path: `/manager/help/${cUSer?._id}`,
+        name: "Help",
+        icon: <FaQuestionCircle />,
+      }
+    ]
+  }
 ];
+};
 
 const getUserMenu = (cUSer) => [
   {
@@ -204,18 +228,20 @@ function AdminSidebar({ children, cUSer }) {
 
   // Get menu items based on user role
   const getMenuItems = () => {
+    console.log("Current user role:", cUSer?.role); // Debug log
+    console.log("Current user ID:", cUSer?._id); // Debug log
+    
     switch (cUSer?.role) {
       case "Admin":
         return getAdminMenu();
       case "manager":
-        return getManagerMenu();
+        return getManagerMenu(cUSer); // Make sure to pass cUSer here
       case "user":
-        return getUserMenu(cUSer); // Pass cUSer to getUserMenu
+        return getUserMenu(cUSer);
       default:
         return [];
     }
   };
-
   const menuItem = getMenuItems();
 
   return (

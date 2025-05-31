@@ -19,11 +19,9 @@ import Order from '../branch/Order';
 import Security from '../user/Security';
 import EditProfilePage from '../user/EditProfilePage';
 import UserContext from '../admin/UserContext';
-import BranchSidebar from '../branch/BranchSidebar'; 
 import CreateBranch from "../admin/CreateBranch";
 import BranchList from "../admin/BranchList";
 import NoAccess from "../branch/NoAccess";
-import UserSidebar from "../user/UserSidebar";
 import PaymentSuccess from "../user/PaymentSuccess";
 import OrderHistory from "../user/OrderHistory";
 import Home from "../user/Home";
@@ -106,6 +104,9 @@ function InnerApp() {
           <Route path="sellproduct" element={<ProductSold />} />
           <Route path="reports" element={<Report />} />
           <Route path="orders" element={<Order />} />
+          <Route path="security-question/:userId" element={<Security />} />
+          <Route path="edit-profile/:userId" element={<EditProfilePage />} />
+          <Route path="help/:userId" element={<Help />} />
         </Route>
 
         {/* User Layout */}

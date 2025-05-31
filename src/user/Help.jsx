@@ -26,9 +26,26 @@ function Help() {
 
   const validate = () => {
     const errors = {};
-    if (!formData.name.trim()) errors.name = "Name is required.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = "Enter a valid email address.";
-    if (!formData.description.trim()) errors.description = "Description is required.";
+    
+    // Name validation
+    if (!formData.name.trim()) {
+      errors.name = "Name is required.";
+    } else if (!/^[A-Za-z\s]+$/.test(formData.name)) {
+      errors.name = "Name should contain only letters and spaces.";
+    }
+    
+    // Email validation
+    if (!formData.email) {
+      errors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Enter a valid email address.";
+    }
+    
+    // Description validation
+    if (!formData.description.trim()) {
+      errors.description = "Description is required.";
+    }
+    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };

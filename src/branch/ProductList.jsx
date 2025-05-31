@@ -14,8 +14,15 @@ const ProductList = () => {
   const [message, setMessage] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [alert, setAlert] = useState(""); // Alert state
-  const [searchQuery, setSearchQuery] = useState(""); // New state for search query
+  const [alert, setAlert] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editErrors, setEditErrors] = useState({
+    name: "",
+    quantity: "",
+    purchaseprice: "",
+    saleprice: "",
+    description: ""
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,12 +44,8 @@ const ProductList = () => {
           }),
         ]);
 
-        console.log("Products Response:", productsResponse.data); // Log the response
-        console.log("Categories Response:", categoriesResponse.data);
-
         setProducts(productsResponse.data.products);
         setCategories(categoriesResponse.data);
-
         checkStockLevels(productsResponse.data.products);
       } catch (error) {
         setMessage(`Error: ${error.response ? error.response.data.message : error.message}`);
@@ -52,8 +55,10 @@ const ProductList = () => {
   }, []);
 
   const checkStockLevels = (products) => {
-    const lowStockProducts = products.flatMap(categoryGroup => categoryGroup.products).filter(product => product.status === 'Low Stock');
-    const outOfStockProducts = products.flatMap(categoryGroup => categoryGroup.products).filter(product => product.status === 'Out Of Stock');
+    const lowStockProducts = products.flatMap(categoryGroup => categoryGroup.products)
+      .filter(product => product.status === 'Low Stock');
+    const outOfStockProducts = products.flatMap(categoryGroup => categoryGroup.products)
+      .filter(product => product.status === 'Out Of Stock');
 
     const lowStockNames = lowStockProducts.map(product => product.name).join(', ');
     const outOfStockNames = outOfStockProducts.map(product => product.name).join(', ');
@@ -68,20 +73,66 @@ const ProductList = () => {
       alertMessage += `Alert: The following products are out of stock: ${outOfStockNames}.`;
     }
 
-    setAlert(alertMessage || ""); // Clear alert if no issues
+    setAlert(alertMessage || "");
+  };
+
+  const validateName = (name) => {
+    if (!name.trim()) return "Name is required";
+    if (/^\d+$/.test(name)) return "Name cannot be only numbers";
+    if (!/^[A-Za-z0-9\s]+$/.test(name)) return "Only letters and numbers allowed";
+    return "";
+  };
+
+  const validateNumber = (value, fieldName) => {
+    if (!value && value !== 0) return `${fieldName} is required`;
+    if (isNaN(Number(value))) return "Must be a valid number";
+    if (Number(value) < 0) return "Cannot be negative";
+    return "";
   };
 
   const startEditing = (product) => {
     setEditingProduct(product._id);
     setEditData({ ...product });
+    setEditErrors({
+      name: "",
+      quantity: "",
+      purchaseprice: "",
+      saleprice: "",
+      description: ""
+    });
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditData((prevData) => ({ ...prevData, [name]: value }));
+    
+    if (name === "name") {
+      setEditErrors(prev => ({ ...prev, name: validateName(value) }));
+    } else if (name === "quantity") {
+      setEditErrors(prev => ({ ...prev, quantity: validateNumber(value, "Quantity") }));
+    } else if (name === "purchaseprice") {
+      setEditErrors(prev => ({ ...prev, purchaseprice: validateNumber(value, "Purchase price") }));
+    } else if (name === "saleprice") {
+      setEditErrors(prev => ({ ...prev, saleprice: validateNumber(value, "Sale price") }));
+    }
+  };
+
+  const validateEditForm = () => {
+    const newErrors = {
+      name: validateName(editData.name),
+      quantity: validateNumber(editData.quantity, "Quantity"),
+      purchaseprice: validateNumber(editData.purchaseprice, "Purchase price"),
+      saleprice: validateNumber(editData.saleprice, "Sale price"),
+      description: ""
+    };
+    setEditErrors(newErrors);
+    return !Object.values(newErrors).some(error => error);
   };
 
   const saveChanges = (productId) => {
+    if (!validateEditForm()) return;
+  
+    // Determine the new status based on the editData quantity
     let newStatus;
     if (editData.quantity === 0) {
       newStatus = 'Out Of Stock';
@@ -90,7 +141,7 @@ const ProductList = () => {
     } else {
       newStatus = 'Available';
     }
-
+  
     axios
       .put(`http://localhost:3001/updateproduct/${productId}`, {
         ...editData,
@@ -101,14 +152,24 @@ const ProductList = () => {
           prevProducts.map((categoryGroup) => ({
             ...categoryGroup,
             products: categoryGroup.products.map((product) =>
-              product._id === productId ? response.data : product
+              product._id === productId ? { ...response.data, status: newStatus } : product
             ),
           }))
         );
-        checkStockLevels(products); // Check stock levels after saving
+        // Recheck stock levels with the updated products
+        setProducts(prevProducts => {
+          const updatedProducts = prevProducts.map((categoryGroup) => ({
+            ...categoryGroup,
+            products: categoryGroup.products.map((product) =>
+              product._id === productId ? { ...response.data, status: newStatus } : product
+            ),
+          }));
+          checkStockLevels(updatedProducts);
+          return updatedProducts;
+        });
         setEditingProduct(null);
         setEditData({});
-        toast.success("Product updated successfully"); // ✅ Show success toast
+        toast.success("Product updated successfully");
       })
       .catch((error) => {
         setMessage(`Error: ${error.response ? error.response.data.message : error.message}`);
@@ -132,8 +193,9 @@ const ProductList = () => {
             }))
             .filter((categoryGroup) => categoryGroup.products.length > 0)
         );
-        checkStockLevels(products); // Check stock levels after deleting
-        toast.success("Product deleted successfully"); // ✅ Show success toast
+        checkStockLevels(products);
+        toast.success("Product deleted successfully");
+        setConfirmDeleteId(null);
       })
       .catch((error) => {
         setMessage(`Error: ${error.response ? error.response.data.message : error.message}`);
@@ -145,7 +207,6 @@ const ProductList = () => {
     return map;
   }, {});
 
-  // Filter products based on the search query
   const filteredProducts = products.map(categoryGroup => ({
     ...categoryGroup,
     products: categoryGroup.products.filter(product =>
@@ -153,7 +214,7 @@ const ProductList = () => {
       product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       categoryMap[product.category]?.toLowerCase().includes(searchQuery.toLowerCase())
     ),
-  })).filter(categoryGroup => categoryGroup.products.length > 0); // Remove empty categories
+  })).filter(categoryGroup => categoryGroup.products.length > 0);
 
   return (
     <div className="mt-10 ml-80 lg:ml-20">
@@ -198,9 +259,6 @@ const ProductList = () => {
                 <table className="w-full min-w-[640px] bg-gray-800 rounded-lg">
                   <thead>
                     <tr>
-                      {/* <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
-                        Image
-                      </th> */}
                       <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
                         Product Name
                       </th>
@@ -213,10 +271,7 @@ const ProductList = () => {
                       <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
                         Selling Price
                       </th>
-                      <th
-                        className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left"
-                        style={{ display: window.innerWidth < 768 ? 'none' : 'table-cell' }}
-                      >
+                      <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
                         Description
                       </th>
                       <th className="text-[15px] uppercase border border-solid tracking-wide font-semibold text-gray-300 py-2 px-3 bg-gray-700 text-left">
@@ -233,73 +288,89 @@ const ProductList = () => {
                         key={product._id}
                         className="hover:bg-gray-600 transition duration-300"
                       >
-                        {/* <td className="py-2 px-4 border-b border-gray-600 text-center">
-                          {product.image ? (
-                            <img
-                              src={`http://localhost:3001${product.image}`} // Prepend the backend URL
-                              alt={product.name}
-                              className="w-16 h-16 object-cover rounded"
-                            />
-                          ) : (
-                            <span className="text-gray-400">No Image</span>
-                          )}
-                        </td> */}
+                        {/* Product Name */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
-                            <input
-                              type="text"
-                              name="name"
-                              value={editData.name}
-                              onChange={handleInputChange}
-                              className="border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              style={{ maxWidth: "120px" }}
-                            />
+                            <div>
+                              <input
+                                type="text"
+                                name="name"
+                                value={editData.name}
+                                onChange={handleInputChange}
+                                className={`border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                                  editErrors.name ? "border-red-500 focus:ring-red-500" : "border-gray-600 focus:ring-blue-500"
+                                }`}
+                              />
+                              {editErrors.name && <span className="text-red-500 text-xs">{editErrors.name}</span>}
+                            </div>
                           ) : (
                             product.name
                           )}
                         </td>
+
+                        {/* Quantity */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
-                            <input
-                              type="number"
-                              name="quantity"
-                              value={editData.quantity}
-                              onChange={handleInputChange}
-                              className="border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              style={{ maxWidth: "120px" }}
-                            />
+                            <div>
+                              <input
+                                type="number"
+                                name="quantity"
+                                value={editData.quantity}
+                                onChange={handleInputChange}
+                                className={`border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                                  editErrors.quantity ? "border-red-500 focus:ring-red-500" : "border-gray-600 focus:ring-blue-500"
+                                }`}
+                              />
+                              {editErrors.quantity && <span className="text-red-500 text-xs">{editErrors.quantity}</span>}
+                            </div>
                           ) : (
                             product.quantity
                           )}
                         </td>
+
+                        {/* Purchase Price */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
-                            <input
-                              type="number"
-                              name="purchaseprice"
-                              value={editData.purchaseprice}
-                              onChange={handleInputChange}
-                              className="border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              style={{ maxWidth: "120px" }}
-                            />
+                            <div>
+                              <input
+                                type="number"
+                                name="purchaseprice"
+                                value={editData.purchaseprice}
+                                onChange={handleInputChange}
+                                step="0.01"
+                                className={`border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                                  editErrors.purchaseprice ? "border-red-500 focus:ring-red-500" : "border-gray-600 focus:ring-blue-500"
+                                }`}
+                              />
+                              {editErrors.purchaseprice && <span className="text-red-500 text-xs">{editErrors.purchaseprice}</span>}
+                            </div>
                           ) : (
                             product.purchaseprice
                           )}
                         </td>
+
+                        {/* Sale Price */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
-                            <input
-                              type="number"
-                              name="saleprice"
-                              value={editData.saleprice}
-                              onChange={handleInputChange}
-                              className="border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              style={{ maxWidth: "120px" }}
-                            />
+                            <div>
+                              <input
+                                type="number"
+                                name="saleprice"
+                                value={editData.saleprice}
+                                onChange={handleInputChange}
+                                step="0.01"
+                                className={`border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                                  editErrors.saleprice ? "border-red-500 focus:ring-red-500" : "border-gray-600 focus:ring-blue-500"
+                                }`}
+                              />
+                              {editErrors.saleprice && <span className="text-red-500 text-xs">{editErrors.saleprice}</span>}
+                            </div>
                           ) : (
                             product.saleprice
                           )}
                         </td>
+
+                        {/* Description */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <input
@@ -308,32 +379,33 @@ const ProductList = () => {
                               value={editData.description}
                               onChange={handleInputChange}
                               className="border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              style={{ maxWidth: "120px" }}
                             />
                           ) : (
                             product.description
                           )}
                         </td>
+
+                        {/* Status (Non-editable) */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
-                          {editingProduct === product._id ? (
-                            <input
-                              type="text"
-                              name="status"
-                              value={editData.status}
-                              onChange={handleInputChange}
-                              className="border p-1 w-full bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              style={{ maxWidth: "120px" }}
-                            />
+                          {product.status === 'Available' ? (
+                            <span className="text-green-400">{product.status}</span>
+                          ) : product.status === 'Low Stock' ? (
+                            <span className="text-yellow-400">{product.status}</span>
                           ) : (
-                            product.status
+                            <span className="text-red-400">{product.status}</span>
                           )}
                         </td>
+
+                        {/* Actions */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <>
                               <button
                                 onClick={() => saveChanges(product._id)}
-                                className="text-blue-400 hover:underline mr-4"
+                                disabled={Object.values(editErrors).some(error => error)}
+                                className={`text-blue-400 hover:underline mr-4 ${
+                                  Object.values(editErrors).some(error => error) ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
                               >
                                 Save
                               </button>
@@ -375,64 +447,22 @@ const ProductList = () => {
 
       {/* Confirmation Modal */}
       {confirmDeleteId && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#1f2937",
-              padding: "1.5rem",
-              borderRadius: "8px",
-              maxWidth: "400px",
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-            }}
-          >
-            <h3 style={{ color: "white", marginBottom: "1rem" }}>
-              Are you sure you want to delete this product?
-            </h3>
-            <div>
-              <button
-               onClick={() => {
-                deleteProduct(confirmDeleteId);
-                setConfirmDeleteId(null);
-              }}
-              
-                style={{
-                  backgroundColor: "#ef4444",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  padding: "0.5rem 1rem",
-                  marginRight: "1rem",
-                  cursor: "pointer",
-                }}
-              >
-                Yes, Delete
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-xl text-white mb-4">Confirm Deletion</h3>
+            <p className="text-gray-300 mb-6">Are you sure you want to delete this product?</p>
+            <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setConfirmDeleteId(null)}
-                style={{
-                  backgroundColor: "#6b7280",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  padding: "0.5rem 1rem",
-                  cursor: "pointer",
-                }}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded"
               >
                 Cancel
+              </button>
+              <button
+                onClick={() => deleteProduct(confirmDeleteId)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded"
+              >
+                Delete
               </button>
             </div>
           </div>

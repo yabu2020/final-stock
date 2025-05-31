@@ -11,6 +11,10 @@ function SecurityQuestionPage() {
   const [newSecurityAnswer, setNewSecurityAnswer] = useState("");
   const [updateMessage, setUpdateMessage] = useState("");
   const [updateError, setUpdateError] = useState("");
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+const effectiveUserId = userId || currentUser?._id;
+
+console.log("Effective user ID:", effectiveUserId); // Add this
 
   const predefinedQuestions = [
     "Date of Birth",
@@ -22,41 +26,37 @@ function SecurityQuestionPage() {
   ];
 
   useEffect(() => {
-    if (userId) {
-      console.log("Fetching security question for userId:", userId); // Log the userId
-      fetchSecurityQuestion(userId);
-    } else {
-      console.error("User ID is undefined");
+    if (!effectiveUserId) {
+      setUpdateError("User identification failed. Please log in again.");
+      return;
     }
-  }, [userId]);
-
-  const fetchSecurityQuestion = (userId) => {
-    console.log("Fetching security question for userId:", userId); // Log the userId being sent
-
-    axios
-      .get("http://localhost:3001/security-question", { params: { userId } })
-      .then((response) => {
-        console.log("Response from /security-question:", response.data); // Log the response
-        const { securityQuestion, securityAnswer } = response.data;
-        setSecurityQuestion(securityQuestion || "No current security question");
-        setSecurityAnswer(securityAnswer || "");
-      })
-      .catch((error) => {
-        console.error(
-          "Error fetching security question:",
-          error.response?.data || error.message
-        ); // Log errors
-        setUpdateError(`Error: ${error.message}`);
-      });
+    fetchSecurityQuestion(effectiveUserId);
+  }, [effectiveUserId]);
+  const fetchSecurityQuestion = (effectiveUserId) => {
+    console.log("Fetching security question for user ID:", effectiveUserId); // Add this
+    axios.get("http://localhost:3001/security-question", { 
+      params: { userId: effectiveUserId } 
+    })
+    .then((response) => {
+      console.log("Response:", response.data); // Add this
+      const { securityQuestion, securityAnswer } = response.data;
+      setSecurityQuestion(securityQuestion || "No current security question");
+      setSecurityAnswer(securityAnswer || "");
+    })
+    .catch((error) => {
+      console.error("Full error:", error); // Add this
+      console.error("Error response:", error.response?.data); // Add this
+      setUpdateError("Failed to load security question. Please try again.");
+    });
   };
 
   const handleUpdateSecurityQuestion = (e) => {
     e.preventDefault();
-    setUpdateMessage("");
-    setUpdateError("");
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const effectiveUserId = userId || currentUser?._id;
 
-    if (!newSecurityQuestion || !newSecurityAnswer) {
-      setUpdateError("Both question and answer are required.");
+    if (!effectiveUserId) {
+      setUpdateError("User identification failed. Please log in again.");
       return;
     }
 

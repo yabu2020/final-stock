@@ -130,7 +130,8 @@ function ProductSold() {
   // Map products to react-select options
   const productOptions = products.map((product) => ({
     value: product._id,
-    label: ` - ${product.name} - ${product.saleprice} (${product.status})`,
+    label: `${product.name} (${product.status})`, // Simplified label
+    product: product // Keep full product data for reference if needed
   }));
 
   return (
@@ -148,40 +149,72 @@ function ProductSold() {
       <div className="mb-6">
         <label className="block text-lg font-medium text-gray-300 mb-2">Select Product:</label>
         <Select
-          options={productOptions}
-          value={selectedProduct}
-          onChange={setSelectedProduct}
-          onInputChange={handleInputChange}
-          placeholder="Search and select a product..."
-          isClearable
-          styles={{
-            control: (provided) => ({
-              ...provided,
-              backgroundColor: "#374151", // Tailwind bg-gray-700
-              borderColor: "#4B5563", // Tailwind border-gray-600
-              color: "white",
-            }),
-            input: (provided) => ({
-              ...provided,
-              color: "white",
-              opacity: 1,
-            }),
-            menu: (provided) => ({
-              ...provided,
-              backgroundColor: "#374151",
-            }),
-            singleValue: (provided) => ({
-              ...provided,
-              color: "white",
-            }),
-            option: (provided, state) => ({
-              ...provided,
-              backgroundColor: state.isFocused ? "#2563EB" : "#374151",
-              color: "white",
-              cursor: "pointer",
-            }),
-          }}
-        />
+  options={productOptions}
+  value={selectedProduct}
+  onChange={setSelectedProduct}
+  onInputChange={handleInputChange}
+  placeholder="Search products..."
+  isClearable
+  styles={{
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: "#374151",
+      borderColor: "#4B5563",
+      color: "white",
+      minHeight: '44px',
+      width: '100%', // Ensure it takes full width of parent
+      maxWidth: '500px', // Set a maximum width
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "white",
+      opacity: 1,
+      width: 'auto', // Let the menu adjust its width
+      minWidth: '100%', // At least as wide as the control
+      maxWidth: '500px', // Same max width as control
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: "#374151",
+      maxHeight: '300px', // Limit dropdown height
+      overflow: 'hidden',
+      width: 'auto', // Let the menu adjust its width
+      minWidth: '100%', // At least as wide as the control
+      maxWidth: '500px', // Same max width as control
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      maxHeight: '300px',
+      padding: 0,
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "white",
+      maxWidth: 'calc(100% - 20px)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? "#2563EB" : "#374151",
+      color: "white",
+      cursor: "pointer",
+      padding: '8px 12px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    }),
+  }}
+  formatOptionLabel={({ label, product }) => (
+    <div>
+      <div style={{ fontWeight: 500 }}>{product.name}</div>
+      <div style={{ fontSize: '0.8em', opacity: 0.8 }}>
+        {product.saleprice} | {product.status}
+      </div>
+    </div>
+  )}
+  noOptionsMessage={() => "No products found"}
+/>
       </div>
 
       <div className="mb-6">
