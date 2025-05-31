@@ -54,14 +54,14 @@ const getManagerMenu = () => [
     icon: <FaHome />,
   },
   {
-    path: "/manager/addproduct",
+    path: "/manager/buyproduct",
     name: "Buy Product",
-    icon: <FaPlusSquare />,
+    icon: <FaShoppingBasket />,
   },
   {
-    path: "/manager/buyproduct",
+    path: "/manager/addproduct",
     name: "Add Product",
-    icon: <FaShoppingBasket />,
+    icon: <FaPlusSquare/>,
   },
   {
     path: "/manager/productlist",

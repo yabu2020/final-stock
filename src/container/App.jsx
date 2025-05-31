@@ -35,6 +35,8 @@ import EmployeeManagement from "../admin/EmployeeManagement";
 import AdminReports from "../admin/AdminReports";
 import ManagerDashboard from "../branch/ManagerDashboard";
 import { UserProvider } from "../admin/UserContext";
+import Modal from 'react-modal';
+Modal.setAppElement('#root');
 
 function InnerApp() {
   const { cUSer, setCUSer } = useContext(UserContext);

@@ -281,7 +281,7 @@ function Login({ setCuser }) {
           {/* Name Field */}
           <div className="mb-6">
             <label htmlFor="name" className="block mb-2 text-sm text-gray-300 dark:text-gray-300">
-              Name
+              Username
             </label>
             <input
               type="text"

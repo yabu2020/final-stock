@@ -1,175 +1,295 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import Select from "react-select";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-function CreateBranch({ setBranches }) {
-  const [branchName, setBranchName] = useState("");
-  const [location, setLocation] = useState("");
-  const [managers, setManagers] = useState([]);
-  const [selectedManager, setSelectedManager] = useState(null);
-  const [error, setError] = useState("");
+function CreateUser() {
+  const [formData, setFormData] = useState({
+    customerName: "",
+    customerPhone: "",
+    customerAddress: "",
+    password: "",
+  });
 
-  useEffect(() => {
-    Promise.all([
-      axios.get("http://localhost:3001/users?role=manager"),
-      axios.get("http://localhost:3001/branches"),
-    ])
-      .then(([managersResponse, branchesResponse]) => {
-        // Get assigned manager IDs
-        const assignedManagerIds = branchesResponse.data
-          .map(branch => branch.manager?._id || branch.manager)
-          .filter(Boolean);
+  const [touched, setTouched] = useState({
+    customerName: false,
+    customerPhone: false,
+    customerAddress: false,
+    password: false,
+  });
 
-        // Filter out assigned managers
-        const availableManagers = managersResponse.data
-          .filter(manager => manager.role === "manager")
-          .filter(manager => !assignedManagerIds.includes(manager._id));
+  const [errors, setErrors] = useState({
+    customerName: "",
+    customerPhone: "",
+    customerAddress: "",
+    password: "",
+  });
 
-        // Map to react-select options
-        const options = availableManagers.map(manager => ({
-          value: manager._id,
-          label: manager.name,
-        }));
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-        setManagers(options);
-      })
-      .catch(err => console.error("Error fetching managers or branches", err));
-  }, []);
+  // Field validation rules
+  const validateField = (name, value) => {
+    switch (name) {
+      case "customerName":
+        if (!value.trim()) return "Name is required";
+        if (value.length < 3) return "Name must be at least 3 characters";
+        if (/^\d+$/.test(value)) return "Name cannot be only numbers";
+        return "";
 
-  const handleSubmit = (e) => {
+      case "customerPhone":
+        if (!value.trim()) return "Phone number is required";
+        if (!/^(09|07)\d{8}$/.test(value)) 
+          return "Must start with 09 or 07 and be 10 digits";
+        return "";
+
+      case "customerAddress":
+        if (!value.trim()) return "Address is required";
+        if (/^\d+$/.test(value)) return "Address must include letters";
+        if (value.length < 5) return "Address must be at least 5 characters";
+        return "";
+
+      case "password":
+        if (!value.trim()) return "Password is required";
+        if (value.length < 6) return "Must be at least 6 characters";
+        if (!/[a-zA-Z]/.test(value) || !/\d/.test(value)) 
+          return "Must include letters and numbers";
+        return "";
+
+      default:
+        return "";
+    }
+  };
+
+  // Handle field blur (mark as touched and validate)
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
+  };
+
+  // Handle input changes with real-time validation for touched fields
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Validate in real-time only after field is touched
+    if (touched[name]) {
+      setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  // Validate entire form before submission
+  const validateForm = () => {
+    const newErrors = {
+      customerName: validateField("customerName", formData.customerName),
+      customerPhone: validateField("customerPhone", formData.customerPhone),
+      customerAddress: validateField("customerAddress", formData.customerAddress),
+      password: validateField("password", formData.password),
+    };
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-
-    if (!branchName || !location) {
-      setError("Branch name and location are required.");
-      return;
-    }
-
-    if (!selectedManager) {
-      setError("Please select a branch manager.");
-      return;
-    }
-
-    axios.post("http://localhost:3001/addbranch", {
-      branchName,
-      location,
-      managerId: selectedManager.value,
-    })
-    .then(response => {
-      if (response.status === 201) {
-        if (typeof setBranches === "function") {
-          setBranches(prev => [...prev, response.data]);
-        }
-        alert("Branch created successfully!");
-        setBranchName("");
-        setLocation("");
-        setSelectedManager(null);
-      } else {
-        setError("Unexpected response from server. Please try again.");
-      }
-    })
-    .catch(err => {
-      console.error("Error response:", err);
-      if (err.response) {
-        if (err.response.data.error === "This manager is already assigned to another branch") {
-          setError("This manager is already assigned to another branch.");
-        } else {
-          setError(err.response.data?.error || "Error creating branch");
-        }
-      } else if (err.request) {
-        setError("No response from server. Please check your connection.");
-      } else {
-        setError("An unexpected error occurred.");
-      }
+    setIsSubmitting(true);
+    
+    // Mark all fields as touched to show errors
+    setTouched({
+      customerName: true,
+      customerPhone: true,
+      customerAddress: true,
+      password: true,
     });
+
+    // Validate form before submission
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        type: "user",
+        name: formData.customerName,
+        phone: formData.customerPhone,
+        address: formData.customerAddress,
+        password: formData.password,
+      };
+
+      await axios.post("http://localhost:3001/adduser", payload);
+
+      // Show success toast
+      toast.success("Customer account created successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
+      // Reset form
+      setFormData({ 
+        customerName: "", 
+        customerPhone: "", 
+        customerAddress: "", 
+        password: "" 
+      });
+      setTouched({ 
+        customerName: false, 
+        customerPhone: false, 
+        customerAddress: false, 
+        password: false 
+      });
+      setErrors({ 
+        customerName: "", 
+        customerPhone: "", 
+        customerAddress: "", 
+        password: "" 
+      });
+
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || "Error creating user account";
+      toast.error(errorMsg, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-gray-800 text-white">
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">Create Branch</h2>
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-md mx-auto bg-gray-800 rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">
+          Create Customer Account
+        </h2>
 
-        {error && <p className="text-red-400 mb-4">{error}</p>}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Branch Name */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Name Field */}
           <div>
-            <label htmlFor="branchName" className="block mb-1 font-medium text-gray-300">Branch Name:</label>
+            <label className="block text-sm font-medium mb-2 text-gray-300">
+              Full Name
+            </label>
             <input
               type="text"
-              id="branchName"
-              value={branchName}
-              onChange={(e) => setBranchName(e.target.value)}
-              required
-              className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-              placeholder="Enter branch name"
+              name="customerName"
+              value={formData.customerName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                errors.customerName 
+                  ? "border-red-500 focus:ring-red-500" 
+                  : "border-gray-600 focus:ring-blue-500"
+              } border`}
+              placeholder="John Doe"
+              disabled={isSubmitting}
             />
+            {errors.customerName && (
+              <p className="mt-1 text-sm text-red-400">{errors.customerName}</p>
+            )}
           </div>
 
-          {/* Location */}
+          {/* Phone Field */}
           <div>
-            <label htmlFor="location" className="block mb-1 font-medium text-gray-300">Location:</label>
+            <label className="block text-sm font-medium mb-2 text-gray-300">
+              Phone Number
+            </label>
             <input
               type="text"
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-              className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-              placeholder="Enter location"
+              name="customerPhone"
+              value={formData.customerPhone}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                errors.customerPhone 
+                  ? "border-red-500 focus:ring-red-500" 
+                  : "border-gray-600 focus:ring-blue-500"
+              } border`}
+              placeholder="0912345678"
+              disabled={isSubmitting}
             />
+            {errors.customerPhone && (
+              <p className="mt-1 text-sm text-red-400">{errors.customerPhone}</p>
+            )}
           </div>
 
-          {/* Manager Select */}
+          {/* Address Field */}
           <div>
-            <label className="block mb-1 font-medium text-gray-300">Branch Manager:</label>
-            <Select
-              options={managers}
-              value={selectedManager}
-              onChange={setSelectedManager}
-              placeholder="Select a manager..."
-              isClearable
-              styles={{
-                control: (provided) => ({
-                  ...provided,
-                  backgroundColor: "#374151", // Tailwind bg-gray-700
-                  borderColor: "#4B5563", // Tailwind border-gray-600
-                  color: "white",
-                }),
-                input: (provided) => ({
-                  ...provided,
-                  color: "white",           // Make typed text white
-                  opacity: 1,               // ensure visibility
-                }),
-                menu: (provided) => ({
-                  ...provided,
-                  backgroundColor: "#374151",
-                }),
-                singleValue: (provided) => ({
-                  ...provided,
-                  color: "white",
-                }),
-                option: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isFocused ? "#2563EB" : "#374151",
-                  color: "white",
-                  cursor: "pointer",
-                }),
-              }}
+            <label className="block text-sm font-medium mb-2 text-gray-300">
+              Address
+            </label>
+            <input
+              type="text"
+              name="customerAddress"
+              value={formData.customerAddress}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                errors.customerAddress 
+                  ? "border-red-500 focus:ring-red-500" 
+                  : "border-gray-600 focus:ring-blue-500"
+              } border`}
+              placeholder="123 Main St, City"
+              disabled={isSubmitting}
             />
+            {errors.customerAddress && (
+              <p className="mt-1 text-sm text-red-400">{errors.customerAddress}</p>
+            )}
+          </div>
+
+          {/* Password Field */}
+          <div>
+            <label className="block text-sm font-medium mb-2 text-gray-300">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
+                  errors.password 
+                    ? "border-red-500 focus:ring-red-500" 
+                    : "border-gray-600 focus:ring-blue-500"
+                } border`}
+                placeholder="At least 6 characters"
+                disabled={isSubmitting}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={isSubmitting}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-400">{errors.password}</p>
+            )}
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-2 mt-4 bg-blue-600 rounded-md text-white font-semibold hover:bg-blue-500 transition"
+            disabled={isSubmitting}
+            className={`w-full py-2 px-4 rounded font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition ${
+              isSubmitting
+                ? "bg-blue-700 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-500"
+            }`}
           >
-            Add Branch
+            {isSubmitting ? "Creating Account..." : "Create Customer Account"}
           </button>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 }
 
-export default CreateBranch;
+export default CreateUser;

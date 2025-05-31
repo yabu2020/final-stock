@@ -79,44 +79,44 @@ function OrderHistory() {
             </tr>
           </thead>
           <tbody>
-            {orderHistory.length > 0 ? (
-              filteredOrders.map((order, index) => (
-                <tr key={index} className="border-b border-gray-600">
-                  <td className="px-4 py-2 text-gray-300">
-                    {order.product?.name || "N/A"}
-                  </td>
-                  <td className="px-4 py-2 text-gray-300">
-                    {order.quantity || "N/A"}
-                  </td>
-                  <td className="px-4 py-2 text-gray-300">
-                    {order.totalPrice || "N/A"}
-                  </td>
-                  <td className="px-4 py-2 text-gray-300">
-                    {new Date(order.dateOrdered).toLocaleDateString()}
-                  </td>
-                  {/* <td className="px-4 py-2 text-gray-300">{order.userId?.name || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{order.userId?.address || "N/A"}</td>
-                <td className="px-4 py-2 text-gray-300">{order.userId?.phone || "N/A"}</td> */}
-                  <td
-                    className={`px-4 py-2 text-gray-300 ${
-                      order.status === "Confirmed"
-                        ? "text-blue-500"
-                        : order.status === "Rejected"
-                        ? "text-red-500"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {order.status || "Pending"}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center py-4 text-gray-400">
-                  No orders placed
-                </td>
-              </tr>
-            )}
+          {filteredOrders.length > 0 ? (
+  filteredOrders.map((order, index) => (
+    <tr key={index} className="border-b border-gray-600">
+      <td className="px-4 py-2 text-gray-300">
+        {order.product?.name || "N/A"}
+      </td>
+      <td className="px-4 py-2 text-gray-300">
+        {order.quantity || "N/A"}
+      </td>
+      <td className="px-4 py-2 text-gray-300">
+        {order.totalPrice || "N/A"}
+      </td>
+      <td className="px-4 py-2 text-gray-300">
+        {new Date(order.dateOrdered).toLocaleDateString()}
+      </td>
+      <td
+        className={`px-4 py-2 text-gray-300 ${
+          order.status === "Confirmed"
+            ? "text-blue-500"
+            : order.status === "Rejected"
+            ? "text-red-500"
+            : "text-gray-500"
+        }`}
+      >
+        {order.status || "Pending"}
+      </td>
+    </tr>
+  ))
+) : (
+  <tr>
+    <td colSpan="5" className="text-center py-4 text-gray-400">
+      {orderHistory.length === 0
+        ? "No orders placed"
+        : "No matching orders found"}
+    </td>
+  </tr>
+)}
+
           </tbody>
         </table>
       </div>
