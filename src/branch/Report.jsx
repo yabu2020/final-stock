@@ -30,7 +30,7 @@ function Report() {
       return;
     }
     axios
-      .get("http://localhost:3001/reports", { params: { branchManagerId } })
+      .get("https://final-stock-backend.onrender.com/reports", { params: { branchManagerId } })
       .then((response) => {
         setReports(response.data);
       })
@@ -57,7 +57,7 @@ function Report() {
     end.setHours(23, 59, 59, 999);
 
     axios
-      .post("http://localhost:3001/reports", {
+      .post("https://final-stock-backend.onrender.com/reports", {
         startDate: start.toISOString(),
         endDate: end.toISOString(),
         branchManagerId,
@@ -101,7 +101,7 @@ Found ${error.response.data.counts.orders} orders and ${error.response.data.coun
   const sendToAdmin = async (reportId) => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/reports/${reportId}/send-to-admin`,
+        `https://final-stock-backend.onrender.com/reports/${reportId}/send-to-admin`,
         {
           sentToAdmin: true,
           sentAt: new Date(),

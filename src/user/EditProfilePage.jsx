@@ -24,7 +24,7 @@ function EditProfilePage() {
   }, [userId]);
 
   const fetchUserProfile = (userId) => {
-    axios.get(`http://localhost:3001/users/${userId}`)
+    axios.get(`https://final-stock-backend.onrender.com/users/${userId}`)
       .then(response => {
         setUser(response.data);
       })
@@ -79,7 +79,7 @@ function EditProfilePage() {
       return;
     }
 
-    axios.put(`http://localhost:3001/users/${userId}`, user)
+    axios.put(`https://final-stock-backend.onrender.com/users/${userId}`, user)
       .then(response => {
         if (response.data) {
           setMessage(response.data.message || "Profile updated successfully!");

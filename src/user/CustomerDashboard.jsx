@@ -26,11 +26,11 @@ function CustomerDashboard() {
   }, [cUSer]);
 
   const fetchUserData = async () => {
-    const userResponse = await axios.get(`http://localhost:3001/users/${cUSer._id}`);
+    const userResponse = await axios.get(`https://final-stock-backend.onrender.com/users/${cUSer._id}`);
     const updatedUser = userResponse.data;
     try {
       setLoading(true);
-      const ordersResponse = await axios.get(`http://localhost:3001/orders?userId=${cUSer._id}&sort=-createdAt&populate=product`);
+      const ordersResponse = await axios.get(`https://final-stock-backend.onrender.com/orders?userId=${cUSer._id}&sort=-createdAt&populate=product`);
       const orders = ordersResponse.data;
       const totalOrders = orders.length;
       const pendingOrders = orders.filter(order => order.status === 'Pending').length;

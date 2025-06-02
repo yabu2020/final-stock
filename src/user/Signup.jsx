@@ -90,7 +90,7 @@ function Signup() {
       return;
     }
 
-    axios.post("http://localhost:3001/signup", { ...formData, type: "user" })
+    axios.post("https://final-stock-backend.onrender.com/signup", { ...formData, type: "user" })
       .then(() => {
         setErrors(prev => ({ ...prev, form: "Registration successful! Redirecting to login..." }));
         setTimeout(() => navigate("/login"), 2000);

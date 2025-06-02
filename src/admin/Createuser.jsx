@@ -97,7 +97,7 @@ function CreateUser() {
         address: customerAddress.trim(),
       };
 
-      await axios.post("http://localhost:3001/adduser", payload);
+      await axios.post("https://final-stock-backend.onrender.com/adduser", payload);
       toast.success("Customer account created successfully!");
 
       setCustomerName("");

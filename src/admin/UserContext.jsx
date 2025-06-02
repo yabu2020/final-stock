@@ -16,7 +16,7 @@ export const UserProvider = ({ children }) => {
       fetchFullUser(storedUser._id);
     } else {
       // Otherwise, get current session user
-      axios.get("http://localhost:3001/api/current_user")
+      axios.get("https://final-stock-backend.onrender.com/api/current_user")
         .then(res => {
           const user = res.data;
           localStorage.setItem("currentUser", JSON.stringify(user));
@@ -30,7 +30,7 @@ export const UserProvider = ({ children }) => {
 
   const fetchFullUser = async (userId) => {
     try {
-      const response = await axios.get(`http://localhost:3001/users/${userId}`);
+      const response = await axios.get(`https://final-stock-backend.onrender.com/users/${userId}`);
       const fullUser = response.data;
       setCUSer(fullUser);
       localStorage.setItem("currentUser", JSON.stringify(fullUser));

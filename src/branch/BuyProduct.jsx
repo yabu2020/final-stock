@@ -27,7 +27,7 @@ function BuyProduct() {
       return;
     }
     axios
-      .get("http://localhost:3001/categories", {
+      .get("https://final-stock-backend.onrender.com/categories", {
         params: { branchManagerId },
       })
       .then((response) => setCategories(response.data))
@@ -80,7 +80,7 @@ function BuyProduct() {
     }
 
     axios
-      .post("http://localhost:3001/addproduct", formData, {
+      .post("https://final-stock-backend.onrender.com/addproduct", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

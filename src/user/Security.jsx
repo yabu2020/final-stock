@@ -32,7 +32,7 @@ function SecurityQuestionPage() {
 
   const fetchSecurityQuestion = (effectiveUserId) => {
     axios
-      .get("http://localhost:3001/security-question", { 
+      .get("https://final-stock-backend.onrender.com/security-question", { 
         params: { userId: effectiveUserId } 
       })
       .then((response) => {
@@ -56,7 +56,7 @@ function SecurityQuestionPage() {
     }
 
     axios
-      .post("http://localhost:3001/update-security-question", {
+      .post("https://final-stock-backend.onrender.com/update-security-question", {
         userId,
         newSecurityQuestion,
         newSecurityAnswer,

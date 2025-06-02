@@ -22,7 +22,7 @@ function AdminOrderPage() {
 
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/admin/orders", {
+        const response = await axios.get("https://final-stock-backend.onrender.com/admin/orders", {
           params: { branchManagerId },
         });
 
@@ -50,7 +50,7 @@ function AdminOrderPage() {
     try {
       setMessage("Confirming order...");
       const response = await axios.patch(
-        `http://localhost:3001/admin/orders/${orderId}/confirm`
+        `https://final-stock-backend.onrender.com/admin/orders/${orderId}/confirm`
       );
 
       setMessage("Order confirmed successfully");
@@ -72,7 +72,7 @@ function AdminOrderPage() {
     try {
       setMessage("Rejecting order...");
       const response = await axios.patch(
-        `http://localhost:3001/admin/orders/${orderId}/reject`
+        `https://final-stock-backend.onrender.com/admin/orders/${orderId}/reject`
       );
 
       setMessage("Order rejected successfully");

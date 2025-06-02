@@ -37,7 +37,7 @@ function ManagerDashboard() {
         setLoading(true);
         setError(null);
 
-        const response = await axios.get("http://localhost:3001/api/manager/stats", {
+        const response = await axios.get("https://final-stock-backend.onrender.com/api/manager/stats", {
           params: { managerId: cUSer._id },
         });
 

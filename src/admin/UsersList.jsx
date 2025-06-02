@@ -24,7 +24,7 @@ const UserList = () => {
 
   const fetchUsers = () => {
     axios
-      .get("http://localhost:3001/users")
+      .get("https://final-stock-backend.onrender.com/users")
       .then((response) => setUsers(response.data))
       .catch((err) => console.log("Error fetching users", err));
   };
@@ -88,7 +88,7 @@ const UserList = () => {
     if (!validateForm()) return;
 
     axios
-      .put(`http://localhost:3001/users/${editingUserId}`, userEditData)
+      .put(`https://final-stock-backend.onrender.com/users/${editingUserId}`, userEditData)
       .then(() => {
         setUsers((prev) =>
           prev.map((user) =>
@@ -111,7 +111,7 @@ const UserList = () => {
 
   const handleDelete = (id) => {
     axios
-      .delete(`http://localhost:3001/users/${id}`)
+      .delete(`https://final-stock-backend.onrender.com/users/${id}`)
       .then(() => {
         setUsers((prev) => prev.filter((user) => user._id !== id));
         toast.success("User deleted successfully!");

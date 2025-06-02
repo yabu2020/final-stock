@@ -25,7 +25,7 @@ function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const statsResponse = await axios.get("http://localhost:3001/api/stats");
+      const statsResponse = await axios.get("https://final-stock-backend.onrender.com/api/stats");
       const { totalUsers, totalEmployees, totalBranches, totalReports } = statsResponse.data;
 
       setStatsData([
@@ -55,13 +55,13 @@ function AdminDashboard() {
         },
       ]);
 
-      const revenueResponse = await axios.get("http://localhost:3001/api/revenue-stats");
+      const revenueResponse = await axios.get("https://final-stock-backend.onrender.com/api/revenue-stats");
       setBarChartData(revenueResponse.data);
 
-      const breakdownResponse = await axios.get("http://localhost:3001/api/user-breakdown");
+      const breakdownResponse = await axios.get("https://final-stock-backend.onrender.com/api/user-breakdown");
       setPieChartData(breakdownResponse.data);
 
-      const reportsResponse = await axios.get("http://localhost:3001/api/admin/reports");
+      const reportsResponse = await axios.get("https://final-stock-backend.onrender.com/api/admin/reports");
       setReportsData(reportsResponse.data);
       
     } catch (err) {

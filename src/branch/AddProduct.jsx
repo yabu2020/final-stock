@@ -18,7 +18,7 @@ function AddProduct() {
     }
 
     axios
-      .get("http://localhost:3001/productlist", {
+      .get("https://final-stock-backend.onrender.com/productlist", {
         params: { branchManagerId },
       })
       .then((response) => {
@@ -52,7 +52,7 @@ function AddProduct() {
     }
 
     axios
-      .post("http://localhost:3001/buyproduct", {
+      .post("https://final-stock-backend.onrender.com/buyproduct", {
         productId: selectedProduct,
         quantity: parsedQuantity,
       })

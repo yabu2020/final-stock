@@ -33,8 +33,8 @@ const ProductList = () => {
           return;
         }
         const [productsResponse, categoriesResponse] = await Promise.all([
-          axios.get("http://localhost:3001/productlist", { params: { branchManagerId } }),
-          axios.get("http://localhost:3001/categories", { params: { branchManagerId } }),
+          axios.get("https://final-stock-backend.onrender.com/productlist", { params: { branchManagerId } }),
+          axios.get("https://final-stock-backend.onrender.com/categories", { params: { branchManagerId } }),
         ]);
         setProducts(productsResponse.data.products);
         setCategories(categoriesResponse.data);
@@ -126,7 +126,7 @@ const ProductList = () => {
       newStatus = 'Available';
     }
     axios
-      .put(`http://localhost:3001/updateproduct/${productId}`, { ...editData, status: newStatus })
+      .put(`https://final-stock-backend.onrender.com/updateproduct/${productId}`, { ...editData, status: newStatus })
       .then((response) => {
         setProducts((prevProducts) =>
           prevProducts.map((categoryGroup) => ({
@@ -153,7 +153,7 @@ const ProductList = () => {
 
   const deleteProduct = (productId) => {
     axios
-      .delete(`http://localhost:3001/deleteproduct/${productId}`)
+      .delete(`https://final-stock-backend.onrender.com/deleteproduct/${productId}`)
       .then(() => {
         setProducts((prevProducts) =>
           prevProducts

@@ -70,7 +70,7 @@ function Category() {
 
     try {
       const checkResponse = await axios.get(
-        `http://localhost:3001/check-code?code=${code}&branchManagerId=${branchManagerId}`
+        `https://final-stock-backend.onrender.com/check-code?code=${code}&branchManagerId=${branchManagerId}`
       );
 
       if (checkResponse.data.exists) {
@@ -79,7 +79,7 @@ function Category() {
         return;
       }
 
-      const response = await axios.post("http://localhost:3001/category", payload);
+      const response = await axios.post("https://final-stock-backend.onrender.com/category", payload);
 
       setMessage("Category registered successfully.");
       setCode("");

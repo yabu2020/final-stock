@@ -84,7 +84,7 @@ function ResetPassword() {
     if (!validateForm()) return;
 
     axios
-      .post("http://localhost:3001/reset-password", {
+      .post("https://final-stock-backend.onrender.com/reset-password", {
         name,
         securityQuestion,
         securityAnswer,

@@ -31,7 +31,7 @@ function Login({ setCuser }) {
   
     if (hasError) return;
   
-    axios.post("http://localhost:3001", { name, password })
+    axios.post("https://final-stock-backend.onrender.com", { name, password })
       .then(result => {
         const response = result.data;
           if (response.message === "Login successful") {

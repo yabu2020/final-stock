@@ -29,7 +29,7 @@ function ProductSold() {
       }
 
       axios
-        .get("http://localhost:3001/productlist", {
+        .get("https://final-stock-backend.onrender.com/productlist", {
           params: { branchManagerId, search },
         })
         .then((response) => {
@@ -60,7 +60,7 @@ function ProductSold() {
     }
 
     axios
-      .get("http://localhost:3001/assigned-products", {
+      .get("https://final-stock-backend.onrender.com/assigned-products", {
         params: { branchManagerId },
       })
       .then((response) => {
@@ -88,7 +88,7 @@ function ProductSold() {
     const totalPrice = product.saleprice * quantity;
 
     axios
-      .post("http://localhost:3001/sellproduct", {
+      .post("https://final-stock-backend.onrender.com/sellproduct", {
         productId: selectedProduct.value,
         quantity,
         totalPrice,

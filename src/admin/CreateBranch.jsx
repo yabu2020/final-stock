@@ -76,8 +76,8 @@ function CreateBranch({ setBranches }) {
 
   useEffect(() => {
     Promise.all([
-      axios.get("http://localhost:3001/users?role=manager"),
-      axios.get("http://localhost:3001/branches"),
+      axios.get("https://final-stock-backend.onrender.com/users?role=manager"),
+      axios.get("https://final-stock-backend.onrender.com/branches"),
     ])
       .then(([managersResponse, branchesResponse]) => {
         const assignedManagerIds = branchesResponse.data
@@ -118,7 +118,7 @@ function CreateBranch({ setBranches }) {
     const hasErrors = Object.values(validationErrors).some(error => error);
     if (hasErrors) return;
 
-    axios.post("http://localhost:3001/addbranch", {
+    axios.post("https://final-stock-backend.onrender.com/addbranch", {
       branchName,
       location,
       managerId: selectedManager.value,

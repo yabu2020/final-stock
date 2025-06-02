@@ -14,7 +14,7 @@ function AdminReports() {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/admin/reports');
+      const response = await axios.get('https://final-stock-backend.onrender.com/admin/reports');
       setReports(response.data);
       setError(null);
     } catch (err) {

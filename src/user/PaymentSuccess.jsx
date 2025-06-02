@@ -30,7 +30,7 @@ function PaymentSuccess() {
 
         const verifyPayment = async (attempt = 1) => {
           try {
-            const response = await axios.post('http://localhost:3001/api/payments/verify', {
+            const response = await axios.post('https://final-stock-backend.onrender.com/api/payments/verify', {
               tx_ref: tx_ref
             }, {
               timeout: 8000
@@ -60,7 +60,7 @@ function PaymentSuccess() {
         }
 
         setMessage("Creating your order...");
-        const orderResponse = await axios.post('http://localhost:3001/orders', {
+        const orderResponse = await axios.post('https://final-stock-backend.onrender.com/orders', {
           ...orderData,
           paymentVerified: true,
           paymentData: paymentData

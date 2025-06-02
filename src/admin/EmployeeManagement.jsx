@@ -60,7 +60,7 @@ function EmployeeManagement() {
     }
 
     try {
-      await axios.post("http://localhost:3001/addemployee", {
+      await axios.post("https://final-stock-backend.onrender.com/addemployee", {
         name,
         phone,
         address,

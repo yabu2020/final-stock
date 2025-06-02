@@ -59,7 +59,7 @@ function ResetPassword() {
 
     if (nameError || passwordError || confirmPasswordError) return;
 
-    axios.post("http://localhost:3001/resetpassword", { name, newPassword })
+    axios.post("https://final-stock-backend.onrender.com/resetpassword", { name, newPassword })
       .then((response) => {
         toast.success(response.data.message);
         setName("");

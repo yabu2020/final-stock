@@ -29,14 +29,14 @@ function BranchList() {
 
   const fetchBranches = () => {
     axios
-      .get("http://localhost:3001/branches")
+      .get("https://final-stock-backend.onrender.com/branches")
       .then((response) => setBranches(response.data))
       .catch((err) => console.error("Error fetching branches", err));
   };
 
   const fetchManagers = () => {
     axios
-      .get("http://localhost:3001/users")
+      .get("https://final-stock-backend.onrender.com/users")
       .then((res) => {
         const onlyManagers = res.data.filter(user => user.role === "manager");
         setManagers(onlyManagers);
@@ -86,7 +86,7 @@ function BranchList() {
     if (!validateForm()) return;
 
     axios
-      .put(`http://localhost:3001/branches/${editingBranchId}`, {
+      .put(`https://final-stock-backend.onrender.com/branches/${editingBranchId}`, {
         branchName: branchEditData.branchName,
         location: branchEditData.location,
         managerId: branchEditData.manager
@@ -114,7 +114,7 @@ function BranchList() {
   const handleDelete = async (branchId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3001/branches/${branchId}`, {
+      await axios.delete(`https://final-stock-backend.onrender.com/branches/${branchId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

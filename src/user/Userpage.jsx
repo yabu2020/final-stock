@@ -32,7 +32,7 @@ function Userpage() {
       sessionStorage.removeItem("pendingOrder");
       const fetchOrderHistory = async () => {
         try {
-          const response = await axios.get(`http://localhost:3001/orders?userId=${cUSer._id}&sort=-createdAt`);
+          const response = await axios.get(`https://final-stock-backend.onrender.com/orders?userId=${cUSer._id}&sort=-createdAt`);
           const uniqueOrders = Array.from(new Map(response.data.map((order) => [order._id, order])).values());
           setOrderHistory(uniqueOrders);
         } catch (error) {
@@ -48,7 +48,7 @@ function Userpage() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/branches")
+      .get("https://final-stock-backend.onrender.com/branches")
       .then((res) => setBranches(res.data))
       .catch((err) => setMessage({ text: `Error fetching branches: ${err.message}`, isError: true }));
   }, []);
@@ -62,7 +62,7 @@ function Userpage() {
         return;
       }
       axios
-        .get("http://localhost:3001/productlist", {
+        .get("https://final-stock-backend.onrender.com/productlist", {
           params: { search: searchTerm, branchManagerId: selectedBranchData.manager._id },
         })
         .then((res) => {
@@ -86,7 +86,7 @@ function Userpage() {
     if (userId && !hasFetchedRef.current) {
       hasFetchedRef.current = true;
       axios
-        .get(`http://localhost:3001/orders?userId=${userId}`)
+        .get(`https://final-stock-backend.onrender.com/orders?userId=${userId}`)
         .then((res) => {
           const uniqueOrders = Array.from(new Map(res.data.map((o) => [o._id, o])).values());
           setOrderHistory(uniqueOrders);
@@ -125,7 +125,7 @@ function Userpage() {
       unitPrice: product.saleprice,
       totalPrice: product.saleprice * quantity,
       branchName: selectedBranchData.branchName,
-      productImage: product.image ? `http://localhost:3001${product.image}` : null,
+      productImage: product.image ? `https://final-stock-backend.onrender.com${product.image}` : null,
     };
     setOrderDetails(details);
     setShowOrderConfirmation(true);
@@ -160,11 +160,11 @@ function Userpage() {
       last_name: cUSer.name.split(" ")[1] || "",
       tx_ref,
       metadata: { orderId: orderData._id, userId: orderData.userId, branchId: orderData.branchId },
-      return_url: "http://localhost:5173/payment-success",
-      callback_url: "http://localhost:5173/payment-success",
+      return_url: window.location.origin + "/payment-success", // Changed to frontend URL
+      callback_url: window.location.origin + "/payment-success", // Changed to frontend URL
     };
     axios
-      .post("http://localhost:3001/api/payments/initiate", paymentPayload)
+      .post("https://final-stock-backend.onrender.com/api/payments/initiate", paymentPayload)
       .then((res) => {
         window.location.href = res.data.checkout_url;
       })
@@ -351,7 +351,7 @@ function Userpage() {
                   <div className="relative h-48 bg-gray-700">
                     {product.image ? (
                       <img
-                        src={`http://localhost:3001${product.image}`}
+                        src={`https://final-stock-backend.onrender.com${product.image}`}
                         alt={product.name}
                         className="w-full h-full object-contain p-4"
                         onError={(e) => {
