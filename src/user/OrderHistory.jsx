@@ -1,4 +1,3 @@
-// src/pages/user/OrderHistory.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -17,7 +16,6 @@ function OrderHistory() {
           `http://localhost:3001/orders?userId=${cUSer._id}&sort=-createdAt`
         );
 
-        // Remove duplicates by order._id
         const uniqueOrders = Array.from(
           new Map(response.data.map((order) => [order._id, order])).values()
         );
@@ -34,6 +32,7 @@ function OrderHistory() {
       fetchOrderHistory();
     }
   }, [cUSer]);
+
   const filteredOrders = orderHistory.filter(
     (order) =>
       order.product?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -50,10 +49,7 @@ function OrderHistory() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 rounded-lg shadow-md bg-gray-900 min-h-screen">
-      {/* Order History Table */}
-      <h3 className="text-xl font-semibold text-blue-400 mt-10">
-        Order History
-      </h3>
+      <h3 className="text-xl font-semibold text-blue-400 mt-10">Order History</h3>
       <div className="mt-4">
         <input
           type="text"
@@ -72,51 +68,47 @@ function OrderHistory() {
               <th className="px-4 py-2">Quantity</th>
               <th className="px-4 py-2">Total Price</th>
               <th className="px-4 py-2">Date</th>
-              {/* <th className="px-4 py-2">User Name</th>
-            <th className="px-4 py-2">User Address</th>
-            <th className="px-4 py-2">User Phone</th> */}
               <th className="px-4 py-2">Status</th>
             </tr>
           </thead>
           <tbody>
-          {filteredOrders.length > 0 ? (
-  filteredOrders.map((order, index) => (
-    <tr key={index} className="border-b border-gray-600">
-      <td className="px-4 py-2 text-gray-300">
-        {order.product?.name || "N/A"}
-      </td>
-      <td className="px-4 py-2 text-gray-300">
-        {order.quantity || "N/A"}
-      </td>
-      <td className="px-4 py-2 text-gray-300">
-        {order.totalPrice || "N/A"}
-      </td>
-      <td className="px-4 py-2 text-gray-300">
-        {new Date(order.dateOrdered).toLocaleDateString()}
-      </td>
-      <td
-        className={`px-4 py-2 text-gray-300 ${
-          order.status === "Confirmed"
-            ? "text-blue-500"
-            : order.status === "Rejected"
-            ? "text-red-500"
-            : "text-gray-500"
-        }`}
-      >
-        {order.status || "Pending"}
-      </td>
-    </tr>
-  ))
-) : (
-  <tr>
-    <td colSpan="5" className="text-center py-4 text-gray-400">
-      {orderHistory.length === 0
-        ? "No orders placed"
-        : "No matching orders found"}
-    </td>
-  </tr>
-)}
-
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order, index) => (
+                <tr key={index} className="border-b border-gray-600">
+                  <td className="px-4 py-2 text-gray-300">
+                    {order.product?.name || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300">
+                    {order.quantity || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300">
+                    {order.totalPrice || "N/A"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-300">
+                    {new Date(order.dateOrdered).toLocaleDateString()}
+                  </td>
+                  <td
+                    className={`px-4 py-2 text-gray-300 ${
+                      order.status === "Confirmed"
+                        ? "text-blue-500"
+                        : order.status === "Rejected"
+                        ? "text-red-500"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {order.status || "Pending"}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center py-4 text-gray-400">
+                  {orderHistory.length === 0
+                    ? "No orders placed"
+                    : "No matching orders found"}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

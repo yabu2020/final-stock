@@ -1,6 +1,7 @@
-import { useEffect, useState ,useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+
 function PaymentSuccess() {
   const navigate = useNavigate();
   const { search } = useLocation();
@@ -8,11 +9,11 @@ function PaymentSuccess() {
   const [message, setMessage] = useState("Verifying your payment...");
   const [txRef, setTxRef] = useState("");
   const [retryCount, setRetryCount] = useState(0);
-  const hasProcessedRef = useRef(false); // Add this ref to track processing
+  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
     const processPayment = async () => {
-      if (hasProcessedRef.current) return; // Prevent duplicate processing
+      if (hasProcessedRef.current) return;
       hasProcessedRef.current = true;
 
       try {
@@ -27,7 +28,6 @@ function PaymentSuccess() {
         setTxRef(tx_ref);
         setMessage(`Verifying payment ${tx_ref}...`);
 
-        // Verify payment with retry logic
         const verifyPayment = async (attempt = 1) => {
           try {
             const response = await axios.post('http://localhost:3001/api/payments/verify', {
@@ -53,14 +53,12 @@ function PaymentSuccess() {
 
         const paymentData = await verifyPayment();
 
-        // Get order data from storage
         const orderData = JSON.parse(sessionStorage.getItem('pendingOrder'));
 
         if (!orderData) {
           throw new Error("Order data not found");
         }
 
-        // Create the order
         setMessage("Creating your order...");
         const orderResponse = await axios.post('http://localhost:3001/orders', {
           ...orderData,
@@ -68,20 +66,18 @@ function PaymentSuccess() {
           paymentData: paymentData
         });
 
-        // Clean up storage immediately after successful order creation
         sessionStorage.removeItem('pendingOrder');
 
         setStatus("success");
         setMessage("Payment and order processed successfully!");
 
-        // Redirect after delay
         setTimeout(() => {
           navigate('/user/Userpage', {
             state: {
               paymentSuccess: true,
               order: orderResponse.data
             },
-            replace: true // Add replace to prevent duplicate navigation
+            replace: true
           });
         }, 3000);
 
@@ -93,7 +89,7 @@ function PaymentSuccess() {
           error.message ||
           "Payment processing failed"
         );
-        
+
         if (error.message.includes("not found") || error.message.includes("timeout")) {
           setRetryCount(prev => prev + 1);
         } else {
@@ -126,8 +122,8 @@ function PaymentSuccess() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
+        <h2 className="text-xl md:text-2xl font-bold mb-4">
           {status === "success" ? "✅ Payment Successful" : 
            status === "error" ? "❌ Payment Error" : "Processing Payment"}
         </h2>
@@ -145,13 +141,13 @@ function PaymentSuccess() {
           <div className="flex gap-4">
             <button
               onClick={handleRetry}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
             >
               Try Again
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded"
+              className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded transition-colors"
             >
               Cancel
             </button>

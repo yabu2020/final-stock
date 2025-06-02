@@ -1,24 +1,17 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useContext,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useContext, useRef } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import debounce from "lodash.debounce";
 import UserContext from "../admin/UserContext";
 import Select from "react-select";
-import { FaClipboardList, FaShoppingCart,FaTimes } from "react-icons/fa";
-import Modal from "react-modal"; // Import modal library
+import { FaClipboardList, FaShoppingCart, FaTimes } from "react-icons/fa";
+import Modal from "react-modal";
 
 function Userpage() {
   const { userId } = useParams();
   const { cUSer } = useContext(UserContext);
   const location = useLocation();
   const locationState = location.state;
-
   const [branches, setBranches] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState("");
   const [products, setProducts] = useState([]);
@@ -31,29 +24,21 @@ function Userpage() {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
-
   const hasFetchedRef = useRef(false);
 
-  // Handle success or error messages on redirect from payment
   useEffect(() => {
     if (locationState?.paymentSuccess) {
       setMessage("Order placed successfully!");
       sessionStorage.removeItem("pendingOrder");
-
       const fetchOrderHistory = async () => {
         try {
-          const response = await axios.get(
-            `http://localhost:3001/orders?userId=${cUSer._id}&sort=-createdAt`
-          );
-          const uniqueOrders = Array.from(
-            new Map(response.data.map((order) => [order._id, order])).values()
-          );
+          const response = await axios.get(`http://localhost:3001/orders?userId=${cUSer._id}&sort=-createdAt`);
+          const uniqueOrders = Array.from(new Map(response.data.map((order) => [order._id, order])).values());
           setOrderHistory(uniqueOrders);
         } catch (error) {
           console.error("Error refreshing orders:", error);
         }
       };
-
       if (cUSer?._id) fetchOrderHistory();
     } else if (locationState?.paymentError) {
       setMessage(`Payment failed: ${locationState.paymentError}`);
@@ -61,52 +46,33 @@ function Userpage() {
     }
   }, [cUSer, locationState]);
 
-  // Fetch branches once
   useEffect(() => {
     axios
       .get("http://localhost:3001/branches")
       .then((res) => setBranches(res.data))
-      .catch((err) =>
-        setMessage(`Error fetching branches: ${err.message}`)
-      );
+      .catch((err) => setMessage(`Error fetching branches: ${err.message}`));
   }, []);
 
-  // Debounced fetch products by branch and manager
   const fetchProducts = useCallback(
     debounce(() => {
       if (!selectedBranch) return;
-
-      const selectedBranchData = branches.find(
-        (b) => b._id === selectedBranch
-      );
+      const selectedBranchData = branches.find((b) => b._id === selectedBranch);
       if (!selectedBranchData?.manager?._id) {
         setMessage("This branch does not have a manager assigned.");
         return;
       }
-
       axios
         .get("http://localhost:3001/productlist", {
-          params: {
-            search: searchTerm,
-            branchManagerId: selectedBranchData.manager._id,
-          },
+          params: { search: searchTerm, branchManagerId: selectedBranchData.manager._id },
         })
         .then((res) => {
           const allProducts = res.data.products.flatMap((cat) =>
-            cat.products.map((p) => ({
-              ...p,
-              categoryName: cat.categoryName,
-            }))
+            cat.products.map((p) => ({ ...p, categoryName: cat.categoryName }))
           );
-
-          const filtered = allProducts.filter(
-            (p) => p.status === "Available" || p.status === "Low Stock"
-          );
+          const filtered = allProducts.filter((p) => p.status === "Available" || p.status === "Low Stock");
           setProducts(filtered);
         })
-        .catch((err) =>
-          setMessage(`Error fetching products: ${err.message}`)
-        );
+        .catch((err) => setMessage(`Error fetching products: ${err.message}`));
     }, 300),
     [selectedBranch, searchTerm, branches]
   );
@@ -115,7 +81,6 @@ function Userpage() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Fetch order history once for user
   useEffect(() => {
     const userId = cUSer?._id;
     if (userId && !hasFetchedRef.current) {
@@ -123,14 +88,10 @@ function Userpage() {
       axios
         .get(`http://localhost:3001/orders?userId=${userId}`)
         .then((res) => {
-          const uniqueOrders = Array.from(
-            new Map(res.data.map((o) => [o._id, o])).values()
-          );
+          const uniqueOrders = Array.from(new Map(res.data.map((o) => [o._id, o])).values());
           setOrderHistory(uniqueOrders);
         })
-        .catch((err) =>
-          setMessage(`Error fetching order history: ${err.message}`)
-        );
+        .catch((err) => setMessage(`Error fetching order history: ${err.message}`));
     }
   }, [cUSer]);
 
@@ -140,39 +101,32 @@ function Userpage() {
 
   const handlePlaceOrder = () => {
     if (isPlacingOrder) return;
-    
     if (!selectedProduct || quantity <= 0) {
       setMessage("Please select a product and enter a valid quantity.");
       return;
     }
-
     const product = products.find((p) => p._id === selectedProduct);
     if (!product) {
       setMessage("Selected product not found.");
       return;
     }
-
     if (quantity > product.quantity) {
       setMessage(`Only ${product.quantity} units available.`);
       return;
     }
-
     const selectedBranchData = branches.find((b) => b._id === selectedBranch);
     if (!selectedBranchData?.manager?._id) {
       setMessage("This branch does not have a manager assigned.");
       return;
     }
-
-    // Prepare order details for confirmation
     const details = {
       productName: product.name,
       quantity,
       unitPrice: product.saleprice,
       totalPrice: product.saleprice * quantity,
       branchName: selectedBranchData.branchName,
-      productImage: product.image ? `http://localhost:3001${product.image}` : null
+      productImage: product.image ? `http://localhost:3001${product.image}` : null,
     };
-
     setOrderDetails(details);
     setShowOrderConfirmation(true);
   };
@@ -180,10 +134,8 @@ function Userpage() {
   const confirmOrder = () => {
     setIsPlacingOrder(true);
     setShowOrderConfirmation(false);
-
     const product = products.find((p) => p._id === selectedProduct);
     const selectedBranchData = branches.find((b) => b._id === selectedBranch);
-
     const tx_ref = `txn-${Date.now()}`;
     const orderData = {
       product: selectedProduct,
@@ -200,24 +152,17 @@ function Userpage() {
       createdAt: new Date().toISOString(),
       status: "Pending",
     };
-
     sessionStorage.setItem("pendingOrder", JSON.stringify(orderData));
-
     const paymentPayload = {
       amount: orderData.totalPrice,
       email: cUSer.email,
       first_name: cUSer.name.split(" ")[0],
       last_name: cUSer.name.split(" ")[1] || "",
       tx_ref,
-      metadata: {
-        orderId: orderData._id,
-        userId: orderData.userId,
-        branchId: orderData.branchId,
-      },
+      metadata: { orderId: orderData._id, userId: orderData.userId, branchId: orderData.branchId },
       return_url: "http://localhost:5173/payment-success",
       callback_url: "http://localhost:5173/payment-success",
     };
-
     axios
       .post("http://localhost:3001/api/payments/initiate", paymentPayload)
       .then((res) => {
@@ -235,26 +180,22 @@ function Userpage() {
     setOrderDetails(null);
   };
 
-  // Modal styles
   const customStyles = {
     content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
-      backgroundColor: '#1F2937',
-      border: '1px solid #374151',
-      borderRadius: '0.5rem',
-      padding: '2rem',
-      maxWidth: '500px',
-      width: '90%',
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "#1F2937",
+      border: "1px solid #374151",
+      borderRadius: "0.5rem",
+      padding: "2rem",
+      maxWidth: "500px",
+      width: "90%",
     },
-    overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
-      zIndex: 1000,
-    },
+    overlay: { backgroundColor: "rgba(0, 0, 0, 0.75)", zIndex: 1000 },
   };
 
   if (loading) return <p>Loading...</p>;
@@ -280,13 +221,12 @@ function Userpage() {
             <FaTimes size={20} />
           </button>
         </div>
-        
         {orderDetails && (
           <div className="space-y-4">
             <div className="flex items-start">
               {orderDetails.productImage && (
-                <img 
-                  src={orderDetails.productImage} 
+                <img
+                  src={orderDetails.productImage}
                   alt={orderDetails.productName}
                   className="w-20 h-20 object-contain mr-4 rounded"
                   onError={(e) => {
@@ -300,7 +240,6 @@ function Userpage() {
                 <p className="text-gray-300">Branch: {orderDetails.branchName}</p>
               </div>
             </div>
-            
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="bg-gray-800 p-3 rounded">
                 <p className="text-gray-400 text-sm">Quantity</p>
@@ -311,12 +250,10 @@ function Userpage() {
                 <p className="text-white font-medium">${orderDetails.unitPrice.toFixed(2)}</p>
               </div>
             </div>
-            
             <div className="bg-blue-900/30 p-3 rounded mt-2">
               <p className="text-gray-400 text-sm">Total Amount</p>
               <p className="text-white font-bold text-xl">${orderDetails.totalPrice.toFixed(2)}</p>
             </div>
-            
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={cancelOrder}
@@ -331,9 +268,25 @@ function Userpage() {
               >
                 {isPlacingOrder ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Processing...
                   </>
@@ -348,14 +301,10 @@ function Userpage() {
           </div>
         )}
       </Modal>
-  
       {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
-  
       {/* Branch Selector */}
       <div className="mb-6">
-        <label className="text-lg text-gray-300 mb-2 block">
-          Select Branch:
-        </label>
+        <label className="text-lg text-gray-300 mb-2 block">Select Branch:</label>
         <Select
           value={branchOptions.find((o) => o.value === selectedBranch) || null}
           onChange={(option) => setSelectedBranch(option?.value || "")}
@@ -380,14 +329,10 @@ function Userpage() {
           }}
         />
       </div>
-  
       {/* Product Grid */}
       {selectedBranch && (
         <div className="mt-8">
-          <h2 className="text-2xl font-bold text-white mb-6">
-            Available Products
-          </h2>
-  
+          <h2 className="text-2xl font-bold text-white mb-6">Available Products</h2>
           {products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {products.map((product) => (
@@ -417,31 +362,18 @@ function Userpage() {
                       </span>
                     )}
                   </div>
-  
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold text-white">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-2">
-                      {product.categoryName}
-                    </p>
-                    <p className="text-blue-400 font-bold">
-                      ${product.saleprice?.toFixed(2)}
-                    </p>
-  
+                    <h3 className="text-lg font-semibold text-white">{product.name}</h3>
+                    <p className="text-gray-400 text-sm mb-2">{product.categoryName}</p>
+                    <p className="text-blue-400 font-bold">${product.saleprice?.toFixed(2)}</p>
                     <div className="mt-4 flex justify-between items-center">
                       <input
                         type="number"
                         min="1"
                         max={product.quantity}
-                        value={
-                          selectedProduct === product._id ? quantity : 1
-                        }
+                        value={selectedProduct === product._id ? quantity : 1}
                         onChange={(e) => {
-                          const newQty = Math.min(
-                            parseInt(e.target.value, 10) || 1,
-                            product.quantity
-                          );
+                          const newQty = Math.min(parseInt(e.target.value, 10) || 1, product.quantity);
                           setQuantity(newQty);
                           setSelectedProduct(product._id);
                         }}
@@ -452,9 +384,7 @@ function Userpage() {
                           setSelectedProduct(product._id);
                           handlePlaceOrder();
                         }}
-                        disabled={
-                          isPlacingOrder && selectedProduct === product._id
-                        }
+                        disabled={isPlacingOrder && selectedProduct === product._id}
                         className={`px-4 py-2 rounded-md flex items-center ${
                           isPlacingOrder && selectedProduct === product._id
                             ? "bg-gray-600 cursor-not-allowed"
@@ -462,9 +392,7 @@ function Userpage() {
                         } text-white`}
                       >
                         <FaShoppingCart className="mr-2" />
-                        {isPlacingOrder && selectedProduct === product._id
-                          ? "Processing..."
-                          : "Order"}
+                        {isPlacingOrder && selectedProduct === product._id ? "Processing..." : "Order"}
                       </button>
                     </div>
                   </div>
@@ -472,13 +400,10 @@ function Userpage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-400 text-center py-8">
-              No products available in this branch.
-            </p>
+            <p className="text-gray-400 text-center py-8">No products available in this branch.</p>
           )}
         </div>
       )}
-  
       {/* Order History Link */}
       <div className="mt-8 text-center">
         <Link

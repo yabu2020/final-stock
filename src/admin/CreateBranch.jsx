@@ -1,295 +1,271 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Select from "react-select";
 
-function CreateUser() {
-  const [formData, setFormData] = useState({
-    customerName: "",
-    customerPhone: "",
-    customerAddress: "",
-    password: "",
-  });
-
-  const [touched, setTouched] = useState({
-    customerName: false,
-    customerPhone: false,
-    customerAddress: false,
-    password: false,
-  });
-
+function CreateBranch({ setBranches }) {
+  const [branchName, setBranchName] = useState("");
+  const [location, setLocation] = useState("");
+  const [managers, setManagers] = useState([]);
+  const [selectedManager, setSelectedManager] = useState(null);
   const [errors, setErrors] = useState({
-    customerName: "",
-    customerPhone: "",
-    customerAddress: "",
-    password: "",
+    branchName: "",
+    location: "",
+    manager: ""
+  });
+  const [touched, setTouched] = useState({
+    branchName: false,
+    location: false,
+    manager: false
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const validateBranchName = (name) => {
+    if (!name.trim()) return "Branch name is required";
+    if (/^\d+$/.test(name.trim())) return "Branch name cannot be only numbers";
+    if (!/^[a-zA-Z0-9\s]+$/.test(name.trim())) return "Only letters and numbers allowed";
+    return "";
+  };
 
-  // Field validation rules
-  const validateField = (name, value) => {
-    switch (name) {
-      case "customerName":
-        if (!value.trim()) return "Name is required";
-        if (value.length < 3) return "Name must be at least 3 characters";
-        if (/^\d+$/.test(value)) return "Name cannot be only numbers";
-        return "";
+  const validateLocation = (loc) => {
+    if (!loc.trim()) return "Location is required";
+    if (/^\d+$/.test(loc.trim())) return "Location cannot be only numbers";
+    if (!/[a-zA-Z]/.test(loc.trim())) return "Location must contain letters";
+    return "";
+  };
 
-      case "customerPhone":
-        if (!value.trim()) return "Phone number is required";
-        if (!/^(09|07)\d{8}$/.test(value)) 
-          return "Must start with 09 or 07 and be 10 digits";
-        return "";
+  const validateManager = (manager) => {
+    if (!manager) return "Please select a branch manager";
+    return "";
+  };
 
-      case "customerAddress":
-        if (!value.trim()) return "Address is required";
-        if (/^\d+$/.test(value)) return "Address must include letters";
-        if (value.length < 5) return "Address must be at least 5 characters";
-        return "";
+  useEffect(() => {
+    if (touched.branchName) {
+      setErrors(prev => ({
+        ...prev,
+        branchName: validateBranchName(branchName)
+      }));
+    }
+  }, [branchName, touched.branchName]);
 
-      case "password":
-        if (!value.trim()) return "Password is required";
-        if (value.length < 6) return "Must be at least 6 characters";
-        if (!/[a-zA-Z]/.test(value) || !/\d/.test(value)) 
-          return "Must include letters and numbers";
-        return "";
+  useEffect(() => {
+    if (touched.location) {
+      setErrors(prev => ({
+        ...prev,
+        location: validateLocation(location)
+      }));
+    }
+  }, [location, touched.location]);
 
-      default:
-        return "";
+  useEffect(() => {
+    if (touched.manager) {
+      setErrors(prev => ({
+        ...prev,
+        manager: validateManager(selectedManager)
+      }));
+    }
+  }, [selectedManager, touched.manager]);
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    if (field === 'manager') {
+      setErrors(prev => ({
+        ...prev,
+        manager: validateManager(selectedManager)
+      }));
     }
   };
 
-  // Handle field blur (mark as touched and validate)
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    setTouched(prev => ({ ...prev, [name]: true }));
-    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
-  };
+  useEffect(() => {
+    Promise.all([
+      axios.get("http://localhost:3001/users?role=manager"),
+      axios.get("http://localhost:3001/branches"),
+    ])
+      .then(([managersResponse, branchesResponse]) => {
+        const assignedManagerIds = branchesResponse.data
+          .map(branch => branch.manager?._id || branch.manager)
+          .filter(Boolean);
 
-  // Handle input changes with real-time validation for touched fields
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+        const availableManagers = managersResponse.data
+          .filter(manager => manager.role === "manager")
+          .filter(manager => !assignedManagerIds.includes(manager._id));
 
-    // Validate in real-time only after field is touched
-    if (touched[name]) {
-      setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
-    }
-  };
+        const options = availableManagers.map(manager => ({
+          value: manager._id,
+          label: manager.name,
+        }));
 
-  // Validate entire form before submission
-  const validateForm = () => {
-    const newErrors = {
-      customerName: validateField("customerName", formData.customerName),
-      customerPhone: validateField("customerPhone", formData.customerPhone),
-      customerAddress: validateField("customerAddress", formData.customerAddress),
-      password: validateField("password", formData.password),
-    };
+        setManagers(options);
+      })
+      .catch(err => console.error("Error fetching managers or branches", err));
+  }, []);
 
-    setErrors(newErrors);
-    return !Object.values(newErrors).some(error => error);
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
-    // Mark all fields as touched to show errors
     setTouched({
-      customerName: true,
-      customerPhone: true,
-      customerAddress: true,
-      password: true,
+      branchName: true,
+      location: true,
+      manager: true
     });
 
-    // Validate form before submission
-    if (!validateForm()) {
-      setIsSubmitting(false);
-      return;
-    }
+    const validationErrors = {
+      branchName: validateBranchName(branchName),
+      location: validateLocation(location),
+      manager: validateManager(selectedManager)
+    };
 
-    try {
-      const payload = {
-        type: "user",
-        name: formData.customerName,
-        phone: formData.customerPhone,
-        address: formData.customerAddress,
-        password: formData.password,
-      };
+    setErrors(validationErrors);
 
-      await axios.post("http://localhost:3001/adduser", payload);
+    const hasErrors = Object.values(validationErrors).some(error => error);
+    if (hasErrors) return;
 
-      // Show success toast
-      toast.success("Customer account created successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-
-      // Reset form
-      setFormData({ 
-        customerName: "", 
-        customerPhone: "", 
-        customerAddress: "", 
-        password: "" 
-      });
-      setTouched({ 
-        customerName: false, 
-        customerPhone: false, 
-        customerAddress: false, 
-        password: false 
-      });
-      setErrors({ 
-        customerName: "", 
-        customerPhone: "", 
-        customerAddress: "", 
-        password: "" 
-      });
-
-    } catch (err) {
-      const errorMsg = err.response?.data?.error || "Error creating user account";
-      toast.error(errorMsg, {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    axios.post("http://localhost:3001/addbranch", {
+      branchName,
+      location,
+      managerId: selectedManager.value,
+    })
+    .then(response => {
+      if (response.status === 201) {
+        if (typeof setBranches === "function") {
+          setBranches(prev => [...prev, response.data]);
+        }
+        alert("Branch created successfully!");
+        setBranchName("");
+        setLocation("");
+        setSelectedManager(null);
+        setTouched({
+          branchName: false,
+          location: false,
+          manager: false
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Error response:", err);
+      if (err.response) {
+        if (err.response.data.error === "This manager is already assigned to another branch") {
+          setErrors(prev => ({ ...prev, manager: "This manager is already assigned to another branch." }));
+        } else {
+          setErrors(prev => ({ ...prev, form: err.response.data?.error || "Error creating branch" }));
+        }
+      } else if (err.request) {
+        setErrors(prev => ({ ...prev, form: "No response from server. Please check your connection." }));
+      } else {
+        setErrors(prev => ({ ...prev, form: "An unexpected error occurred." }));
+      }
+    });
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="max-w-md mx-auto bg-gray-800 rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">
-          Create Customer Account
-        </h2>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4">
+      <div className="w-full max-w-md p-6 sm:p-8 rounded-lg shadow-lg bg-gray-800 text-white">
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-400">Create Branch</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Name Field */}
+        {errors.form && <p className="text-red-400 mb-4 text-center">{errors.form}</p>}
+
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-300">
-              Full Name
+            <label htmlFor="branchName" className="block mb-1 font-medium text-gray-300">
+              Branch Name:
             </label>
             <input
               type="text"
-              name="customerName"
-              value={formData.customerName}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
-                errors.customerName 
-                  ? "border-red-500 focus:ring-red-500" 
-                  : "border-gray-600 focus:ring-blue-500"
-              } border`}
-              placeholder="John Doe"
-              disabled={isSubmitting}
+              id="branchName"
+              value={branchName}
+              onChange={(e) => setBranchName(e.target.value)}
+              onBlur={() => handleBlur("branchName")}
+              className={`w-full px-3 py-2 rounded-md bg-gray-700 border ${
+                errors.branchName && touched.branchName ? "border-red-500" : "border-gray-600"
+              } focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
+              placeholder="Enter branch name"
             />
-            {errors.customerName && (
-              <p className="mt-1 text-sm text-red-400">{errors.customerName}</p>
+            {errors.branchName && touched.branchName && (
+              <p className="text-red-400 text-sm mt-1">{errors.branchName}</p>
             )}
           </div>
 
-          {/* Phone Field */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-300">
-              Phone Number
+            <label htmlFor="location" className="block mb-1 font-medium text-gray-300">
+              Location:
             </label>
             <input
               type="text"
-              name="customerPhone"
-              value={formData.customerPhone}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
-                errors.customerPhone 
-                  ? "border-red-500 focus:ring-red-500" 
-                  : "border-gray-600 focus:ring-blue-500"
-              } border`}
-              placeholder="0912345678"
-              disabled={isSubmitting}
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              onBlur={() => handleBlur("location")}
+              className={`w-full px-3 py-2 rounded-md bg-gray-700 border ${
+                errors.location && touched.location ? "border-red-500" : "border-gray-600"
+              } focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
+              placeholder="Enter location"
             />
-            {errors.customerPhone && (
-              <p className="mt-1 text-sm text-red-400">{errors.customerPhone}</p>
+            {errors.location && touched.location && (
+              <p className="text-red-400 text-sm mt-1">{errors.location}</p>
             )}
           </div>
 
-          {/* Address Field */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-300">
-              Address
+            <label className="block mb-1 font-medium text-gray-300">
+              Branch Manager:
             </label>
-            <input
-              type="text"
-              name="customerAddress"
-              value={formData.customerAddress}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
-                errors.customerAddress 
-                  ? "border-red-500 focus:ring-red-500" 
-                  : "border-gray-600 focus:ring-blue-500"
-              } border`}
-              placeholder="123 Main St, City"
-              disabled={isSubmitting}
+            <Select
+              options={managers}
+              value={selectedManager}
+              onChange={setSelectedManager}
+              onBlur={() => handleBlur("manager")}
+              placeholder="Select a manager..."
+              isClearable
+              styles={{
+                control: (provided, state) => ({
+                  ...provided,
+                  backgroundColor: "#374151",
+                  borderColor: errors.manager && touched.manager ? "#EF4444" : "#4B5563",
+                  color: "white",
+                  boxShadow: state.isFocused && !errors.manager ? "0 0 0 1px #3B82F6" : "none",
+                }),
+                input: (provided) => ({
+                  ...provided,
+                  color: "white",
+                  opacity: 1,
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  backgroundColor: "#374151",
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  color: "white",
+                }),
+                option: (provided, state) => ({
+                  ...provided,
+                  backgroundColor: state.isFocused ? "#2563EB" : "#374151",
+                  color: "white",
+                  cursor: "pointer",
+                }),
+              }}
             />
-            {errors.customerAddress && (
-              <p className="mt-1 text-sm text-red-400">{errors.customerAddress}</p>
+            {errors.manager && touched.manager && (
+              <p className="text-red-400 text-sm mt-1">{errors.manager}</p>
             )}
           </div>
 
-          {/* Password Field */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-300">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 ${
-                  errors.password 
-                    ? "border-red-500 focus:ring-red-500" 
-                    : "border-gray-600 focus:ring-blue-500"
-                } border`}
-                placeholder="At least 6 characters"
-                disabled={isSubmitting}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={isSubmitting}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-400">{errors.password}</p>
-            )}
-          </div>
-
-          {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting}
-            className={`w-full py-2 px-4 rounded font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition ${
-              isSubmitting
-                ? "bg-blue-700 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-500"
-            }`}
+            className="w-full py-2 mt-4 bg-blue-600 rounded-md text-white font-semibold hover:bg-blue-500 transition disabled:bg-blue-400 disabled:cursor-not-allowed"
+            disabled={
+              (touched.branchName && errors.branchName) ||
+              (touched.location && errors.location) ||
+              (touched.manager && errors.manager) ||
+              !branchName ||
+              !location ||
+              !selectedManager
+            }
           >
-            {isSubmitting ? "Creating Account..." : "Create Customer Account"}
+            Add Branch
           </button>
         </form>
       </div>
-      <ToastContainer />
     </div>
   );
 }
 
-export default CreateUser;
+export default CreateBranch;

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function CreateUser() {
   const [customerName, setCustomerName] = useState("");
@@ -10,7 +12,6 @@ function CreateUser() {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  // Validation helper functions (same as your original code)
   const validateName = (name) => {
     if (!name.trim()) return "Name is required";
     if (/^\d+$/.test(name.trim())) return "Name cannot be only numbers";
@@ -97,7 +98,7 @@ function CreateUser() {
       };
 
       await axios.post("http://localhost:3001/adduser", payload);
-      alert("Customer account created successfully!");
+      toast.success("Customer account created successfully!");
 
       setCustomerName("");
       setCustomerPhone("");
@@ -108,94 +109,110 @@ function CreateUser() {
       setTouched({});
     } catch (err) {
       const errorMessage = err.response?.data?.error || "Error creating user";
-      setFormError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen text-white">
-      <h2 className="text-2xl font-bold mb-6">Create Customer Account</h2>
+    <div className="p-4 sm:p-8 bg-gray-900 min-h-screen text-white">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6">Create Customer Account</h2>
 
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Customer Name */}
-          <div>
-            <label className="block mb-1">Customer Name</label>
-            <input
-              type="text"
-              placeholder="Enter customer name"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              onBlur={() => handleBlur("customerName")}
-              className="w-full px-3 py-2 rounded bg-gray-700 text-white"
-            />
-            {touched.customerName && errors.customerName && (
-              <p className="text-red-500 text-sm mt-1">{errors.customerName}</p>
-            )}
+        <form onSubmit={handleSubmit} className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1 text-sm sm:text-base">Customer Name</label>
+              <input
+                type="text"
+                placeholder="Enter customer name"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                onBlur={() => handleBlur("customerName")}
+                className={`w-full px-3 py-2 rounded bg-gray-700 text-white border ${
+                  errors.customerName && touched.customerName ? "border-red-500" : "border-gray-600"
+                }`}
+              />
+              {touched.customerName && errors.customerName && (
+                <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.customerName}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-1 text-sm sm:text-base">Customer Phone</label>
+              <input
+                type="text"
+                placeholder="Enter customer phone"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                onBlur={() => handleBlur("customerPhone")}
+                className={`w-full px-3 py-2 rounded bg-gray-700 text-white border ${
+                  errors.customerPhone && touched.customerPhone ? "border-red-500" : "border-gray-600"
+                }`}
+              />
+              {touched.customerPhone && errors.customerPhone && (
+                <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.customerPhone}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-1 text-sm sm:text-base">Customer Address</label>
+              <input
+                type="text"
+                placeholder="Enter customer address"
+                value={customerAddress}
+                onChange={(e) => setCustomerAddress(e.target.value)}
+                onBlur={() => handleBlur("customerAddress")}
+                className={`w-full px-3 py-2 rounded bg-gray-700 text-white border ${
+                  errors.customerAddress && touched.customerAddress ? "border-red-500" : "border-gray-600"
+                }`}
+              />
+              {touched.customerAddress && errors.customerAddress && (
+                <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.customerAddress}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-1 text-sm sm:text-base">Password</label>
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onBlur={() => handleBlur("password")}
+                className={`w-full px-3 py-2 rounded bg-gray-700 text-white border ${
+                  errors.password && touched.password ? "border-red-500" : "border-gray-600"
+                }`}
+              />
+              {touched.password && errors.password && (
+                <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.password}</p>
+              )}
+            </div>
           </div>
 
-          {/* Customer Phone */}
-          <div>
-            <label className="block mb-1">Customer Phone</label>
-            <input
-              type="text"
-              placeholder="Enter customer phone"
-              value={customerPhone}
-              onChange={(e) => setCustomerPhone(e.target.value)}
-              onBlur={() => handleBlur("customerPhone")}
-              className="w-full px-3 py-2 rounded bg-gray-700 text-white"
-            />
-            {touched.customerPhone && errors.customerPhone && (
-              <p className="text-red-500 text-sm mt-1">{errors.customerPhone}</p>
-            )}
-          </div>
+          <button
+            type="submit"
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition w-full sm:w-auto"
+          >
+            Create Customer Account
+          </button>
 
-          {/* Customer Address */}
-          <div>
-            <label className="block mb-1">Customer Address</label>
-            <input
-              type="text"
-              placeholder="Enter customer address"
-              value={customerAddress}
-              onChange={(e) => setCustomerAddress(e.target.value)}
-              onBlur={() => handleBlur("customerAddress")}
-              className="w-full px-3 py-2 rounded bg-gray-700 text-white"
-            />
-            {touched.customerAddress && errors.customerAddress && (
-              <p className="text-red-500 text-sm mt-1">{errors.customerAddress}</p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() => handleBlur("password")}
-              className="w-full px-3 py-2 rounded bg-gray-700 text-white"
-            />
-            {touched.password && errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-400"
-        >
-          Create Customer Account
-        </button>
-
-        {/* Error Message */}
-        {formError && (
-          <p className="text-red-500 mt-4">{formError}</p>
-        )}
-      </form>
+          {formError && (
+            <p className="text-red-500 mt-4 text-sm sm:text-base">{formError}</p>
+          )}
+        </form>
+      </div>
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }

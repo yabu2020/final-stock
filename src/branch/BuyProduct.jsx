@@ -22,12 +22,10 @@ function BuyProduct() {
   useEffect(() => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
     const branchManagerId = currentUser?._id;
-
     if (!branchManagerId) {
       setMessage("You must be logged in as a branch manager to register products.");
       return;
     }
-
     axios
       .get("http://localhost:3001/categories", {
         params: { branchManagerId },
@@ -55,7 +53,6 @@ function BuyProduct() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const newErrors = {
       name: validateName(name),
       purchaseprice: validatePrice(purchaseprice, "Purchase price"),
@@ -63,14 +60,11 @@ function BuyProduct() {
       category: !category ? "Category is required" : "",
       image: !image ? "Product image is required" : ""
     };
-
     setErrors(newErrors);
-
     if (Object.values(newErrors).some(error => error)) return;
 
     const purchasePrice = parseFloat(purchaseprice);
     const salePrice = parseFloat(saleprice);
-
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
@@ -80,7 +74,6 @@ function BuyProduct() {
     formData.append("image", image);
 
     const token = localStorage.getItem("token");
-
     if (!token) {
       setMessage("You must be logged in to add a product.");
       return;
@@ -116,31 +109,17 @@ function BuyProduct() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div
-        className="w-full max-w-lg p-8 rounded-lg shadow-lg"
-        style={{ maxWidth: "780px", backgroundColor: "#1f2937" }}
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">
-          Buy Product
-        </h1>
-
+      <div className="w-full max-w-lg p-8 rounded-lg shadow-lg" style={{ maxWidth: "780px", backgroundColor: "#1f2937" }}>
+        <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">Buy Product</h1>
         {message && (
-          <p
-            className={`text-sm mt-4 text-center ${
-              message.includes("successfully") ? "text-green-500" : "text-red-500"
-            }`}
-          >
+          <p className={`text-sm mt-4 text-center ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>
             {message}
           </p>
         )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Row 1: Product Name & Category */}
           <div className="flex flex-wrap -mx-3 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label htmlFor="name" className="block font-medium text-gray-300 mb-1">
-                Product Name:
-              </label>
+              <label htmlFor="name" className="block font-medium text-gray-300 mb-1">Product Name:</label>
               <input
                 type="text"
                 id="name"
@@ -149,17 +128,12 @@ function BuyProduct() {
                   setName(e.target.value);
                   setErrors(prev => ({ ...prev, name: validateName(e.target.value) }));
                 }}
-                className={`w-full px-3 py-2 bg-gray-800 border ${
-                  errors.name ? "border-red-500" : "border-gray-600"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
+                className={`w-full px-3 py-2 bg-gray-800 border ${errors.name ? "border-red-500" : "border-gray-600"} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
               />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
-
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="category" className="block font-medium text-gray-300 mb-1">
-                Category:
-              </label>
+              <label htmlFor="category" className="block font-medium text-gray-300 mb-1">Category:</label>
               <Select
                 id="category"
                 options={categories.map((cat) => ({
@@ -178,18 +152,9 @@ function BuyProduct() {
                     borderColor: errors.category ? "#ef4444" : "#4b5563",
                     color: "#fff",
                   }),
-                  input: (base) => ({
-                    ...base,
-                    color: "#fff",
-                  }),
-                  singleValue: (base) => ({
-                    ...base,
-                    color: "#fff",
-                  }),
-                  menu: (base) => ({
-                    ...base,
-                    backgroundColor: "#1f2937",
-                  }),
+                  input: (base) => ({ ...base, color: "#fff" }),
+                  singleValue: (base) => ({ ...base, color: "#fff" }),
+                  menu: (base) => ({ ...base, backgroundColor: "#1f2937" }),
                   option: (base, state) => ({
                     ...base,
                     backgroundColor: state.isFocused ? "#3b82f6" : "#1f2937",
@@ -200,13 +165,9 @@ function BuyProduct() {
               {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
             </div>
           </div>
-
-          {/* Row 2: Purchase Price & Sale Price */}
           <div className="flex flex-wrap -mx-3 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label htmlFor="purchaseprice" className="block font-medium text-gray-300 mb-1">
-                Purchase Price:
-              </label>
+              <label htmlFor="purchaseprice" className="block font-medium text-gray-300 mb-1">Purchase Price:</label>
               <input
                 type="number"
                 id="purchaseprice"
@@ -217,17 +178,12 @@ function BuyProduct() {
                 }}
                 step="0.01"
                 min="0"
-                className={`w-full px-3 py-2 bg-gray-800 border ${
-                  errors.purchaseprice ? "border-red-500" : "border-gray-600"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
+                className={`w-full px-3 py-2 bg-gray-800 border ${errors.purchaseprice ? "border-red-500" : "border-gray-600"} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
               />
               {errors.purchaseprice && <p className="text-red-500 text-xs mt-1">{errors.purchaseprice}</p>}
             </div>
-
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="saleprice" className="block font-medium text-gray-300 mb-1">
-                Sale Price:
-              </label>
+              <label htmlFor="saleprice" className="block font-medium text-gray-300 mb-1">Sale Price:</label>
               <input
                 type="number"
                 id="saleprice"
@@ -238,20 +194,14 @@ function BuyProduct() {
                 }}
                 step="0.01"
                 min="0"
-                className={`w-full px-3 py-2 bg-gray-800 border ${
-                  errors.saleprice ? "border-red-500" : "border-gray-600"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
+                className={`w-full px-3 py-2 bg-gray-800 border ${errors.saleprice ? "border-red-500" : "border-gray-600"} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
               />
               {errors.saleprice && <p className="text-red-500 text-xs mt-1">{errors.saleprice}</p>}
             </div>
           </div>
-
-          {/* Row 3: Description & Image */}
           <div className="flex flex-wrap -mx-3 mb-6">
             <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label htmlFor="description" className="block font-medium text-gray-300 mb-1">
-                Description:
-              </label>
+              <label htmlFor="description" className="block font-medium text-gray-300 mb-1">Description:</label>
               <textarea
                 id="description"
                 value={description}
@@ -260,9 +210,7 @@ function BuyProduct() {
               />
             </div>
             <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="image" className="block font-medium text-gray-300 mb-1">
-                Product Image:
-              </label>
+              <label htmlFor="image" className="block font-medium text-gray-300 mb-1">Product Image:</label>
               <input
                 type="file"
                 id="image"
@@ -271,15 +219,11 @@ function BuyProduct() {
                   setImage(e.target.files[0]);
                   setErrors(prev => ({ ...prev, image: !e.target.files[0] ? "Product image is required" : "" }));
                 }}
-                className={`w-full px-3 py-2 bg-gray-800 border ${
-                  errors.image ? "border-red-500" : "border-gray-600"
-                } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
+                className={`w-full px-3 py-2 bg-gray-800 border ${errors.image ? "border-red-500" : "border-gray-600"} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white`}
               />
               {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
             </div>
           </div>
-
-          {/* Submit Button */}
           <div className="flex justify-center">
             <button
               type="submit"

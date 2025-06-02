@@ -28,81 +28,47 @@ function Signup() {
 
   const navigate = useNavigate();
 
-  // Validation functions
   const validateField = (name, value) => {
     let error = "";
-    
     switch (name) {
       case "name":
-        if (!value.trim()) {
-          error = "Name is required";
-        } else if (!/^[A-Za-z\s]+$/.test(value)) {
-          error = "Name must contain letters only";
-        } else if (value.length < 2) {
-          error = "Name must be at least 2 characters";
-        }
+        if (!value.trim()) error = "Name is required";
+        else if (!/^[A-Za-z\s]+$/.test(value)) error = "Name must contain letters only";
+        else if (value.length < 2) error = "Name must be at least 2 characters";
         break;
       case "phone":
-        if (!value.trim()) {
-          error = "Phone number is required";
-        } else if (!/^(09|07)\d{8}$/.test(value)) {
-          error = "Must start with 09 or 07 and be 10 digits";
-        }
+        if (!value.trim()) error = "Phone number is required";
+        else if (!/^(09|07)\d{8}$/.test(value)) error = "Must start with 09 or 07 and be 10 digits";
         break;
       case "address":
-        if (!value.trim()) {
-          error = "Address is required";
-        } else if (!/[A-Za-z]/.test(value)) {
-          error = "Must contain letters (not numbers only)";
-        } else if (value.length < 5) {
-          error = "Address must be at least 5 characters";
-        }
+        if (!value.trim()) error = "Address is required";
+        else if (!/[A-Za-z]/.test(value)) error = "Must contain letters (not numbers only)";
+        else if (value.length < 5) error = "Address must be at least 5 characters";
         break;
       case "password":
-        if (!value.trim()) {
-          error = "Password is required";
-        } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(value)) {
-          error = "Must be 6+ chars with letters and numbers";
-        }
+        if (!value.trim()) error = "Password is required";
+        else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(value)) error = "Must be 6+ chars with letters and numbers";
         break;
       default:
         break;
     }
-    
     return error;
   };
 
-  // Handle input changes with validation
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Validate only if the field has been touched
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (touched[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: validateField(name, value)
-      }));
+      setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
     }
   };
 
-  // Handle blur events (mark field as touched)
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    setTouched(prev => ({
-      ...prev,
-      [name]: true
-    }));
-    setErrors(prev => ({
-      ...prev,
-      [name]: validateField(name, value)
-    }));
+    setTouched(prev => ({ ...prev, [name]: true }));
+    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
   };
 
-  // Validate entire form
   const validateForm = () => {
     const newErrors = {
       name: validateField("name", formData.name),
@@ -111,57 +77,38 @@ function Signup() {
       password: validateField("password", formData.password),
       form: ""
     };
-
     setErrors(newErrors);
-    return !newErrors.name && !newErrors.phone && 
-           !newErrors.address && !newErrors.password;
+    return !newErrors.name && !newErrors.phone && !newErrors.address && !newErrors.password;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Mark all fields as touched
-    setTouched({
-      name: true,
-      phone: true,
-      address: true,
-      password: true
-    });
-
+    setTouched({ name: true, phone: true, address: true, password: true });
     if (!validateForm()) {
       setIsSubmitting(false);
       return;
     }
 
-    axios.post("http://localhost:3001/signup", {
-      ...formData,
-      type: "user"
-    })
-    .then(() => {
-      setErrors(prev => ({
-        ...prev,
-        form: "Registration successful! Redirecting to login..."
-      }));
-      setTimeout(() => navigate("/login"), 2000);
-    })
-    .catch((err) => {
-      const errorMsg = err.response?.data?.error || "Registration failed. Please try again.";
-      setErrors(prev => ({
-        ...prev,
-        form: errorMsg
-      }));
-    })
-    .finally(() => setIsSubmitting(false));
+    axios.post("http://localhost:3001/signup", { ...formData, type: "user" })
+      .then(() => {
+        setErrors(prev => ({ ...prev, form: "Registration successful! Redirecting to login..." }));
+        setTimeout(() => navigate("/login"), 2000);
+      })
+      .catch((err) => {
+        const errorMsg = err.response?.data?.error || "Registration failed. Please try again.";
+        setErrors(prev => ({ ...prev, form: errorMsg }));
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-gray-800 text-white">
-        <h2 className="text-2xl font-bold text-center mb-6 text-blue-400">
+      <div className="w-full max-w-md p-6 sm:p-8 rounded-lg shadow-lg bg-gray-800 text-white">
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-6 text-blue-400">
           Sign Up
         </h2>
-        
+
         {errors.form && (
           <div className={`mb-4 p-3 rounded text-center ${
             errors.form.includes("success") 

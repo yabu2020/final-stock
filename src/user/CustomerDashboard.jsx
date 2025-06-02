@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PackageCheck, PackageSearch, Edit, ShoppingCart } from "lucide-react";
+import { PackageCheck, PackageSearch, ShoppingCart } from "lucide-react";
 import axios from "axios";
 import UserContext from '../admin/UserContext';
 import { useNavigate } from "react-router-dom";
@@ -27,28 +27,22 @@ function CustomerDashboard() {
 
   const fetchUserData = async () => {
     const userResponse = await axios.get(`http://localhost:3001/users/${cUSer._id}`);
-const updatedUser = userResponse.data;
+    const updatedUser = userResponse.data;
     try {
       setLoading(true);
-      
-      // Fetch orders with product details
       const ordersResponse = await axios.get(`http://localhost:3001/orders?userId=${cUSer._id}&sort=-createdAt&populate=product`);
       const orders = ordersResponse.data;
-      
-      // Calculate stats
       const totalOrders = orders.length;
       const pendingOrders = orders.filter(order => order.status === 'Pending').length;
       const totalSpent = orders
         .filter(order => order.status === "Confirmed")
         .reduce((sum, order) => sum + (order.totalPrice || 0), 0);
-          
       setOrderHistory(orders);
       setStats({
         totalOrders,
         pendingOrders,
         totalSpent: parseFloat(totalSpent.toFixed(2))
       });
-      
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -57,7 +51,6 @@ const updatedUser = userResponse.data;
   };
 
   const handleEditProfile = () => {
-    // Navigate to profile edit page
     navigate('/profile/edit');
   };
 
@@ -81,14 +74,12 @@ const updatedUser = userResponse.data;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 md:p-8 space-y-8">
-      {/* Header with greeting and quick actions */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Welcome back, {cUSer.firstName || cUSer.name?.split(' ')[0] || 'User'}!</h1>
           <p className="text-gray-400">Here's what's happening with your account</p>
         </div>
         <div className="flex items-center gap-4">
-  
           <Avatar className="h-10 w-10 border-2 border-primary hover:border-primary/80 transition-colors">
             <AvatarImage src={cUSer.avatar} />
             <AvatarFallback>{fullName[0]}</AvatarFallback>
@@ -96,7 +87,6 @@ const updatedUser = userResponse.data;
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gray-800/50 border-gray-700 hover:border-gray-600 transition-colors">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -130,9 +120,7 @@ const updatedUser = userResponse.data;
         </Card>
       </div>
 
-      {/* Profile and Order History Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Profile Card */}
         <Card className="bg-gray-800/50 border-gray-700 hover:border-gray-600 transition-colors">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -171,7 +159,6 @@ const updatedUser = userResponse.data;
           </CardContent>
         </Card>
 
-        {/* Order History */}
         <Card className="bg-gray-800/50 border-gray-700 hover:border-gray-600 transition-colors">
           <CardHeader>
             <CardTitle>Recent Orders</CardTitle>
@@ -207,7 +194,6 @@ const updatedUser = userResponse.data;
               {orderHistory.length === 0 && (
                 <p className="text-gray-400 text-center py-4">No orders found</p>
               )}
-            
             </div>
           </CardContent>
         </Card>

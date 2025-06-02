@@ -19,7 +19,7 @@ function ResetPassword() {
     securityQuestion: "",
     securityAnswer: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const navigate = useNavigate();
 
@@ -36,7 +36,6 @@ function ResetPassword() {
     const errors = {};
     let isValid = true;
 
-    // Name validation (only letters, no numbers)
     if (!name.trim()) {
       errors.name = "Name is required";
       isValid = false;
@@ -45,19 +44,16 @@ function ResetPassword() {
       isValid = false;
     }
 
-    // Security question validation
     if (!securityQuestion) {
       errors.securityQuestion = "Security question is required";
       isValid = false;
     }
 
-    // Security answer validation
     if (!securityAnswer.trim()) {
       errors.securityAnswer = "Security answer is required";
       isValid = false;
     }
 
-    // Password validation (at least 6 characters, both letters and numbers)
     if (!newPassword) {
       errors.newPassword = "Password is required";
       isValid = false;
@@ -69,7 +65,6 @@ function ResetPassword() {
       isValid = false;
     }
 
-    // Confirm password validation
     if (!confirmPassword) {
       errors.confirmPassword = "Please confirm your password";
       isValid = false;
@@ -86,40 +81,41 @@ function ResetPassword() {
     e.preventDefault();
     setMessage("");
     setError("");
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     axios
-      .post("http://localhost:3001/reset-password", { 
-        name, 
-        securityQuestion, 
-        securityAnswer, 
-        newPassword 
+      .post("http://localhost:3001/reset-password", {
+        name,
+        securityQuestion,
+        securityAnswer,
+        newPassword,
       })
       .then((response) => {
         if (response.data.success) {
-          setMessage("Password has been reset successfully. You will be redirected to the login page.");
+          setMessage(
+            "Password has been reset successfully. You will be redirected to the login page."
+          );
           setTimeout(() => navigate("/login"), 3000);
         } else {
-          setError(response.data.message || "Error resetting password. Please try again.");
+          setError(
+            response.data.message ||
+              "Error resetting password. Please try again."
+          );
         }
       })
       .catch((error) => {
-        const errorMessage = error.response?.data?.message || "An error occurred. Please try again.";
+        const errorMessage =
+          error.response?.data?.message ||
+          "An error occurred. Please try again.";
         setError(errorMessage);
       });
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Clear error when user starts typing
-    setFormErrors(prev => ({ ...prev, [name]: "" }));
-    
-    // Update the corresponding state
-    switch(name) {
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
+
+    switch (name) {
       case "name":
         setName(value);
         break;
@@ -143,11 +139,15 @@ function ResetPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="max-w-md w-full p-6 bg-gray-800 shadow-lg rounded-lg border border-gray-700">
-        <h1 className="text-2xl font-bold text-blue-400 mb-6 text-center">Reset Password</h1>
+        <h1 className="text-2xl font-bold text-blue-400 mb-6 text-center">
+          Reset Password
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name Input */}
           <div>
-            <label htmlFor="name" className="block text-md font-semibold text-gray-300">
+            <label
+              htmlFor="name"
+              className="block text-md font-semibold text-gray-300"
+            >
               Name
             </label>
             <input
@@ -165,12 +165,13 @@ function ResetPassword() {
               <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
             )}
           </div>
-
           {name && (
             <>
-              {/* Security Question Dropdown */}
               <div>
-                <label htmlFor="securityQuestion" className="block text-md font-semibold text-gray-300">
+                <label
+                  htmlFor="securityQuestion"
+                  className="block text-md font-semibold text-gray-300"
+                >
                   Security Question
                 </label>
                 <select
@@ -179,22 +180,31 @@ function ResetPassword() {
                   value={securityQuestion}
                   onChange={handleInputChange}
                   className={`mt-1 block w-full px-3 py-2 bg-gray-700 border ${
-                    formErrors.securityQuestion ? "border-red-500" : "border-gray-600"
+                    formErrors.securityQuestion
+                      ? "border-red-500"
+                      : "border-gray-600"
                   } rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm text-white`}
                 >
-                  <option value="" disabled>Select a security question</option>
+                  <option value="" disabled>
+                    Select a security question
+                  </option>
                   {predefinedQuestions.map((question, index) => (
-                    <option key={index} value={question}>{question}</option>
+                    <option key={index} value={question}>
+                      {question}
+                    </option>
                   ))}
                 </select>
                 {formErrors.securityQuestion && (
-                  <p className="mt-1 text-sm text-red-500">{formErrors.securityQuestion}</p>
+                  <p className="mt-1 text-sm text-red-500">
+                    {formErrors.securityQuestion}
+                  </p>
                 )}
               </div>
-
-              {/* Security Answer Input */}
               <div>
-                <label htmlFor="securityAnswer" className="block text-md font-semibold text-gray-300">
+                <label
+                  htmlFor="securityAnswer"
+                  className="block text-md font-semibold text-gray-300"
+                >
                   Answer Security Question
                 </label>
                 <input
@@ -205,17 +215,22 @@ function ResetPassword() {
                   value={securityAnswer}
                   onChange={handleInputChange}
                   className={`mt-1 block w-full px-3 py-2 bg-gray-700 border ${
-                    formErrors.securityAnswer ? "border-red-500" : "border-gray-600"
+                    formErrors.securityAnswer
+                      ? "border-red-500"
+                      : "border-gray-600"
                   } rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm text-white`}
                 />
                 {formErrors.securityAnswer && (
-                  <p className="mt-1 text-sm text-red-500">{formErrors.securityAnswer}</p>
+                  <p className="mt-1 text-sm text-red-500">
+                    {formErrors.securityAnswer}
+                  </p>
                 )}
               </div>
-
-              {/* New Password Input */}
               <div>
-                <label htmlFor="newPassword" className="block text-md font-semibold text-gray-300">
+                <label
+                  htmlFor="newPassword"
+                  className="block text-md font-semibold text-gray-300"
+                >
                   New Password
                 </label>
                 <div className="relative">
@@ -227,7 +242,9 @@ function ResetPassword() {
                     value={newPassword}
                     onChange={handleInputChange}
                     className={`mt-1 block w-full px-3 py-2 bg-gray-700 border ${
-                      formErrors.newPassword ? "border-red-500" : "border-gray-600"
+                      formErrors.newPassword
+                        ? "border-red-500"
+                        : "border-gray-600"
                     } rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm text-white`}
                   />
                   <div
@@ -235,22 +252,39 @@ function ResetPassword() {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     title={showNewPassword ? "Hide Password" : "Show Password"}
                   >
-                    {showNewPassword ? <FaEyeSlash className="text-gray-400" /> : <FaEye className="text-gray-400" />}
+                    {showNewPassword ? (
+                      <FaEyeSlash className="text-gray-400" />
+                    ) : (
+                      <FaEye className="text-gray-400" />
+                    )}
                   </div>
                 </div>
                 {formErrors.newPassword && (
-                  <p className="mt-1 text-sm text-red-500">{formErrors.newPassword}</p>
+                  <p className="mt-1 text-sm text-red-500">
+                    {formErrors.newPassword}
+                  </p>
                 )}
-                {!formErrors.newPassword && newPassword && (
-                  <p className="mt-1 text-xs text-gray-400">
-                    Password must be at least 6 characters and contain both letters and numbers
+                {newPassword && (
+                  <p
+                    className={`mt-1 text-xs ${
+                      newPassword.length < 6 ||
+                      !/(?=.*[a-zA-Z])(?=.*\d)/.test(newPassword)
+                        ? "text-red-500"
+                        : "text-green-500"
+                    }`}
+                  >
+                    {newPassword.length < 6 ||
+                    !/(?=.*[a-zA-Z])(?=.*\d)/.test(newPassword)
+                      ? "Password must be at least 6 characters and contain both letters and numbers"
+                      : " "}
                   </p>
                 )}
               </div>
-
-              {/* Confirm Password Input */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-md font-semibold text-gray-300">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-md font-semibold text-gray-300"
+                >
                   Confirm New Password
                 </label>
                 <div className="relative">
@@ -262,35 +296,47 @@ function ResetPassword() {
                     value={confirmPassword}
                     onChange={handleInputChange}
                     className={`mt-1 block w-full px-3 py-2 bg-gray-700 border ${
-                      formErrors.confirmPassword ? "border-red-500" : "border-gray-600"
+                      formErrors.confirmPassword
+                        ? "border-red-500"
+                        : "border-gray-600"
                     } rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm text-white`}
                   />
                   <div
                     className="absolute inset-y-0 right-0 flex items-center px-2 cursor-pointer"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    title={showConfirmPassword ? "Hide Password" : "Show Password"}
+                    title={
+                      showConfirmPassword ? "Hide Password" : "Show Password"
+                    }
                   >
-                    {showConfirmPassword ? <FaEyeSlash className="text-gray-400" /> : <FaEye className="text-gray-400" />}
+                    {showConfirmPassword ? (
+                      <FaEyeSlash className="text-gray-400" />
+                    ) : (
+                      <FaEye className="text-gray-400" />
+                    )}
                   </div>
                 </div>
                 {formErrors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-500">{formErrors.confirmPassword}</p>
+                  <p className="mt-1 text-sm text-red-500">
+                    {formErrors.confirmPassword}
+                  </p>
                 )}
               </div>
             </>
           )}
-
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-md mt-4 shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
           >
             Reset Password
           </button>
-
-          {/* Success/Error Messages */}
-          {message && <p className="text-green-500 font-semibold text-center">{message}</p>}
-          {error && <p className="text-red-500 font-semibold text-center">{error}</p>}
+          {message && (
+            <p className="text-green-500 font-semibold text-center">
+              {message}
+            </p>
+          )}
+          {error && (
+            <p className="text-red-500 font-semibold text-center">{error}</p>
+          )}
         </form>
       </div>
     </div>

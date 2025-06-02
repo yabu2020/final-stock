@@ -67,28 +67,22 @@ function AddProduct() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="w-full max-w-lg p-8 rounded-lg shadow-lg" style={{ backgroundColor: "#1f2937" }}>
+    <div className="flex items-center justify-center min-h-screen bg-gray-900 p-4">
+      <div className="w-full max-w-lg p-6 rounded-lg shadow-lg bg-gray-800">
         <h1 className="text-2xl font-bold mb-6 text-center text-blue-400">
           Add Product
         </h1>
 
         {message && (
-          <p
-            className={`text-sm mt-4 text-center ${
-              message.includes("successfully") ? "text-green-500" : "text-red-500"
-            }`}
-          >
+          <p className={`text-sm mt-4 text-center ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>
             {message}
           </p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Row: Product Select & Quantity */}
-          <div className="flex flex-wrap -mx-3 mb-6">
-            {/* Product Selection */}
-            <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-              <label htmlFor="product" className="block font-medium text-gray-300 mb-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-medium text-gray-300 mb-1">
                 Select Product:
               </label>
               <Select
@@ -100,38 +94,36 @@ function AddProduct() {
                   selectedProduct
                     ? {
                         value: selectedProduct,
-                        label:
-                          products.find((p) => p._id === selectedProduct)?.name || "Select",
+                        label: products.find((p) => p._id === selectedProduct)?.name || "Select",
                       }
                     : null
                 }
                 onChange={(option) => setSelectedProduct(option?.value || "")}
                 placeholder="Select product"
                 styles={selectStyles}
+                className="react-select-container"
+                classNamePrefix="react-select"
               />
             </div>
 
-            {/* Quantity */}
-            <div className="w-full md:w-1/2 px-3">
-              <label htmlFor="quantity" className="block font-medium text-gray-300 mb-1">
+            <div>
+              <label className="block font-medium text-gray-300 mb-1">
                 Quantity:
               </label>
               <input
                 type="number"
-                id="quantity"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 required
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               />
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-center">
+          <div className="pt-2">
             <button
               type="submit"
-              className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
+              className="w-full px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-500 transition duration-300"
             >
               Record Purchase
             </button>
@@ -148,6 +140,7 @@ const selectStyles = {
     backgroundColor: "#1f2937",
     borderColor: "#4b5563",
     color: "white",
+    minHeight: "42px",
   }),
   singleValue: (base) => ({
     ...base,
@@ -161,6 +154,7 @@ const selectStyles = {
     ...base,
     backgroundColor: "#1f2937",
     color: "white",
+    zIndex: 9999,
   }),
   option: (base, state) => ({
     ...base,

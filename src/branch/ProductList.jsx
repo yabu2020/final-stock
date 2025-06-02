@@ -13,7 +13,6 @@ const ProductList = () => {
   const [editData, setEditData] = useState({});
   const [message, setMessage] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [alert, setAlert] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [editErrors, setEditErrors] = useState({
@@ -29,21 +28,14 @@ const ProductList = () => {
       try {
         const currentUser = JSON.parse(localStorage.getItem("currentUser"));
         const branchManagerId = currentUser?._id;
-
         if (!branchManagerId) {
           setMessage("You must be logged in as a branch manager to view products.");
           return;
         }
-
         const [productsResponse, categoriesResponse] = await Promise.all([
-          axios.get("http://localhost:3001/productlist", {
-            params: { branchManagerId },
-          }),
-          axios.get("http://localhost:3001/categories", {
-            params: { branchManagerId },
-          }),
+          axios.get("http://localhost:3001/productlist", { params: { branchManagerId } }),
+          axios.get("http://localhost:3001/categories", { params: { branchManagerId } }),
         ]);
-
         setProducts(productsResponse.data.products);
         setCategories(categoriesResponse.data);
         checkStockLevels(productsResponse.data.products);
@@ -59,20 +51,15 @@ const ProductList = () => {
       .filter(product => product.status === 'Low Stock');
     const outOfStockProducts = products.flatMap(categoryGroup => categoryGroup.products)
       .filter(product => product.status === 'Out Of Stock');
-
     const lowStockNames = lowStockProducts.map(product => product.name).join(', ');
     const outOfStockNames = outOfStockProducts.map(product => product.name).join(', ');
-
     let alertMessage = '';
-
     if (lowStockProducts.length > 0) {
       alertMessage += `Alert: The following products are low on stock: ${lowStockNames}. `;
     }
-
     if (outOfStockProducts.length > 0) {
       alertMessage += `Alert: The following products are out of stock: ${outOfStockNames}.`;
     }
-
     setAlert(alertMessage || "");
   };
 
@@ -105,7 +92,6 @@ const ProductList = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditData((prevData) => ({ ...prevData, [name]: value }));
-    
     if (name === "name") {
       setEditErrors(prev => ({ ...prev, name: validateName(value) }));
     } else if (name === "quantity") {
@@ -131,8 +117,6 @@ const ProductList = () => {
 
   const saveChanges = (productId) => {
     if (!validateEditForm()) return;
-  
-    // Determine the new status based on the editData quantity
     let newStatus;
     if (editData.quantity === 0) {
       newStatus = 'Out Of Stock';
@@ -141,12 +125,8 @@ const ProductList = () => {
     } else {
       newStatus = 'Available';
     }
-  
     axios
-      .put(`http://localhost:3001/updateproduct/${productId}`, {
-        ...editData,
-        status: newStatus,
-      })
+      .put(`http://localhost:3001/updateproduct/${productId}`, { ...editData, status: newStatus })
       .then((response) => {
         setProducts((prevProducts) =>
           prevProducts.map((categoryGroup) => ({
@@ -156,17 +136,7 @@ const ProductList = () => {
             ),
           }))
         );
-        // Recheck stock levels with the updated products
-        setProducts(prevProducts => {
-          const updatedProducts = prevProducts.map((categoryGroup) => ({
-            ...categoryGroup,
-            products: categoryGroup.products.map((product) =>
-              product._id === productId ? { ...response.data, status: newStatus } : product
-            ),
-          }));
-          checkStockLevels(updatedProducts);
-          return updatedProducts;
-        });
+        checkStockLevels(products);
         setEditingProduct(null);
         setEditData({});
         toast.success("Product updated successfully");
@@ -218,11 +188,10 @@ const ProductList = () => {
 
   return (
     <div className="mt-10 ml-80 lg:ml-20">
-      {/* Header Section */}
       <div className="bg-gray-900 p-4 rounded-lg shadow-md mb-6">
         <div className="flex justify-between items-center">
           <h1 className="font-semibold text-2xl text-blue-400">List of Products</h1>
-          <Link to="/manager/addproduct">
+          <Link to="/manager/buyproduct">
             <button className="bg-blue-600 w-28 h-11 justify-around text-white hover:bg-blue-500 transition duration-300 rounded-md">
               New Products
             </button>
@@ -232,11 +201,7 @@ const ProductList = () => {
           <p className="text-green-500 text-md font-medium mt-2">{message}</p>
         )}
       </div>
-
-      {/* Alert Section */}
       {alert && <p className="text-red-500 font-bold mb-6">{alert}</p>}
-
-      {/* Search Bar */}
       <div className="bg-gray-900 p-4 rounded-lg shadow-md mb-6">
         <input
           type="text"
@@ -246,8 +211,6 @@ const ProductList = () => {
           className="w-full px-4 py-2 border border-gray-600 bg-gray-700 text-white focus:outline-none focus:border-blue-500"
         />
       </div>
-
-      {/* Product List */}
       <div className="bg-gray-900 p-6 rounded-lg shadow-md overflow-x-auto">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((categoryGroup, index) => (
@@ -284,11 +247,7 @@ const ProductList = () => {
                   </thead>
                   <tbody>
                     {categoryGroup.products.map((product) => (
-                      <tr
-                        key={product._id}
-                        className="hover:bg-gray-600 transition duration-300"
-                      >
-                        {/* Product Name */}
+                      <tr key={product._id} className="hover:bg-gray-600 transition duration-300">
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <div>
@@ -307,8 +266,6 @@ const ProductList = () => {
                             product.name
                           )}
                         </td>
-
-                        {/* Quantity */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <div>
@@ -327,8 +284,6 @@ const ProductList = () => {
                             product.quantity
                           )}
                         </td>
-
-                        {/* Purchase Price */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <div>
@@ -348,8 +303,6 @@ const ProductList = () => {
                             product.purchaseprice
                           )}
                         </td>
-
-                        {/* Sale Price */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <div>
@@ -369,8 +322,6 @@ const ProductList = () => {
                             product.saleprice
                           )}
                         </td>
-
-                        {/* Description */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <input
@@ -384,8 +335,6 @@ const ProductList = () => {
                             product.description
                           )}
                         </td>
-
-                        {/* Status (Non-editable) */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {product.status === 'Available' ? (
                             <span className="text-green-400">{product.status}</span>
@@ -395,8 +344,6 @@ const ProductList = () => {
                             <span className="text-red-400">{product.status}</span>
                           )}
                         </td>
-
-                        {/* Actions */}
                         <td className="py-2 px-4 border-b border-gray-600 text-gray-300">
                           {editingProduct === product._id ? (
                             <>
@@ -444,8 +391,6 @@ const ProductList = () => {
           <p className="text-center text-gray-400">No products found.</p>
         )}
       </div>
-
-      {/* Confirmation Modal */}
       {confirmDeleteId && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-6 rounded-lg max-w-md w-full">
@@ -468,8 +413,6 @@ const ProductList = () => {
           </div>
         </div>
       )}
-
-      {/* Toast Container */}
       <ToastContainer 
         position="top-right"
         autoClose={3000}

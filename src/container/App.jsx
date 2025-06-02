@@ -39,12 +39,22 @@ Modal.setAppElement('#root');
 function InnerApp() {
   const { cUSer, setCUSer } = useContext(UserContext);
 
+  // useEffect(() => {
+  //   const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+  //   if (storedUser) {
+  //     setCUSer(storedUser);
+  //   }
+  // }, []);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+    const storedUser = JSON.parse(localStorage.getItem("currentUser"));
     if (storedUser) {
       setCUSer(storedUser);
     }
+    setLoading(false);
   }, []);
+  if (loading) return <div>Loading...</div>;
 
   return (
     <BrowserRouter>

@@ -41,13 +41,11 @@ function EditProfilePage() {
       phone: "",
     };
 
-    // Name validation (no numbers)
     if (!/^[a-zA-Z\s]+$/.test(user.name)) {
       newErrors.name = "Name should contain only letters";
       valid = false;
     }
 
-    // Phone validation (09 or 07 followed by 8 digits)
     if (!/^(09|07)\d{8}$/.test(user.phone)) {
       newErrors.phone = "Phone must start with 09 or 07 and be 10 digits";
       valid = false;
@@ -63,8 +61,7 @@ function EditProfilePage() {
       ...prev,
       [name]: value
     }));
-    
-    // Clear error when user types
+
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
@@ -74,19 +71,16 @@ function EditProfilePage() {
   };
 
   const handleSubmit = (e) => {
-    console.log("Submitting:", user); // Log what's being sent
     e.preventDefault();
     setMessage("");
     setError("");
-  
+
     if (!validateForm()) {
       return;
     }
-  
+
     axios.put(`http://localhost:3001/users/${userId}`, user)
       .then(response => {
-        console.log("Update response:", response.data); // Log the response
-        // Check for success flag or just response data
         if (response.data) {
           setMessage(response.data.message || "Profile updated successfully!");
           setTimeout(() => navigate(-1), 2000);
@@ -102,8 +96,9 @@ function EditProfilePage() {
         setError(errorMsg);
       });
   };
+
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-gray-900 rounded-lg shadow-lg">
+    <div className="max-w-2xl mx-auto p-6 bg-gray-900 rounded-lg shadow-lg">
       <h2 className="text-3xl font-semibold text-blue-400 mb-6">Edit Profile</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -155,25 +150,25 @@ function EditProfilePage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="py-3 px-6 bg-gray-600 text-white font-semibold rounded-md hover:bg-gray-500"
+            className="py-3 px-6 bg-gray-600 text-white font-semibold rounded-md hover:bg-gray-500 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="py-3 px-6 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500"
+            className="py-3 px-6 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500 transition-colors"
           >
             Update Profile
           </button>
         </div>
         
         {message && (
-          <div className="p-3 bg-green-100 text-green-800 rounded-md">
+          <div className="p-3 bg-green-100 text-green-800 rounded-md mt-4">
             {message}
           </div>
         )}
         {error && (
-          <div className="p-3 bg-red-100 text-red-800 rounded-md">
+          <div className="p-3 bg-red-100 text-red-800 rounded-md mt-4">
             {error}
           </div>
         )}
