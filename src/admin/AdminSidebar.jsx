@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { FaBars, FaUserPlus, FaUsers, FaBuilding, FaProjectDiagram, FaChartBar, FaSignOutAlt, FaLock, FaShoppingBasket, FaUsersCog, FaTag, FaShoppingCart, FaHome, FaPlusSquare, FaBox, FaClipboardList, FaCog, FaQuestionCircle, FaUserEdit } from "react-icons/fa";
 
-const getAdminMenu = () => [
+const getAdminMenu = (cUSer) => [
   { path: "/admin/admin-dashboard", name: "Dashboard", icon: <FaHome /> },
   { path: "/admin/employees", name: "Employee", icon: <FaUsersCog /> },
   { path: "/admin/adduser", name: "Create User", icon: <FaUserPlus /> },
@@ -11,6 +11,15 @@ const getAdminMenu = () => [
   { path: "/admin/branches", name: "Branch List", icon: <FaBuilding /> },
   { path: "/admin/reports", name: "Report", icon: <FaChartBar /> },
   { path: "/admin/resetpassword", name: "Reset Password", icon: <FaLock /> },
+  { 
+    name: "Settings", 
+    icon: <FaCog />,
+    submenu: [
+      { path: `/admin/security-question/${cUSer?._id}`, name: "Security Question", icon: <FaLock /> },
+      { path: `/admin/edit-profile/${cUSer?._id}`, name: "Edit Profile", icon: <FaUserEdit /> },
+      { path: `/admin/help/${cUSer?._id}`, name: "Help", icon: <FaQuestionCircle /> }
+    ]
+  }
 ];
 
 const getManagerMenu = (cUSer) => [  
@@ -119,7 +128,7 @@ function AdminSidebar({ children, cUSer }) {
 
   const getMenuItems = () => {
     switch (cUSer?.role) {
-      case "Admin": return getAdminMenu();
+      case "Admin": return getAdminMenu(cUSer);
       case "manager": return getManagerMenu(cUSer);
       case "user": return getUserMenu(cUSer);
       default: return [];

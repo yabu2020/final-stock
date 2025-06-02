@@ -90,6 +90,9 @@ function InnerApp() {
           <Route path="addbranch" element={<CreateBranch />} />
           <Route path="resetpassword" element={<Resetpassword />} />
           <Route path="reports" element={<AdminReports />} />
+          <Route path="security-question/:userId" element={<Security />} />
+          <Route path="edit-profile/:userId" element={<EditProfilePage />} />
+          <Route path="help/:userId" element={<Help />} />
         </Route>
 
         {/* Manager Layout */}
