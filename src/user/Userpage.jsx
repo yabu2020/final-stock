@@ -17,7 +17,7 @@ function Userpage() {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", isError: true });
   const [orderHistory, setOrderHistory] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ function Userpage() {
 
   useEffect(() => {
     if (locationState?.paymentSuccess) {
-      setMessage("Order placed successfully!");
+      setMessage({ text: "Order placed successfully!", isError: false });
       sessionStorage.removeItem("pendingOrder");
       const fetchOrderHistory = async () => {
         try {
@@ -41,7 +41,7 @@ function Userpage() {
       };
       if (cUSer?._id) fetchOrderHistory();
     } else if (locationState?.paymentError) {
-      setMessage(`Payment failed: ${locationState.paymentError}`);
+      setMessage({ text: `Payment failed: ${locationState.paymentError}`, isError: true });
       sessionStorage.removeItem("pendingOrder");
     }
   }, [cUSer, locationState]);
@@ -50,7 +50,7 @@ function Userpage() {
     axios
       .get("http://localhost:3001/branches")
       .then((res) => setBranches(res.data))
-      .catch((err) => setMessage(`Error fetching branches: ${err.message}`));
+      .catch((err) => setMessage({ text: `Error fetching branches: ${err.message}`, isError: true }));
   }, []);
 
   const fetchProducts = useCallback(
@@ -58,7 +58,7 @@ function Userpage() {
       if (!selectedBranch) return;
       const selectedBranchData = branches.find((b) => b._id === selectedBranch);
       if (!selectedBranchData?.manager?._id) {
-        setMessage("This branch does not have a manager assigned.");
+        setMessage({ text: "This branch does not have a manager assigned.", isError: true });
         return;
       }
       axios
@@ -72,7 +72,7 @@ function Userpage() {
           const filtered = allProducts.filter((p) => p.status === "Available" || p.status === "Low Stock");
           setProducts(filtered);
         })
-        .catch((err) => setMessage(`Error fetching products: ${err.message}`));
+        .catch((err) => setMessage({ text: `Error fetching products: ${err.message}`, isError: true }));
     }, 300),
     [selectedBranch, searchTerm, branches]
   );
@@ -91,7 +91,7 @@ function Userpage() {
           const uniqueOrders = Array.from(new Map(res.data.map((o) => [o._id, o])).values());
           setOrderHistory(uniqueOrders);
         })
-        .catch((err) => setMessage(`Error fetching order history: ${err.message}`));
+        .catch((err) => setMessage({ text: `Error fetching order history: ${err.message}`, isError: true }));
     }
   }, [cUSer]);
 
@@ -102,21 +102,21 @@ function Userpage() {
   const handlePlaceOrder = () => {
     if (isPlacingOrder) return;
     if (!selectedProduct || quantity <= 0) {
-      setMessage("Please select a product and enter a valid quantity.");
+      setMessage({ text: "Please select a product and enter a valid quantity.", isError: true });
       return;
     }
     const product = products.find((p) => p._id === selectedProduct);
     if (!product) {
-      setMessage("Selected product not found.");
+      setMessage({ text: "Selected product not found.", isError: true });
       return;
     }
     if (quantity > product.quantity) {
-      setMessage(`Only ${product.quantity} units available.`);
+      setMessage({ text: `Only ${product.quantity} units available.`, isError: true });
       return;
     }
     const selectedBranchData = branches.find((b) => b._id === selectedBranch);
     if (!selectedBranchData?.manager?._id) {
-      setMessage("This branch does not have a manager assigned.");
+      setMessage({ text: "This branch does not have a manager assigned.", isError: true });
       return;
     }
     const details = {
@@ -170,7 +170,7 @@ function Userpage() {
       })
       .catch((err) => {
         sessionStorage.removeItem("pendingOrder");
-        setMessage("Payment initialization failed. Please try again.");
+        setMessage({ text: "Payment initialization failed. Please try again.", isError: true });
         setIsPlacingOrder(false);
       });
   };
@@ -301,7 +301,14 @@ function Userpage() {
           </div>
         )}
       </Modal>
-      {message && <p className="text-red-500 text-lg mb-4">{message}</p>}
+
+      {/* Message Display */}
+      {message.text && (
+        <p className={`text-lg mb-4 ${message.isError ? 'text-red-500' : 'text-green-500'}`}>
+          {message.text}
+        </p>
+      )}
+
       {/* Branch Selector */}
       <div className="mb-6">
         <label className="text-lg text-gray-300 mb-2 block">Select Branch:</label>
@@ -329,6 +336,7 @@ function Userpage() {
           }}
         />
       </div>
+
       {/* Product Grid */}
       {selectedBranch && (
         <div className="mt-8">
@@ -404,6 +412,7 @@ function Userpage() {
           )}
         </div>
       )}
+
       {/* Order History Link */}
       <div className="mt-8 text-center">
         <Link
