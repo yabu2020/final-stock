@@ -14,7 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3001', // your Express backend
+        target: 'https://final-stock-backend.onrender.com', // your Express backend
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
       },
