@@ -1,6 +1,6 @@
 // src/admin/FlourPurchase.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from '../api'; // ✅ Use centralized API client
 
 function FlourPurchase() {
   const [data, setData] = useState([]);
@@ -40,7 +40,7 @@ function FlourPurchase() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("/flour-purchase");
+      const res = await api.get("/flour-purchase"); // ✅ api instead of axios
       setData(res.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
@@ -80,10 +80,10 @@ function FlourPurchase() {
       }
 
       if (editingId) {
-        await axios.put(`/flour-purchase/${editingId}`, payload);
+        await api.put(`/flour-purchase/${editingId}`, payload); // ✅
         setEditingId(null);
       } else {
-        await axios.post("/flour-purchase", payload);
+        await api.post("/flour-purchase", payload); // ✅
       }
 
       setForm({
@@ -124,7 +124,7 @@ function FlourPurchase() {
 
     try {
       setLoading(true);
-      await axios.delete(`/flour-purchase/${id}`);
+      await api.delete(`/flour-purchase/${id}`); // ✅
       await fetchData();
     } catch (err) {
       console.error("Delete error:", err);
@@ -139,7 +139,7 @@ function FlourPurchase() {
 
     try {
       setLoading(true);
-      await axios.put(`/flour-purchase/${id}/pay`);
+      await api.put(`/flour-purchase/${id}/pay`); // ✅
       await fetchData();
     } catch (err) {
       console.error("Payment error:", err);

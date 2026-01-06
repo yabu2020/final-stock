@@ -12,6 +12,7 @@ import {
   FaChartBar,
 } from "react-icons/fa";
 
+
 // Menu items matching your App.js routes
 const menuItems = [
   {

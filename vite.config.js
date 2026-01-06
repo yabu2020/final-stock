@@ -13,8 +13,8 @@ export default defineConfig({
     proxy: {
       // ✅ Proxy ALL backend API endpoints (including :id routes)
       '^/(bread|flour-purchase|baking|sales|expense|report)(/.*)?$': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
+        target: 'https://final-stock-backend-1.onrender.com',
+                changeOrigin: true,
         // No rewrite — forward as-is
       },
     },
