@@ -1,6 +1,6 @@
 // src/admin/Expense.jsx
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import api from '../api'; // ✅ Use centralized API instance
 
 function Expense() {
   const [data, setData] = useState([]);
@@ -21,7 +21,7 @@ function Expense() {
   // useEffect(() => {
   //   if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
   //   debounceTimeout.current = setTimeout(() => {
-  //     // search logic already handled in filteredData — no extra API call needed
+  //     // search logic handled in filteredData
   //   }, 300);
   //   return () => clearTimeout(debounceTimeout.current);
   // }, [searchTerm]);
@@ -36,7 +36,6 @@ function Expense() {
     "Other"
   ];
 
-  // Category color mapping for better UX
   const getCategoryColor = (cat) => {
     const colors = {
       "Electricity": "bg-yellow-900/40 text-yellow-300 border-yellow-800",
@@ -51,6 +50,7 @@ function Expense() {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "—";
     const date = new Date(dateString);
     return isNaN(date.getTime())
       ? "—"
@@ -74,12 +74,12 @@ function Expense() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("/expense");
+      const res = await api.get("/expense"); // ✅ api instead of axios
       if (!Array.isArray(res.data)) throw new Error("Invalid response format");
       setData(res.data);
     } catch (err) {
       console.error("Load error:", err);
-      setError("Failed to load expenses: " + (err.response?.data?.error || err.message));
+      setError("Failed to load expenses: " + (err.response?.data?.error || err.message || "Unknown error"));
       setData([]);
     } finally {
       setLoading(false);
@@ -110,10 +110,10 @@ function Expense() {
       };
 
       if (editingId) {
-        await axios.put(`/expense/${editingId}`, payload);
+        await api.put(`/expense/${editingId}`, payload); // ✅
         setEditingId(null);
       } else {
-        await axios.post("/expense", payload);
+        await api.post("/expense", payload); // ✅
       }
 
       // Reset form
@@ -138,10 +138,12 @@ function Expense() {
   const handleEdit = (expense) => {
     setForm({
       title: expense.title || "",
-      amount: expense.amount?.toString() || "",
+      amount: (expense.amount ?? "").toString(),
       category: expense.category || "",
       note: expense.note || "",
-      date: expense.date ? new Date(expense.date).toISOString().split("T")[0] : ""
+      date: expense.date 
+        ? new Date(expense.date).toISOString().split("T")[0] 
+        : new Date().toISOString().split("T")[0]
     });
     setEditingId(expense._id);
   };
@@ -153,11 +155,11 @@ function Expense() {
 
     try {
       setLoading(true);
-      await axios.delete(`/expense/${id}`);
+      await api.delete(`/expense/${id}`); // ✅
       await load();
     } catch (err) {
       console.error("Delete error:", err);
-      setError("Failed to delete: " + (err.response?.data?.error || err.message));
+      setError("Failed to delete: " + (err.response?.data?.error || err.message || "Request failed"));
     } finally {
       setLoading(false);
     }
@@ -183,7 +185,7 @@ function Expense() {
       (e.category || "").toLowerCase().includes(term) ||
       (e.note || "").toLowerCase().includes(term) ||
       formatDate(e.date).toLowerCase().includes(term) ||
-      e.amount.toString().includes(term)
+      e.amount?.toString().includes(term)
     );
   });
 

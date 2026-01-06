@@ -1,6 +1,6 @@
 // src/admin/Bread.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from '../api'; // ✅ Use centralized API instance
 
 function Bread() {
   const [list, setList] = useState([]);
@@ -11,6 +11,7 @@ function Bread() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const formatDate = (dateString) => {
+    if (!dateString) return "—";
     const date = new Date(dateString);
     return isNaN(date.getTime())
       ? "—"
@@ -25,12 +26,12 @@ function Bread() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("/bread");
+      const res = await api.get("/bread"); // ✅ api instead of axios
       if (!Array.isArray(res.data)) throw new Error("Invalid response format");
       setList(res.data);
     } catch (err) {
       console.error("Load error:", err);
-      setError("Failed to load bread list: " + (err.response?.data?.error || err.message));
+      setError("Failed to load bread list: " + (err.response?.data?.error || err.message || "Unknown error"));
       setList([]);
     } finally {
       setLoading(false);
@@ -58,17 +59,17 @@ function Bread() {
       };
 
       if (editingId) {
-        await axios.put(`/bread/${editingId}`, payload);
+        await api.put(`/bread/${editingId}`, payload); // ✅
         setEditingId(null);
       } else {
-        await axios.post("/bread", payload);
+        await api.post("/bread", payload); // ✅
       }
 
       setForm({ name: "", size: "", price: "" });
       await load();
     } catch (err) {
       console.error("Save error:", err);
-      const msg = err.response?.data?.error || "Failed to save bread.";
+      const msg = err.response?.data?.error || err.message || "Failed to save bread.";
       setError(msg);
     } finally {
       setLoading(false);
@@ -77,9 +78,9 @@ function Bread() {
 
   const handleEdit = (bread) => {
     setForm({
-      name: bread.name,
-      size: bread.size,
-      price: bread.price.toString()
+      name: bread.name || "",
+      size: bread.size || "",
+      price: (bread.price ?? "").toString()
     });
     setEditingId(bread._id);
   };
@@ -91,20 +92,20 @@ function Bread() {
 
     try {
       setLoading(true);
-      await axios.delete(`/bread/${id}`);
+      await api.delete(`/bread/${id}`); // ✅
       await load();
     } catch (err) {
       console.error("Delete error:", err);
-      setError("Failed to delete: " + (err.response?.data?.error || err.message));
+      setError("Failed to delete: " + (err.response?.data?.error || err.message || "Server error"));
     } finally {
       setLoading(false);
     }
   };
 
   const filteredData = list.filter((b) =>
-    b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    b.size.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    b.price.toString().includes(searchTerm)
+    (b.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (b.size || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (b.price?.toString() || "").includes(searchTerm)
   );
 
   return (
@@ -155,6 +156,7 @@ function Bread() {
             <input
               type="number"
               step="0.01"
+              min="0.01"
               placeholder="e.g., 50.00"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -209,41 +211,54 @@ function Bread() {
           </div>
 
           {loading && list.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
+            <div className="text-center py-8 text-gray-500">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mr-2"></div>
+              Loading bread list...
+            </div>
           ) : filteredData.length === 0 ? (
             <div className="text-center py-8 text-gray-500 bg-gray-800/50 rounded-lg">
-              {searchTerm ? "No matches found." : "No bread added yet."}
+              <div className="text-4xl mb-2">🍞</div>
+              <p className="font-medium">
+                {searchTerm ? "No bread matches your search" : "No bread added yet"}
+              </p>
+              <p className="text-sm mt-1">
+                {searchTerm ? "Try a different keyword." : "Add your first bread item above."}
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-gray-700">
               <table className="min-w-full divide-y divide-gray-700 text-sm">
-                <thead className="bg-gray-750">
+                <thead className="bg-gray-750 text-gray-300 uppercase text-xs">
                   <tr>
-                    <th className="px-3 py-2 text-left font-medium text-gray-300 uppercase tracking-wider">Name</th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-300 uppercase tracking-wider">Size</th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-300 uppercase tracking-wider">Price</th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-300 uppercase tracking-wider">Added</th>
-                    <th className="px-3 py-2 text-left font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Name</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Size</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Price</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Added</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                <tbody className="bg-gray-800 divide-y divide-gray-750">
                   {filteredData.map((b) => (
-                    <tr key={b._id} className="hover:bg-gray-750 transition-colors">
-                      <td className="px-3 py-2.5 font-medium text-gray-200">{b.name}</td>
-                      <td className="px-3 py-2.5">{b.size}</td>
-                      <td className="px-3 py-2.5 text-green-400 font-medium">${b.price}</td>
-                      <td className="px-3 py-2.5 text-xs text-gray-400">{formatDate(b.createdAt)}</td>
-                      <td className="px-3 py-2">
+                    <tr key={b._id} className="hover:bg-gray-750/60 transition-colors">
+                      <td className="px-3 py-3 font-medium text-gray-200">{b.name}</td>
+                      <td className="px-3 py-3 text-gray-300">{b.size}</td>
+                      <td className="px-3 py-3 text-green-400 font-medium">${Number(b.price).toFixed(2)}</td>
+                      <td className="px-3 py-3 text-xs text-gray-400">
+                        {formatDate(b.createdAt || b.updatedAt)}
+                      </td>
+                      <td className="px-3 py-3">
                         <div className="flex flex-wrap gap-1">
                           <button
                             onClick={() => handleEdit(b)}
-                            className="text-[11px] px-2 py-1 bg-blue-800 hover:bg-blue-700 text-white rounded whitespace-nowrap"
+                            className="text-[11px] px-2.5 py-1 bg-blue-800 hover:bg-blue-700 text-white rounded whitespace-nowrap transition"
+                            aria-label={`Edit ${b.name}`}
                           >
                             ✏️ Edit
                           </button>
                           <button
                             onClick={() => handleDelete(b._id)}
-                            className="text-[11px] px-2 py-1 bg-red-800 hover:bg-red-700 text-white rounded whitespace-nowrap"
+                            className="text-[11px] px-2.5 py-1 bg-red-800 hover:bg-red-700 text-white rounded whitespace-nowrap transition"
+                            aria-label={`Delete ${b.name}`}
                           >
                             🗑️ Del
                           </button>

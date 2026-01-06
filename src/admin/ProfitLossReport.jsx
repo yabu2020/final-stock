@@ -1,6 +1,6 @@
 // src/admin/ProfitLossReport.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from '../api'; // ✅ Use centralized API instance
 
 function ProfitLossReport() {
   const [report, setReport] = useState(null);
@@ -26,7 +26,9 @@ function ProfitLossReport() {
     if (num == null || isNaN(num)) return "$0.00";
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(num);
   };
 
@@ -43,7 +45,7 @@ function ProfitLossReport() {
         params.endDate = filters.endDate;
       }
 
-      const res = await axios.get("/report/profit-loss", { params });
+      const res = await api.get("/report/profit-loss", { params }); // ✅ api instead of axios
 
       if (res.data.error) {
         throw new Error(res.data.error);
@@ -78,7 +80,7 @@ function ProfitLossReport() {
       setReport(safeReport);
     } catch (err) {
       console.error("❌ Report error:", err);
-      setError("Report Error: " + (err.response?.data?.error || err.message || "Unknown error"));
+      setError("Report Error: " + (err.response?.data?.error || err.message || "Failed to generate report"));
       setReport(null);
     } finally {
       setLoading(false);
@@ -147,14 +149,24 @@ function ProfitLossReport() {
               disabled={loading}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 disabled:opacity-70 transition whitespace-nowrap w-full sm:w-auto"
             >
-              {loading ? "Generating..." : "Generate Report"}
+              {loading ? (
+                <span className="flex items-center gap-1">
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0a8 8 0 11-16 0z"></path>
+                  </svg>
+                  Generating...
+                </span>
+              ) : (
+                "Generate Report"
+              )}
             </button>
           </form>
         </div>
 
         {error && (
           <div className="bg-red-900/30 border-l-4 border-red-500 text-red-200 p-4 mb-6 rounded">
-            <p className="flex items-center gap-1">
+            <p className="flex items-center gap-1 text-sm">
               ⚠️ <span>{error}</span>
             </p>
           </div>
@@ -194,8 +206,7 @@ function ProfitLossReport() {
                   {formatCurrency(report.summary.expense.total)}
                 </p>
                 <p className="text-xs text-gray-400 mt-2">
-                  • Expense: {formatCurrency(report.summary.expense.breakdown.expense)}
-                  <br />
+                  • Expense: {formatCurrency(report.summary.expense.breakdown.expense)}<br />
                   • Flour: {formatCurrency(report.summary.expense.breakdown.flour)}
                 </p>
               </div>
@@ -228,12 +239,12 @@ function ProfitLossReport() {
                   </div>
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-700">
-                      <thead className="bg-gray-700 text-gray-200">
+                      <thead className="bg-gray-700 text-gray-200 uppercase text-xs">
                         <tr>
-                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Bread</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Qty</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Total</th>
+                          <th className="px-3 py-2 text-left font-medium">Date</th>
+                          <th className="px-3 py-2 text-left font-medium">Bread</th>
+                          <th className="px-3 py-2 text-left font-medium">Qty</th>
+                          <th className="px-3 py-2 text-left font-medium">Total</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-700 text-gray-300">
@@ -269,11 +280,11 @@ function ProfitLossReport() {
                   </div>
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-700">
-                      <thead className="bg-gray-700 text-gray-200">
+                      <thead className="bg-gray-700 text-gray-200 uppercase text-xs">
                         <tr>
-                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Title</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                          <th className="px-3 py-2 text-left font-medium">Date</th>
+                          <th className="px-3 py-2 text-left font-medium">Title</th>
+                          <th className="px-3 py-2 text-left font-medium">Amount</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-700 text-gray-300">
@@ -309,12 +320,12 @@ function ProfitLossReport() {
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-700 text-gray-200">
+                    <thead className="bg-gray-700 text-gray-200 uppercase text-xs">
                       <tr>
-                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Supplier</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Qty (kg)</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Total</th>
+                        <th className="px-3 py-2 text-left font-medium">Date</th>
+                        <th className="px-3 py-2 text-left font-medium">Supplier</th>
+                        <th className="px-3 py-2 text-left font-medium">Qty (kg)</th>
+                        <th className="px-3 py-2 text-left font-medium">Total</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700 text-gray-300">
@@ -322,7 +333,7 @@ function ProfitLossReport() {
                         report.details.flourPurchases.map((fp, i) => (
                           <tr key={i} className="hover:bg-gray-700/30">
                             <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(fp.date)}</td>
-                            <td className="px-3 py-2 text-sm">{fp.supplier}</td>
+                            <td className="px-3 py-2 text-sm">{fp.supplier || "—"}</td>
                             <td className="px-3 py-2 text-sm">{fp.quantityKg} kg</td>
                             <td className="px-3 py-2 text-sm font-medium text-green-400 whitespace-nowrap">
                               {formatCurrency(fp.totalPrice)}
