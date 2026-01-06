@@ -29,7 +29,6 @@ function ProfitLossReport() {
       currency
     }).format(num);
   };
-  
 
   const loadReport = async () => {
     try {
@@ -100,21 +99,21 @@ function ProfitLossReport() {
   };
 
   return (
-    <div className="p-6 bg-gray-900 min-h-screen">
-      <div className="max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 bg-gray-900 min-h-screen">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">
+        <div className="flex flex-col items-start sm:items-center sm:flex-row justify-between gap-4 mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">
             📊 Profit & Loss Report
           </h2>
-          
+
           {/* Filter Form */}
-          <form onSubmit={handleSubmit} className="flex flex-wrap gap-2">
+          <form onSubmit={handleSubmit} className="flex flex-wrap gap-2 w-full sm:w-auto">
             <select
               name="period"
               value={filters.period}
               onChange={handleFilterChange}
-              className="px-3 py-1.5 bg-gray-800 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 bg-gray-800 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-auto"
             >
               <option value="daily">Today</option>
               <option value="monthly">This Month</option>
@@ -129,7 +128,7 @@ function ProfitLossReport() {
                   name="startDate"
                   value={filters.startDate}
                   onChange={handleFilterChange}
-                  className="px-3 py-1.5 bg-gray-800 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 bg-gray-800 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-auto"
                   required
                 />
                 <input
@@ -137,7 +136,7 @@ function ProfitLossReport() {
                   name="endDate"
                   value={filters.endDate}
                   onChange={handleFilterChange}
-                  className="px-3 py-1.5 bg-gray-800 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 bg-gray-800 border border-gray-600 text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-auto"
                   required
                 />
               </>
@@ -146,7 +145,7 @@ function ProfitLossReport() {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-500 disabled:opacity-70 transition"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 disabled:opacity-70 transition whitespace-nowrap w-full sm:w-auto"
             >
               {loading ? "Generating..." : "Generate Report"}
             </button>
@@ -155,28 +154,33 @@ function ProfitLossReport() {
 
         {error && (
           <div className="bg-red-900/30 border-l-4 border-red-500 text-red-200 p-4 mb-6 rounded">
-            <p>⚠️ {error}</p>
+            <p className="flex items-center gap-1">
+              ⚠️ <span>{error}</span>
+            </p>
           </div>
         )}
 
         {loading && !report && (
-          <div className="text-center py-12 text-gray-400">Generating report...</div>
+          <div className="text-center py-12 text-gray-400">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mr-2"></div>
+            Generating report...
+          </div>
         )}
 
         {report && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Period Info */}
             <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-lg font-semibold text-white">
                 📅 {report.period.label}
               </h3>
-              <p className="text-gray-400">
-                {report.period.start} to {report.period.end}
+              <p className="text-gray-400 text-sm">
+                {formatDate(report.period.start)} to {formatDate(report.period.end)}
               </p>
             </div>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Summary Cards — responsive grid */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div className="bg-green-900/20 border border-green-800 rounded-lg p-4">
                 <h4 className="text-green-400 text-sm font-medium">Total Income</h4>
                 <p className="text-2xl font-bold text-green-300 mt-1">
@@ -190,92 +194,114 @@ function ProfitLossReport() {
                   {formatCurrency(report.summary.expense.total)}
                 </p>
                 <p className="text-xs text-gray-400 mt-2">
-                  • Expense: {formatCurrency(report.summary.expense.breakdown.expense)}<br/>
+                  • Expense: {formatCurrency(report.summary.expense.breakdown.expense)}
+                  <br />
                   • Flour: {formatCurrency(report.summary.expense.breakdown.flour)}
                 </p>
               </div>
 
               <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
                 <h4 className="text-blue-400 text-sm font-medium">Net Profit</h4>
-                <p className={`text-2xl font-bold mt-1 ${
-                  report.summary.profit >= 0 ? "text-green-300" : "text-red-300"
-                }`}>
+                <p
+                  className={`text-2xl font-bold mt-1 ${
+                    report.summary.profit >= 0 ? "text-green-300" : "text-red-300"
+                  }`}
+                >
                   {formatCurrency(report.summary.profit)}
                 </p>
                 <p className="text-xs text-gray-400 mt-2">
-                  Margin: {report.summary.profitMargin}%
+                  Margin: {report.summary.profitMargin.toFixed(2)}%
                 </p>
               </div>
             </div>
 
-            {/* Detailed Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Sales */}
-              <div className="bg-gray-800 rounded-xl shadow border border-gray-700">
-                <div className="px-4 py-3 border-b border-gray-700">
-                  <h3 className="text-lg font-semibold text-white">
-                    💰 Sales ({report.details.sales.length})
-                  </h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-700 text-gray-200">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Date</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Bread</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Qty</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700 text-gray-300">
-                      {report.details.sales.map((s, i) => (
-                        <tr key={i} className="hover:bg-gray-700/30">
-                          <td className="px-3 py-2 text-sm">{formatDate(s.date)}</td>
-                          <td className="px-3 py-2">{s.bread} ({s.size})</td>
-                          <td className="px-3 py-2">{s.quantity}</td>
-                          <td className="px-3 py-2 font-medium text-green-400">
-                            {formatCurrency(s.total)}
-                          </td>
+            {/* Detailed Sections — responsive grid */}
+            <div className="grid grid-cols-1 gap-6">
+              {/* Sales & Expenses side-by-side on md+ */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {/* Sales */}
+                <div className="bg-gray-800 rounded-xl shadow border border-gray-700 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-700">
+                    <h3 className="text-lg font-semibold text-white">
+                      💰 Sales ({report.details.sales.length})
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-700">
+                      <thead className="bg-gray-700 text-gray-200">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Bread</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Qty</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Total</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700 text-gray-300">
+                        {report.details.sales.length > 0 ? (
+                          report.details.sales.map((s, i) => (
+                            <tr key={i} className="hover:bg-gray-700/30">
+                              <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(s.date)}</td>
+                              <td className="px-3 py-2 text-sm">{s.bread} ({s.size})</td>
+                              <td className="px-3 py-2 text-sm">{s.quantity}</td>
+                              <td className="px-3 py-2 text-sm font-medium text-green-400 whitespace-nowrap">
+                                {formatCurrency(s.total)}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" className="px-3 py-4 text-center text-gray-500 italic">
+                              No sales data
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Expenses */}
+                <div className="bg-gray-800 rounded-xl shadow border border-gray-700 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-700">
+                    <h3 className="text-lg font-semibold text-white">
+                      💸 General Expenses ({report.details.expenses.length})
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-700">
+                      <thead className="bg-gray-700 text-gray-200">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Title</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700 text-gray-300">
+                        {report.details.expenses.length > 0 ? (
+                          report.details.expenses.map((e, i) => (
+                            <tr key={i} className="hover:bg-gray-700/30">
+                              <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(e.date)}</td>
+                              <td className="px-3 py-2 text-sm">{e.title}</td>
+                              <td className="px-3 py-2 text-sm font-medium text-red-400 whitespace-nowrap">
+                                {formatCurrency(e.amount)}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="3" className="px-3 py-4 text-center text-gray-500 italic">
+                              No expense data
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
-              {/* Expenses */}
-              <div className="bg-gray-800 rounded-xl shadow border border-gray-700">
-                <div className="px-4 py-3 border-b border-gray-700">
-                  <h3 className="text-lg font-semibold text-white">
-                    💸 General Expenses ({report.details.expenses.length})
-                  </h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-700 text-gray-200">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Date</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Title</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700 text-gray-300">
-                      {report.details.expenses.map((e, i) => (
-                        <tr key={i} className="hover:bg-gray-700/30">
-                          <td className="px-3 py-2 text-sm">{formatDate(e.date)}</td>
-                          <td className="px-3 py-2">{e.title}</td>
-                          <td className="px-3 py-2 font-medium text-red-400">
-                            {formatCurrency(e.amount)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Flour Purchases */}
-              <div className="bg-gray-800 rounded-xl shadow border border-gray-700 lg:col-span-2">
+              {/* Flour Purchases — always full width */}
+              <div className="bg-gray-800 rounded-xl shadow border border-gray-700 overflow-hidden">
                 <div className="px-4 py-3 border-b border-gray-700">
                   <h3 className="text-lg font-semibold text-white">
                     🛒 Flour Purchases ({report.details.flourPurchases.length})
@@ -285,23 +311,31 @@ function ProfitLossReport() {
                   <table className="min-w-full divide-y divide-gray-700">
                     <thead className="bg-gray-700 text-gray-200">
                       <tr>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Date</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Supplier</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Qty (Kg)</th>
-                        <th className="px-3 py-2 text-left text-xs uppercase">Total</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Supplier</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Qty (kg)</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider">Total</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700 text-gray-300">
-                      {report.details.flourPurchases.map((fp, i) => (
-                        <tr key={i} className="hover:bg-gray-700/30">
-                          <td className="px-3 py-2 text-sm">{formatDate(fp.date)}</td>
-                          <td className="px-3 py-2">{fp.supplier}</td>
-                          <td className="px-3 py-2">{fp.quantityKg} kg</td>
-                          <td className="px-3 py-2 font-medium text-green-400">
-                            {formatCurrency(fp.totalPrice)}
+                    <tbody className="divide-y divide-gray-700 text-gray-300">
+                      {report.details.flourPurchases.length > 0 ? (
+                        report.details.flourPurchases.map((fp, i) => (
+                          <tr key={i} className="hover:bg-gray-700/30">
+                            <td className="px-3 py-2 text-sm whitespace-nowrap">{formatDate(fp.date)}</td>
+                            <td className="px-3 py-2 text-sm">{fp.supplier}</td>
+                            <td className="px-3 py-2 text-sm">{fp.quantityKg} kg</td>
+                            <td className="px-3 py-2 text-sm font-medium text-green-400 whitespace-nowrap">
+                              {formatCurrency(fp.totalPrice)}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="px-3 py-4 text-center text-gray-500 italic">
+                            No flour purchase data
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>

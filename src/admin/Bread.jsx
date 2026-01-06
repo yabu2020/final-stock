@@ -231,7 +231,7 @@ function Bread() {
                     <tr key={b._id} className="hover:bg-gray-750 transition-colors">
                       <td className="px-3 py-2.5 font-medium text-gray-200">{b.name}</td>
                       <td className="px-3 py-2.5">{b.size}</td>
-                      <td className="px-3 py-2.5 text-green-400 font-medium">₹{b.price}</td>
+                      <td className="px-3 py-2.5 text-green-400 font-medium">${b.price}</td>
                       <td className="px-3 py-2.5 text-xs text-gray-400">{formatDate(b.createdAt)}</td>
                       <td className="px-3 py-2">
                         <div className="flex flex-wrap gap-1">
