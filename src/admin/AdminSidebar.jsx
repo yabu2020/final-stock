@@ -9,8 +9,7 @@ import {
   FaShoppingCart,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaChartBar,
-} from "react-icons/fa";
+  FaChartBar,} from "react-icons/fa";
 
 
 // Menu items matching your App.js routes
