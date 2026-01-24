@@ -1,6 +1,6 @@
 // src/admin/Baking.jsx
 import { useEffect, useState } from "react";
-import api from '../api'; // ✅ Use centralized API instance
+import api from '../api';
 
 function Baking() {
   const [data, setData] = useState([]);
@@ -10,7 +10,7 @@ function Baking() {
     date: new Date().toISOString().split("T")[0]
   });
   const [loading, setLoading] = useState(false);
-  const [loadingBread, setLoadingBread] = useState(true); // ✅ Separate loading state
+  const [loadingBread, setLoadingBread] = useState(true);
   const [error, setError] = useState("");
   const [breadOptions, setBreadOptions] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -28,13 +28,28 @@ function Baking() {
         });
   };
 
-  const load = async () => {
+  // Load baking records with remaining stock calculation
+  const loadWithRemaining = async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("/baking"); // ✅ api instead of axios
-      if (!Array.isArray(res.data)) throw new Error("Expected array");
-      setData(res.data);
+      
+      // Get all baking records
+      const bakingRes = await api.get("/baking");
+      if (!Array.isArray(bakingRes.data)) throw new Error("Expected array");
+      
+      // Calculate remaining stock for each batch
+      const enrichedData = await Promise.all(
+        bakingRes.data.map(async (batch) => {
+          // Fetch sales linked to this baking batch
+          const salesRes = await api.get(`/sales?baking=${batch._id}`);
+          const sold = salesRes.data.reduce((sum, s) => sum + (s.quantitySold || 0), 0);
+          const remaining = (batch.quantityBaked || 0) - sold;
+          return { ...batch, remaining };
+        })
+      );
+      
+      setData(enrichedData);
     } catch (err) {
       console.error("Baking load error:", err);
       setError(
@@ -50,7 +65,7 @@ function Baking() {
   const loadBreadOptions = async () => {
     try {
       setLoadingBread(true);
-      const res = await api.get("/bread"); // ✅ api instead of axios
+      const res = await api.get("/bread");
       if (Array.isArray(res.data)) {
         setBreadOptions(res.data);
       } else {
@@ -65,7 +80,7 @@ function Baking() {
   };
 
   useEffect(() => {
-    load();
+    loadWithRemaining();
     loadBreadOptions();
   }, []);
 
@@ -86,10 +101,10 @@ function Baking() {
       };
 
       if (editingId) {
-        await api.put(`/baking/${editingId}`, payload); // ✅
+        await api.put(`/baking/${editingId}`, payload);
         setEditingId(null);
       } else {
-        await api.post("/baking", payload); // ✅
+        await api.post("/baking", payload);
       }
 
       // Reset form
@@ -98,7 +113,9 @@ function Baking() {
         quantityBaked: "",
         date: new Date().toISOString().split("T")[0]
       });
-      await load();
+      
+      // Refresh data with updated stock
+      await loadWithRemaining();
     } catch (err) {
       console.error("Baking save error:", err);
       setError(err.response?.data?.error || err.message || "Failed to record baking.");
@@ -129,8 +146,8 @@ function Baking() {
 
     try {
       setLoading(true);
-      await api.delete(`/baking/${id}`); // ✅
-      await load();
+      await api.delete(`/baking/${id}`);
+      await loadWithRemaining(); // 👈 Refresh stock levels
     } catch (err) {
       console.error("Baking delete error:", err);
       setError(
@@ -151,10 +168,19 @@ function Baking() {
     return breadName.includes(term) || breadSize.includes(term) || dateText.includes(term);
   });
 
+  // Calculate total baked and remaining
+  const totalBaked = data.reduce((sum, b) => sum + (b.quantityBaked || 0), 0);
+  const totalRemaining = data.reduce((sum, b) => sum + (b.remaining || 0), 0);
+
   return (
     <div className="p-4 sm:p-6 bg-gray-900 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-xl font-bold text-white mb-4 sm:text-2xl">🍞 Baking Log</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h1 className="text-xl font-bold text-white sm:text-2xl">🍞 Baking Log</h1>
+          <div className="text-sm text-gray-300">
+            Total Baked: {totalBaked} | Remaining: {totalRemaining}
+          </div>
+        </div>
 
         {error && (
           <div className="bg-red-900/30 border-l-4 border-red-500 text-red-200 p-3 mb-4 rounded">
@@ -275,7 +301,9 @@ function Baking() {
                   <tr>
                     <th scope="col" className="px-3 py-2 text-left font-medium">Date</th>
                     <th scope="col" className="px-3 py-2 text-left font-medium">Bread</th>
-                    <th scope="col" className="px-3 py-2 text-left font-medium">Qty</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Baked</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Sold</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Remaining</th>
                     <th scope="col" className="px-3 py-2 text-left font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -293,7 +321,21 @@ function Baking() {
                           {item.bread?.size || "—"}
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-gray-300">{item.quantityBaked || 0}</td>
+                      <td className="px-3 py-3 text-green-400 font-medium">
+                        {item.quantityBaked || 0}
+                      </td>
+                      <td className="px-3 py-3 text-yellow-400">
+                        {(item.quantityBaked || 0) - (item.remaining || 0)}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className={`px-2 py-1 rounded text-[11px] font-medium ${
+                          item.remaining > 0 
+                            ? 'bg-green-900/50 text-green-300 border border-green-800'
+                            : 'bg-red-900/50 text-red-300 border border-red-800'
+                        }`}>
+                          {item.remaining || 0}
+                        </span>
+                      </td>
                       <td className="px-3 py-3">
                         <div className="flex flex-wrap gap-1">
                           <button

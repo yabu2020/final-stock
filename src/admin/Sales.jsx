@@ -1,22 +1,25 @@
 // src/admin/Sales.jsx
 import { useEffect, useState } from "react";
-import api from '../api'; // ✅ Use centralized API instance
+import api from '../api';
 
 function Sales() {
   const [data, setData] = useState([]);
   const [form, setForm] = useState({
-    bread: "",
+    baking: "",
+    bread: "", // 👈 NEW!
     quantitySold: "",
     sellingPrice: "",
     paymentMethod: "cash",
-    date: new Date().toISOString().split("T")[0]
+    date: new Date().toISOString().split("T")[0],
+    _originalQuantity: 0
   });
   const [loading, setLoading] = useState(false);
-  const [loadingBread, setLoadingBread] = useState(true); // ✅ Separate bread loading
+  const [loadingBread, setLoadingBread] = useState(true);
   const [error, setError] = useState("");
   const [breadOptions, setBreadOptions] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [bakingBatches, setBakingBatches] = useState([]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "—";
@@ -34,7 +37,7 @@ function Sales() {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("/sales"); // ✅ api instead of axios
+      const res = await api.get("/sales");
       if (!Array.isArray(res.data)) throw new Error("Expected array");
       setData(res.data);
     } catch (err) {
@@ -46,18 +49,37 @@ function Sales() {
     }
   };
 
-  const loadBreadOptions = async () => {
+  const loadBreadAndBatches = async () => {
     try {
       setLoadingBread(true);
-      const res = await api.get("/bread"); // ✅ api instead of axios
-      if (Array.isArray(res.data)) {
-        setBreadOptions(res.data);
-      } else {
-        setBreadOptions([]);
-      }
+      
+      const breadRes = await api.get("/bread");
+      const breads = Array.isArray(breadRes.data) ? breadRes.data : [];
+      setBreadOptions(breads);
+
+      const bakingRes = await api.get("/baking");
+      const bakingRecords = Array.isArray(bakingRes.data) ? bakingRes.data : [];
+
+      const batchesWithStock = await Promise.all(
+        bakingRecords.map(async (batch) => {
+          const salesRes = await api.get(`/sales?baking=${batch._id}`);
+          const sold = salesRes.data.reduce((sum, s) => sum + (s.quantitySold || 0), 0);
+          const remaining = (batch.quantityBaked || 0) - sold;
+          return {
+            ...batch,
+            remaining,
+            breadName: batch.bread?.name || "Unknown",
+            breadSize: batch.bread?.size || "—"
+          };
+        })
+      );
+
+      const availableBatches = batchesWithStock.filter(b => b.remaining > 0);
+      setBakingBatches(availableBatches);
     } catch (err) {
-      console.warn("Bread load warning:", err.message);
+      console.warn("Failed to load bread/batches:", err.message);
       setBreadOptions([]);
+      setBakingBatches([]);
     } finally {
       setLoadingBread(false);
     }
@@ -65,14 +87,27 @@ function Sales() {
 
   useEffect(() => {
     load();
-    loadBreadOptions();
+    loadBreadAndBatches();
   }, []);
 
   const save = async () => {
-    const { bread, quantitySold, sellingPrice, paymentMethod, date } = form;
-    if (!bread || !quantitySold || !sellingPrice || !date) {
-      setError("Please fill all required fields (Bread, Qty, Price, Date).");
+    const { baking, quantitySold, sellingPrice, paymentMethod, date, _originalQuantity } = form;
+    
+    if (!baking || !quantitySold || !sellingPrice || !date) {
+      setError("Please fill all required fields (Batch, Qty, Price, Date).");
       return;
+    }
+
+    const newQty = Number(quantitySold);
+    const qtyChanged = newQty !== _originalQuantity;
+
+    // Only validate stock if quantity changed
+    if (qtyChanged) {
+      const selectedBatch = bakingBatches.find(b => b._id === baking);
+      if (selectedBatch && newQty > selectedBatch.remaining) {
+        setError(`Only ${selectedBatch.remaining} loaves available in this batch.`);
+        return;
+      }
     }
 
     try {
@@ -80,29 +115,32 @@ function Sales() {
       setError("");
 
       const payload = {
-        bread,
-        quantitySold: Number(quantitySold),
+        baking,
+        bread: form.bread, // 👈 Add this
+        quantitySold: newQty,
         sellingPrice: Number(sellingPrice),
         paymentMethod,
         date
       };
-
       if (editingId) {
-        await api.put(`/sales/${editingId}`, payload); // ✅
+        await api.put(`/sales/${editingId}`, payload);
         setEditingId(null);
       } else {
-        await api.post("/sales", payload); // ✅
+        await api.post("/sales", payload);
       }
 
       // Reset form
       setForm({
-        bread: "",
+        baking: "",
         quantitySold: "",
         sellingPrice: "",
         paymentMethod: "cash",
-        date: new Date().toISOString().split("T")[0]
+        date: new Date().toISOString().split("T")[0],
+        _originalQuantity: 0
       });
+      
       await load();
+      await loadBreadAndBatches();
     } catch (err) {
       console.error("Sale error:", err);
       const msg = err.response?.data?.error || err.message || "Failed to record sale.";
@@ -114,13 +152,15 @@ function Sales() {
 
   const handleEdit = (sale) => {
     setForm({
-      bread: sale.bread?._id || sale.bread,
+      baking: sale.baking?._id || sale.baking,
+      bread: sale.bread?._id || sale.bread, // 👈 Set bread ID
       quantitySold: (sale.quantitySold ?? "").toString(),
       sellingPrice: (sale.sellingPrice ?? "").toString(),
       paymentMethod: sale.paymentMethod || "cash",
       date: sale.date
         ? new Date(sale.date).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      _originalQuantity: sale.quantitySold
     });
     setEditingId(sale._id);
   };
@@ -132,8 +172,9 @@ function Sales() {
 
     try {
       setLoading(true);
-      await api.delete(`/sales/${id}`); // ✅
+      await api.delete(`/sales/${id}`);
       await load();
+      await loadBreadAndBatches();
     } catch (err) {
       console.error("Delete error:", err);
       setError("Failed to delete: " + (err.response?.data?.error || err.message || "Request failed"));
@@ -142,7 +183,6 @@ function Sales() {
     }
   };
 
-  // ✅ Search filter with safe access
   const filteredData = data.filter((sale) => {
     const term = searchTerm.toLowerCase().trim();
     if (!term) return true;
@@ -157,19 +197,29 @@ function Sales() {
     );
   });
 
-  // Calculate total sales for summary
-  const totalSales = filteredData.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
+  // Calculate today's total sales
+  const today = new Date().toISOString().split('T')[0];
+  const todaySales = data.filter(sale => 
+    sale.date && sale.date.toString().startsWith(today)
+  );
+  const todayTotal = todaySales.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
 
   return (
     <div className="p-4 sm:p-6 bg-gray-900 min-h-screen">
       <div className="max-w-6xl mx-auto">
+        {/* Header with Daily Summary */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <h1 className="text-xl font-bold text-white sm:text-2xl">💰 Sales Register</h1>
-          {filteredData.length > 0 && (
-            <div className="text-sm font-medium text-green-400">
-              Total: ${totalSales.toFixed(2)}
+          <div className="flex flex-wrap gap-3 text-sm">
+            {filteredData.length > 0 && (
+              <div className="font-medium text-green-400">
+                Total: ${filteredData.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0).toFixed(2)}
+              </div>
+            )}
+            <div className="font-medium text-blue-400">
+              Today: ${todayTotal.toFixed(2)}
             </div>
-          )}
+          </div>
         </div>
 
         {error && (
@@ -180,7 +230,7 @@ function Sales() {
           </div>
         )}
 
-        {/* Responsive Form */}
+        {/* Form */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">Date</label>
@@ -192,23 +242,25 @@ function Sales() {
             />
           </div>
 
-          <div className="sm:col-span-2 md:col-span-1">
-            <label className="block text-xs font-medium text-gray-400 mb-1">Bread</label>
+          <div className="sm:col-span-2 md:col-span-2">
+            <label className="block text-xs font-medium text-gray-400 mb-1">
+              Bake Batch (Remaining Stock)
+            </label>
             <select
-              value={form.bread}
-              onChange={(e) => setForm({ ...form, bread: e.target.value })}
+              value={form.baking}
+              onChange={(e) => setForm({ ...form, baking: e.target.value })}
               disabled={loadingBread}
               className="w-full px-3 py-2 text-sm bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-400 appearance-none"
             >
-              <option value="">Select bread</option>
+              <option value="">Select a bake batch</option>
               {loadingBread ? (
-                <option disabled>Loading breads...</option>
-              ) : breadOptions.length === 0 ? (
-                <option disabled>No bread available</option>
+                <option disabled>Loading batches...</option>
+              ) : bakingBatches.length === 0 ? (
+                <option disabled>No batches with stock available</option>
               ) : (
-                breadOptions.map((b) => (
-                  <option key={b._id} value={b._id}>
-                    {b.name} ({b.size}) — ${b.price}
+                bakingBatches.map((batch) => (
+                  <option key={batch._id} value={batch._id}>
+                    {batch.breadName} ({batch.breadSize}) — {batch.remaining} loaves left
                   </option>
                 ))
               )}
@@ -216,7 +268,7 @@ function Sales() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1">Qty</label>
+            <label className="block text-xs font-medium text-gray-400 mb-1">Qty to Sell</label>
             <input
               type="number"
               min="1"
@@ -280,6 +332,14 @@ function Sales() {
           )}
         </button>
 
+        {/* Daily Summary Card */}
+        <div className="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+          <div className="text-sm font-medium text-gray-300">📅 Today's Summary</div>
+          <div className="mt-1 text-lg font-bold text-blue-400">
+            ${todayTotal.toFixed(2)} from {todaySales.length} sale{todaySales.length !== 1 ? 's' : ''}
+          </div>
+        </div>
+
         {/* Search & Table */}
         <div className="mt-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
@@ -326,6 +386,7 @@ function Sales() {
                     <th scope="col" className="px-3 py-2 text-left font-medium">Qty</th>
                     <th scope="col" className="px-3 py-2 text-left font-medium">Price</th>
                     <th scope="col" className="px-3 py-2 text-left font-medium">Total</th>
+                    <th scope="col" className="px-3 py-2 text-left font-medium">Remaining</th>
                     <th scope="col" className="px-3 py-2 text-left font-medium">Payment</th>
                     <th scope="col" className="px-3 py-2 text-left font-medium">Actions</th>
                   </tr>
@@ -351,6 +412,15 @@ function Sales() {
                       </td>
                       <td className="px-3 py-3">
                         <span className={`px-2 py-1 rounded text-[11px] font-medium ${
+                          (sale.bakingRemaining || 0) > 0 
+                            ? 'bg-green-900/50 text-green-300 border border-green-800'
+                            : 'bg-red-900/50 text-red-300 border border-red-800'
+                        }`}>
+                          {sale.bakingRemaining || 0}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className={`px-2 py-1 rounded text-[11px] font-medium ${
                           sale.paymentMethod === 'cash'
                             ? 'bg-green-900/50 text-green-300 border border-green-800'
                             : 'bg-yellow-900/50 text-yellow-300 border border-yellow-800'
@@ -363,14 +433,12 @@ function Sales() {
                           <button
                             onClick={() => handleEdit(sale)}
                             className="text-[11px] px-2.5 py-1 bg-blue-800 hover:bg-blue-700 text-white rounded whitespace-nowrap transition"
-                            aria-label={`Edit sale of ${sale.bread?.name || "bread"}`}
                           >
                             ✏️ Edit
                           </button>
                           <button
                             onClick={() => handleDelete(sale._id)}
                             className="text-[11px] px-2.5 py-1 bg-red-800 hover:bg-red-700 text-white rounded whitespace-nowrap transition"
-                            aria-label="Delete sale"
                           >
                             🗑️ Del
                           </button>
