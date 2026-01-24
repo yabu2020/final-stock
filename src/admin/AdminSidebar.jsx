@@ -12,7 +12,6 @@ import {
   FaChartBar,
 } from "react-icons/fa";
 
-
 // Menu items matching your App.js routes
 const menuItems = [
   {
@@ -48,14 +47,32 @@ const menuItems = [
 ];
 
 function AdminSidebar() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Auto-close sidebar on mobile route change
+  // Close sidebar on route change (especially on mobile)
   useEffect(() => {
-    if (window.innerWidth < 768) setIsOpen(false);
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
   }, [location.pathname]);
+
+  // Handle window resize to adjust sidebar state
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsOpen(true); // Auto-open on desktop
+      } else {
+        setIsOpen(false); // Close on mobile
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial call
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -64,29 +81,45 @@ function AdminSidebar() {
     navigate("/login", { replace: true });
   };
 
+  // Determine if we're on mobile
+  const isMobile = window.innerWidth < 768;
+
   return (
-    <div style={{ display: "flex", overflow: "hidden" }}>
+    <div className="flex min-h-screen bg-gray-900 text-white">
+      {/* Overlay for mobile */}
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 bottom-0 bg-gray-900 text-white flex flex-col shadow-lg border-r border-gray-700 z-50 transition-all duration-300 ${
-          isOpen ? "w-64" : "w-20"
-        }`}
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-50 bg-gray-900 border-r border-gray-700 flex flex-col shadow-lg transform transition-transform duration-300 ease-in-out ${
+          isMobile
+            ? isOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+            : "translate-x-0 w-64"
+        } w-64 md:w-64`}
       >
         {/* Header */}
         <div className="flex items-center p-4 bg-gray-800">
-          <h2 className={`${isOpen ? "block" : "hidden"} text-xl font-bold text-blue-400 ml-2`}>
+          <h2 className={`${isOpen || !isMobile ? "block" : "hidden"} text-xl font-bold text-blue-400 ml-2`}>
             Bakery Admin
           </h2>
           <button
             onClick={toggleSidebar}
-            className="ml-auto text-2xl text-gray-300 hover:text-white focus:outline-none"
+            className="ml-auto text-2xl text-gray-300 hover:text-white focus:outline-none md:hidden"
+            aria-label="Toggle sidebar"
           >
             <FaBars />
           </button>
         </div>
 
         {/* Nav Links */}
-        <nav className="flex-1 mt-2">
+        <nav className="flex-1 mt-2 overflow-y-auto">
           {menuItems.map((item, index) => (
             <NavLink
               key={index}
@@ -96,10 +129,9 @@ function AdminSidebar() {
                   isActive ? "bg-blue-600 text-white border-l-4 border-blue-400" : ""
                 }`
               }
-              style={{ justifyContent: isOpen ? "flex-start" : "center" }}
             >
               <span className="text-xl">{item.icon}</span>
-              <span className={`ml-3 ${isOpen ? "block" : "hidden"} font-medium`}>
+              <span className={`ml-3 font-medium ${isMobile && !isOpen ? "hidden" : "block"}`}>
                 {item.name}
               </span>
             </NavLink>
@@ -110,29 +142,24 @@ function AdminSidebar() {
         <button
           onClick={handleLogout}
           className={`flex items-center py-3 px-4 text-red-400 hover:bg-red-700 hover:text-white transition-colors ${
-            isOpen ? "justify-start" : "justify-center"
+            isMobile && !isOpen ? "justify-center" : "justify-start"
           }`}
         >
           <FaSignOutAlt className="text-xl" />
-          <span className={`ml-3 ${isOpen ? "block" : "hidden"} font-medium`}>
+          <span className={`ml-3 font-medium ${isMobile && !isOpen ? "hidden" : "block"}`}>
             Logout
           </span>
         </button>
-      </div>
+      </aside>
 
-      {/* Main Content — Outlet renders /addproduct, /baking, etc. */}
+      {/* Main Content */}
       <main
-        className="flex-1"
-        style={{
-          marginLeft: isOpen ? "16rem" : "5rem",
-          backgroundColor: "#1f2937",
-          padding: "1rem",
-          minHeight: "100vh",
-          transition: "margin-left 0.3s ease",
-        }}
+        className={`flex-1 transition-all duration-300 ${
+          isMobile ? "p-4" : "ml-0 md:ml-64 p-4"
+        }`}
       >
         <div className="max-w-4xl mx-auto">
-          <Outlet /> {/* ✅ This is the key: renders nested route elements */}
+          <Outlet />
         </div>
       </main>
     </div>
